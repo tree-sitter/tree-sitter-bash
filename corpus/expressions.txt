@@ -28,8 +28,9 @@ Variable expansions
 
 echo ${abc}
 echo ${abc:-def}
-echo ${abc: }
 echo ${abc:- }
+echo ${abc:
+}
 
 ---
 
