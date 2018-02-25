@@ -162,6 +162,19 @@ function a {
       (local_variable_declaration (simple_variable_name)))))
 
 =========================================
+Exported variable
+=========================================
+
+export PATH
+export PATH="$PATH:/usr/foobar/bin"
+
+---
+
+(program
+  (environment_variable_export (simple_variable_name))
+  (environment_variable_export (simple_variable_name) (string (simple_expansion (variable_name)))))
+
+=========================================
 Arrays and array expansions
 =========================================
 

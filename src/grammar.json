@@ -26,6 +26,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "environment_variable_export"
+        },
+        {
+          "type": "SYMBOL",
           "name": "environment_variable_assignment"
         },
         {
@@ -608,6 +612,31 @@
         {
           "type": "SYMBOL",
           "name": "_assignment"
+        }
+      ]
+    },
+    "environment_variable_export": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "export"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "simple_variable_name"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_assignment"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
