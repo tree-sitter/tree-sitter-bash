@@ -144,27 +144,50 @@ find "`dirname $file`" -name "$base"'*'
       (raw_string))))
 
 =========================================
-Local Variable Declaration
+Variable declaration: declare & typeset
 =========================================
 
-function a {
-  local a=42 b
-  local c
-}
+declare var1
+typeset -i -r var2=42 var3=10
 
 ---
 
 (program
-  (function_definition
-    (word)
-    (compound_statement
-      (local_variable_declaration
-        (environment_variable_assignment (variable_name) (word))
-        (simple_variable_name))
-      (local_variable_declaration (simple_variable_name)))))
+  (declaration_command (simple_variable_name))
+  (declaration_command (argument) (argument)
+    (environment_variable_assignment (variable_name) (word))
+    (environment_variable_assignment (variable_name) (word))))
 
 =========================================
-Exported variable
+Variable declaration: readonly
+=========================================
+
+readonly var1
+readonly var2=42
+
+---
+
+(program
+  (declaration_command (simple_variable_name))
+  (declaration_command (environment_variable_assignment (variable_name) (word))))
+
+=========================================
+Variable declaration: local
+=========================================
+
+local a=42 b
+local -r c
+
+---
+
+(program
+  (declaration_command
+    (environment_variable_assignment (variable_name) (word))
+    (simple_variable_name))
+  (declaration_command (argument) (simple_variable_name)))
+
+=========================================
+Variable declaration: export
 =========================================
 
 export PATH
@@ -173,8 +196,8 @@ export FOOBAR PATH="$PATH:/usr/foobar/bin"
 ---
 
 (program
-  (export_command (simple_variable_name))
-  (export_command
+  (declaration_command (simple_variable_name))
+  (declaration_command
     (simple_variable_name)
     (environment_variable_assignment (variable_name) (string (simple_expansion (variable_name))))))
 

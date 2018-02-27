@@ -48,11 +48,8 @@ module.exports = grammar({
 
     _statement: $ => choice(
       $.environment_variable_assignment,
-      // Local variable are only allowed inside the body of a function, but to
-      // keep the grammar simple we'll ignore that requirements.
-      $.local_variable_declaration,
       $.command,
-      $.export_command,
+      $.declaration_command,
       $.bracket_command,
       $.for_statement,
       $.while_statement,
@@ -179,18 +176,6 @@ module.exports = grammar({
       ))
     )),
 
-    export_command: $ => seq(
-      'export',
-      repeat(choice(
-        $.simple_variable_name,
-        // This will allow subscript assignment in exports which isn't strictly
-        // allowed but we'll parse it anyway to simplify the AST. For example,
-        // if you want to find all variable assignments you only have to look
-        // for nodes of type `environment_variable_assignment`
-        $.environment_variable_assignment
-      ))
-    ),
-
     command_name: $ => $._expression,
 
     environment_variable_assignment: $ => seq(
@@ -201,24 +186,11 @@ module.exports = grammar({
       $._assignment
     ),
 
-    local_variable_declaration: $ => seq(
-      'local',
+    declaration_command: $ => seq(
+      choice('declare', 'typeset', 'export', 'readonly', 'local'),
+      repeat(alias(seq('-', $.word), 'argument')),
       repeat(choice(
         $.simple_variable_name,
-        // This isn't strictly speaking an environment variable, but given that
-        // we have no way of differentiating between local variable assignment
-        // and environment variable assignment in later parts of the body
-        // anyway we'll re-use this node to simplify the AST. Consider the
-        // following example
-        //
-        //     local a=42
-        //     a=43
-        //
-        // In this case we could tag `local a=42` as a
-        // local_variable_assignment, but semantically `a=43` would also be a
-        // local_variable_assignment but the would parser has no way of knowing
-        // that. So for consistency we use environment_variable_assignment for
-        // all assignments.
         $.environment_variable_assignment
       ))
     ),

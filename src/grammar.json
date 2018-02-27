@@ -30,15 +30,11 @@
         },
         {
           "type": "SYMBOL",
-          "name": "local_variable_declaration"
-        },
-        {
-          "type": "SYMBOL",
           "name": "command"
         },
         {
           "type": "SYMBOL",
-          "name": "export_command"
+          "name": "declaration_command"
         },
         {
           "type": "SYMBOL",
@@ -589,31 +585,6 @@
         ]
       }
     },
-    "export_command": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "export"
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "simple_variable_name"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "environment_variable_assignment"
-              }
-            ]
-          }
-        }
-      ]
-    },
     "command_name": {
       "type": "SYMBOL",
       "name": "_expression"
@@ -640,12 +611,54 @@
         }
       ]
     },
-    "local_variable_declaration": {
+    "declaration_command": {
       "type": "SEQ",
       "members": [
         {
-          "type": "STRING",
-          "value": "local"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "declare"
+            },
+            {
+              "type": "STRING",
+              "value": "typeset"
+            },
+            {
+              "type": "STRING",
+              "value": "export"
+            },
+            {
+              "type": "STRING",
+              "value": "readonly"
+            },
+            {
+              "type": "STRING",
+              "value": "local"
+            }
+          ]
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "-"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "word"
+                }
+              ]
+            },
+            "named": false,
+            "value": "argument"
+          }
         },
         {
           "type": "REPEAT",
