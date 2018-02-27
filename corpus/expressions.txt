@@ -148,8 +148,8 @@ Local Variable Declaration
 =========================================
 
 function a {
-  local a=42
-  local b
+  local a=42 b
+  local c
 }
 
 ---
@@ -158,7 +158,9 @@ function a {
   (function_definition
     (word)
     (compound_statement
-      (local_variable_declaration (simple_variable_name) (word))
+      (local_variable_declaration
+        (environment_variable_assignment (variable_name) (word))
+        (simple_variable_name))
       (local_variable_declaration (simple_variable_name)))))
 
 =========================================

@@ -203,8 +203,24 @@ module.exports = grammar({
 
     local_variable_declaration: $ => seq(
       'local',
-      $.simple_variable_name,
-      optional($._assignment)
+      repeat(choice(
+        $.simple_variable_name,
+        // This isn't strictly speaking an environment variable, but given that
+        // we have no way of differentiating between local variable assignment
+        // and environment variable assignment in later parts of the body
+        // anyway we'll re-use this node to simplify the AST. Consider the
+        // following example
+        //
+        //     local a=42
+        //     a=43
+        //
+        // In this case we could tag `local a=42` as a
+        // local_variable_assignment, but semantically `a=43` would also be a
+        // local_variable_assignment but the would parser has no way of knowing
+        // that. So for consistency we use environment_variable_assignment for
+        // all assignments.
+        $.environment_variable_assignment
+      ))
     ),
 
     _assignment: $ => seq(
