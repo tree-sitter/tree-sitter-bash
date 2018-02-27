@@ -47,7 +47,7 @@ module.exports = grammar({
     // Statements
 
     _statement: $ => choice(
-      $.environment_variable_assignment,
+      $.variable_assignment,
       $.command,
       $.declaration_command,
       $.bracket_command,
@@ -165,7 +165,7 @@ module.exports = grammar({
 
     command: $ => prec.left(seq(
       repeat(choice(
-        $.environment_variable_assignment,
+        $.variable_assignment,
         $.file_redirect
       )),
       $.command_name,
@@ -178,7 +178,7 @@ module.exports = grammar({
 
     command_name: $ => $._expression,
 
-    environment_variable_assignment: $ => seq(
+    variable_assignment: $ => seq(
       choice(
         $.variable_name,
         $.subscript
@@ -191,7 +191,7 @@ module.exports = grammar({
       repeat(alias(seq('-', $.word), 'argument')),
       repeat(choice(
         $.simple_variable_name,
-        $.environment_variable_assignment
+        $.variable_assignment
       ))
     ),
 
