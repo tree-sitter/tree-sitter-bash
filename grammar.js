@@ -47,12 +47,12 @@ module.exports = grammar({
     // Statements
 
     _statement: $ => choice(
-      $.environment_variable_export,
       $.environment_variable_assignment,
       // Local variable are only allowed inside the body of a function, but to
       // keep the grammar simple we'll ignore that requirements.
       $.local_variable_declaration,
       $.command,
+      $.export_command,
       $.bracket_command,
       $.for_statement,
       $.while_statement,
@@ -179,6 +179,18 @@ module.exports = grammar({
       ))
     )),
 
+    export_command: $ => seq(
+      'export',
+      repeat(choice(
+        $.simple_variable_name,
+        // This will allow subscript assignment in exports which isn't strictly
+        // allowed but we'll parse it anyway to simplify the AST. For example,
+        // if you want to find all variable assignments you only have to look
+        // for nodes of type `environment_variable_assignment`
+        $.environment_variable_assignment
+      ))
+    ),
+
     command_name: $ => $._expression,
 
     environment_variable_assignment: $ => seq(
@@ -187,12 +199,6 @@ module.exports = grammar({
         $.subscript
       ),
       $._assignment
-    ),
-
-    environment_variable_export: $ => seq(
-      'export',
-      $.simple_variable_name,
-      optional($._assignment)
     ),
 
     local_variable_declaration: $ => seq(

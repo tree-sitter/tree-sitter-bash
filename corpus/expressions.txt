@@ -166,13 +166,15 @@ Exported variable
 =========================================
 
 export PATH
-export PATH="$PATH:/usr/foobar/bin"
+export FOOBAR PATH="$PATH:/usr/foobar/bin"
 
 ---
 
 (program
-  (environment_variable_export (simple_variable_name))
-  (environment_variable_export (simple_variable_name) (string (simple_expansion (variable_name)))))
+  (export_command (simple_variable_name))
+  (export_command
+    (simple_variable_name)
+    (environment_variable_assignment (variable_name) (string (simple_expansion (variable_name))))))
 
 =========================================
 Arrays and array expansions
