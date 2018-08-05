@@ -72,6 +72,12 @@ module.exports = grammar({
       $.function_definition
     ),
 
+    _statements: $ => seq(
+      repeat($._terminated_statement),
+      $._statement,
+      optional($._terminator)
+    ),
+
     for_statement: $ => seq(
       'for',
       $._simple_variable_name,
@@ -175,9 +181,7 @@ module.exports = grammar({
 
     subshell: $ => seq(
       '(',
-      repeat($._terminated_statement),
-      $._statement,
-      optional($._terminator),
+      $._statements,
       ')'
     ),
 
@@ -443,13 +447,39 @@ module.exports = grammar({
     ),
 
     command_substitution: $ => choice(
-      seq('$(', $._statement, ')'),
-      prec(1, seq('`', $._statement, '`'))
+      seq(
+        '$(',
+        $._statements,
+        ')'
+      ),
+      prec(1, seq(
+        '`',
+        /* FIXME:
+        Would like to use $._statements, but I don't know how to resolve:
+
+        Error: Unresolved conflict for symbol sequence:
+
+          '`'  variable_assignment  •  '`'  …
+
+        Possible interpretations:
+
+          1:  '`'  (_statements  variable_assignment)  •  '`'  …
+          2:  '`'  (command_repeat1  variable_assignment)  •  '`'  …
+
+        Possible resolutions:
+
+          1:  Add a conflict for these rules: `_statements`
+        */
+        repeat($._terminated_statement),
+        $._statement,
+        optional($._terminator),
+        '`'
+      ))
     ),
 
     process_substitution: $ => seq(
       choice('<(', '>('),
-      $._statement,
+      $._statements,
       ')'
     ),
 
