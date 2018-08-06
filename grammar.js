@@ -16,6 +16,7 @@ module.exports = grammar({
 
   inline: $ => [
     $._statement,
+    $._statements,
     $._terminator,
     $._literal,
     $._primary_expression,
@@ -447,34 +448,8 @@ module.exports = grammar({
     ),
 
     command_substitution: $ => choice(
-      seq(
-        '$(',
-        $._statements,
-        ')'
-      ),
-      prec(1, seq(
-        '`',
-        /* FIXME:
-        Would like to use $._statements, but I don't know how to resolve:
-
-        Error: Unresolved conflict for symbol sequence:
-
-          '`'  variable_assignment  •  '`'  …
-
-        Possible interpretations:
-
-          1:  '`'  (_statements  variable_assignment)  •  '`'  …
-          2:  '`'  (command_repeat1  variable_assignment)  •  '`'  …
-
-        Possible resolutions:
-
-          1:  Add a conflict for these rules: `_statements`
-        */
-        repeat($._terminated_statement),
-        $._statement,
-        optional($._terminator),
-        '`'
-      ))
+      seq('$(', $._statements, ')'),
+      prec(1, seq('`', $._statements, '`'))
     ),
 
     process_substitution: $ => seq(

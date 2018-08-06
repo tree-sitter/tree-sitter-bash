@@ -83,6 +83,34 @@
         }
       ]
     },
+    "_statements": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_terminated_statement"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_statement"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_terminator"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
     "for_statement": {
       "type": "SEQ",
       "members": [
@@ -601,27 +629,8 @@
           "value": "("
         },
         {
-          "type": "REPEAT",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_terminated_statement"
-          }
-        },
-        {
           "type": "SYMBOL",
-          "name": "_statement"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "_terminator"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "name": "_statements"
         },
         {
           "type": "STRING",
@@ -1838,7 +1847,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "_statement"
+              "name": "_statements"
             },
             {
               "type": "STRING",
@@ -1858,7 +1867,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "_statement"
+                "name": "_statements"
               },
               {
                 "type": "STRING",
@@ -1887,7 +1896,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "_statement"
+          "name": "_statements"
         },
         {
           "type": "STRING",
@@ -2106,6 +2115,7 @@
   ],
   "inline": [
     "_statement",
+    "_statements",
     "_terminator",
     "_literal",
     "_primary_expression",
