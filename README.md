@@ -10,16 +10,16 @@ Bash grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter).
 
 Install the dependencies:
 
-  npm install
+    npm install
 
 Build and run the tests:
 
-  npm run build
-  npm run test
+    npm run build
+    npm run test
 
 Run the build and tests in watch mode:
 
-  npm run test:watch
+    npm run test:watch
 
 #### References
 
