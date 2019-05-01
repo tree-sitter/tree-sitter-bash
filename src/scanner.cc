@@ -74,7 +74,7 @@ struct Scanner {
       advance(lexer);
     }
 
-    while (iswalpha(lexer->lookahead)) {
+    while (iswalpha(lexer->lookahead) || (quote != 0 && iswspace(lexer->lookahead))) {
       heredoc_delimiter += lexer->lookahead;
       advance(lexer);
     }
@@ -88,7 +88,7 @@ struct Scanner {
 
   bool scan_heredoc_end_identifier(TSLexer *lexer) {
     current_leading_word.clear();
-    while (iswalpha(lexer->lookahead)) {
+    while ((iswalpha(lexer->lookahead) || iswspace(lexer->lookahead)) && current_leading_word.length() < heredoc_delimiter.length()) {
       current_leading_word += lexer->lookahead;
       advance(lexer);
     }

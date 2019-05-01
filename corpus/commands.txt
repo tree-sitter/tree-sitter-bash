@@ -212,6 +212,10 @@ cat << "EOF"
 a=$b
 EOF
 
+cat <<"END OF FILE"
+hello
+END OF FILE
+
 cat << \EOF
 EOF
 
@@ -220,6 +224,7 @@ EOF
 (program
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body)
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body (simple_expansion (variable_name)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body)
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body))
 
 ==========================================
