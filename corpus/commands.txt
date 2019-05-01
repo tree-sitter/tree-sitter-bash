@@ -213,7 +213,8 @@ a=$b
 EOF
 
 cat <<"END OF FILE"
-hello
+hello,
+world
 END OF FILE
 
 cat << \EOF
