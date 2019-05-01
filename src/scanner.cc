@@ -88,7 +88,12 @@ struct Scanner {
 
   bool scan_heredoc_end_identifier(TSLexer *lexer) {
     current_leading_word.clear();
-    while ((iswalpha(lexer->lookahead) || iswspace(lexer->lookahead)) && current_leading_word.length() < heredoc_delimiter.length()) {
+    // Scan the first 'n' characters on this line, to see if they match the heredoc delimiter
+    while (
+      lexer->lookahead != '\0' &&
+      lexer->lookahead != '\n' &&
+      current_leading_word.length() < heredoc_delimiter.length()
+    ) {
       current_leading_word += lexer->lookahead;
       advance(lexer);
     }
