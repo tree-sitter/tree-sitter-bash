@@ -119,7 +119,7 @@ module.exports = grammar({
     c_style_for_statement: $ => seq(
       'for',
       '((',
-      optional($._expression),
+      optional(choice($.variable_assignment, $._expression)),
       $._terminator,
       optional($._expression),
       $._terminator,
@@ -356,7 +356,7 @@ module.exports = grammar({
           '=', '==', '=~', '!=',
           '+', '-', '+=', '-=',
           '<', '>', '<=', '>=',
-          '||', '&&',
+          '||', '&&', '<<', '>>',
           $.test_operator
         ),
         $._expression
@@ -368,10 +368,16 @@ module.exports = grammar({
       )
     )),
 
-    unary_expression: $ => prec.right(seq(
-      choice('!', $.test_operator),
-      $._expression
-    )),
+    unary_expression: $ => choice(
+      prec(1, seq(
+        token(prec(1, choice('-', '+', '~', '++', '--'))),
+        $._expression
+      )),
+      prec.right(seq(
+        choice('!', $.test_operator),
+        $._expression
+      )),
+    ),
 
     postfix_expression: $ => seq(
       $._expression,
@@ -397,12 +403,16 @@ module.exports = grammar({
       $.string,
       $.raw_string,
       $.ansii_c_string,
+      $.number,
       $.expansion,
       $.simple_expansion,
       $.string_expansion,
       $.command_substitution,
-      $.process_substitution
+      $.process_substitution,
+      $.arithmetic_expansion
     ),
+
+    arithmetic_expansion: $ => seq('$((', $._expression, '))'),
 
     concatenation: $ => prec(-1, seq(
       choice(
@@ -428,7 +438,8 @@ module.exports = grammar({
           seq(optional('$'), $._string_content),
           $.expansion,
           $.simple_expansion,
-          $.command_substitution
+          $.command_substitution,
+          $.arithmetic_expansion,
         ),
         optional($._concat)
       )),
@@ -447,6 +458,8 @@ module.exports = grammar({
     raw_string: $ => /'[^']*'/,
 
     ansii_c_string: $ => /\$'([^']|\\')*'/,
+
+    number: $ => /(0x)?[0-9]+(#[0-9A-Za-z@_]+)?/,
 
     simple_expansion: $ => seq(
       '$',
