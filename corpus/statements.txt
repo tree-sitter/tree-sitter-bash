@@ -497,7 +497,7 @@ Arithmetic expansion
 ==========================
 
 a=$((64#@ << 22))
-b="$((42 + 2))"
+b="$((-42 + ~2))"
 
 ---
 
@@ -507,4 +507,6 @@ b="$((42 + 2))"
     (arithmetic_expansion (binary_expression (number) (number))))
   (variable_assignment
     (variable_name)
-      (string (arithmetic_expansion (binary_expression (number) (number))))))
+      (string (arithmetic_expansion (binary_expression
+        (unary_expression (number))
+        (unary_expression (number)))))))

@@ -368,10 +368,16 @@ module.exports = grammar({
       )
     )),
 
-    unary_expression: $ => prec.right(seq(
-      choice('!', $.test_operator),
-      $._expression
-    )),
+    unary_expression: $ => choice(
+      prec(1, seq(
+        token(prec(1, choice('-', '+', '~', '++', '--'))),
+        $._expression
+      )),
+      prec.right(seq(
+        choice('!', $.test_operator),
+        $._expression
+      )),
+    ),
 
     postfix_expression: $ => seq(
       $._expression,
