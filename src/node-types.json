@@ -1,5 +1,80 @@
 [
   {
+    "type": "arithmetic_expansion",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
+          "type": "command_substitution",
+          "named": true
+        },
+        {
+          "type": "concatenation",
+          "named": true
+        },
+        {
+          "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "postfix_expression",
+          "named": true
+        },
+        {
+          "type": "process_substitution",
+          "named": true
+        },
+        {
+          "type": "raw_string",
+          "named": true
+        },
+        {
+          "type": "simple_expansion",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "string_expansion",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
+          "named": true
+        },
+        {
+          "type": "word",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "array",
     "named": true,
     "fields": {},
@@ -9,6 +84,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -64,6 +143,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -143,6 +226,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -226,6 +313,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -356,6 +447,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "case_item",
           "named": true
         },
@@ -412,6 +507,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -483,6 +582,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -711,6 +814,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "command_substitution",
           "named": true
         },
@@ -759,6 +866,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -1070,6 +1181,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "command_substitution",
           "named": true
         },
@@ -1141,6 +1256,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "command_substitution",
           "named": true
         },
@@ -1197,6 +1316,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -1313,6 +1436,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -1564,6 +1691,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "binary_expression",
           "named": true
         },
@@ -1711,6 +1842,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -2053,6 +2188,10 @@
       "required": false,
       "types": [
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "command_substitution",
           "named": true
         },
@@ -2096,6 +2235,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -2241,6 +2384,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "binary_expression",
           "named": true
         },
@@ -2309,6 +2456,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -2387,6 +2538,10 @@
           "named": true
         },
         {
+          "type": "arithmetic_expansion",
+          "named": true
+        },
+        {
           "type": "command_substitution",
           "named": true
         },
@@ -2439,6 +2594,10 @@
       "types": [
         {
           "type": "ansii_c_string",
+          "named": true
+        },
+        {
+          "type": "arithmetic_expansion",
           "named": true
         },
         {
@@ -2817,6 +2976,10 @@
   },
   {
     "type": "--",
+    "named": false
+  },
+  {
+    "type": "$((",
     "named": false
   },
   {

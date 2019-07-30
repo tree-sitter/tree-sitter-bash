@@ -1486,6 +1486,14 @@
                     "value": "&&"
                   },
                   {
+                    "type": "STRING",
+                    "value": "<<"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": ">>"
+                  },
+                  {
                     "type": "SYMBOL",
                     "name": "test_operator"
                   }
@@ -1662,6 +1670,27 @@
         {
           "type": "SYMBOL",
           "name": "process_substitution"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "arithmetic_expansion"
+        }
+      ]
+    },
+    "arithmetic_expansion": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "$(("
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_expression"
+        },
+        {
+          "type": "STRING",
+          "value": "))"
         }
       ]
     },
@@ -1812,6 +1841,10 @@
                   {
                     "type": "SYMBOL",
                     "name": "command_substitution"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "arithmetic_expansion"
                   }
                 ]
               },

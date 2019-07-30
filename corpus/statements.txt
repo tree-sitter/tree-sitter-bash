@@ -491,3 +491,20 @@ a () {
   (redirected_statement
     (compound_statement (command (command_name (word)) (string)) (command (command_name (word)) (string)))
     (file_redirect (number))))
+
+==========================
+Arithmetic expansion
+==========================
+
+a=$((64#@ << 22))
+b="$((42 + 2))"
+
+---
+
+(program
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion (binary_expression (number) (number))))
+  (variable_assignment
+    (variable_name)
+      (string (arithmetic_expansion (binary_expression (number) (number))))))

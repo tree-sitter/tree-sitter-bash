@@ -356,7 +356,7 @@ module.exports = grammar({
           '=', '==', '=~', '!=',
           '+', '-', '+=', '-=',
           '<', '>', '<=', '>=',
-          '||', '&&',
+          '||', '&&', '<<', '>>',
           $.test_operator
         ),
         $._expression
@@ -402,8 +402,11 @@ module.exports = grammar({
       $.simple_expansion,
       $.string_expansion,
       $.command_substitution,
-      $.process_substitution
+      $.process_substitution,
+      $.arithmetic_expansion
     ),
+
+    arithmetic_expansion: $ => seq('$((', $._expression, '))'),
 
     concatenation: $ => prec(-1, seq(
       choice(
@@ -429,7 +432,8 @@ module.exports = grammar({
           seq(optional('$'), $._string_content),
           $.expansion,
           $.simple_expansion,
-          $.command_substitution
+          $.command_substitution,
+          $.arithmetic_expansion,
         ),
         optional($._concat)
       )),
