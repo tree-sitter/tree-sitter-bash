@@ -359,7 +359,7 @@ Numbers
 decimal = 100
 octal = 032
 hexadecimal = 0x32
-custom = 60#10 # Custom base
+custom = 64#2Az9@_1 # Custom base
 
 ---
 

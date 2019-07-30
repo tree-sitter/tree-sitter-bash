@@ -449,7 +449,7 @@ module.exports = grammar({
 
     ansii_c_string: $ => /\$'([^']|\\')*'/,
 
-    number: $ => /(0x)?[0-9]+(#[0-9]+)?/,
+    number: $ => /(0x)?[0-9]+(#[0-9A-Za-z@_]+)?/,
 
     simple_expansion: $ => seq(
       '$',
