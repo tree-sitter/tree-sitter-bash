@@ -356,15 +356,15 @@ echo -ne "\033k$1\033\\" > /dev/stderr
 Numbers
 ==============================
 
-decimal = 100
-octal = 032
-hexadecimal = 0x32
-custom = 64#2Az9@_1 # Custom base
+decimal=100
+octal=032
+hexadecimal=0x32
+custom=64#2Az9@_1 # Custom base
 
 ---
 
 (program
-  (command (command_name (word)) (word) (number))
-  (command (command_name (word)) (word) (number))
-  (command (command_name (word)) (word) (number))
-  (command (command_name (word)) (word) (number)) (comment))
+  (variable_assignment (variable_name) (number))
+  (variable_assignment (variable_name) (number))
+  (variable_assignment (variable_name) (number))
+  (variable_assignment (variable_name) (number)) (comment))
