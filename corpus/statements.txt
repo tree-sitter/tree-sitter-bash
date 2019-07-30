@@ -123,13 +123,13 @@ done
 
 (program
   (c_style_for_statement
-    (word)
+    (variable_assignment (variable_name) (number))
     (binary_expression (word) (number))
     (word)
     (do_group
       (command (command_name (word)) (simple_expansion (variable_name)))))
   (c_style_for_statement
-    (word)
+    (variable_assignment (variable_name) (number))
     (binary_expression (word) (number))
     (word)
     (compound_statement

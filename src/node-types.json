@@ -206,6 +206,10 @@
           "named": true
         },
         {
+          "type": "variable_assignment",
+          "named": true
+        },
+        {
           "type": "word",
           "named": true
         }

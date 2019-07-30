@@ -119,7 +119,7 @@ module.exports = grammar({
     c_style_for_statement: $ => seq(
       'for',
       '((',
-      optional($._expression),
+      optional(choice($.variable_assignment, $._expression)),
       $._terminator,
       optional($._expression),
       $._terminator,
