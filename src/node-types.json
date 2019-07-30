@@ -24,6 +24,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -76,6 +80,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -159,6 +167,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -269,6 +281,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "pipeline",
           "named": true
         },
@@ -352,6 +368,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -411,6 +431,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -467,6 +491,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -687,6 +715,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -735,6 +767,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -1042,6 +1078,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -1113,6 +1153,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -1165,6 +1209,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -1273,6 +1321,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -1524,6 +1576,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "parenthesized_expression",
           "named": true
         },
@@ -1667,6 +1723,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -2047,6 +2107,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -2189,6 +2253,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "parenthesized_expression",
           "named": true
         },
@@ -2253,6 +2321,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -2323,6 +2395,10 @@
           "named": true
         },
         {
+          "type": "number",
+          "named": true
+        },
+        {
           "type": "process_substitution",
           "named": true
         },
@@ -2375,6 +2451,10 @@
         },
         {
           "type": "expansion",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         },
         {
@@ -2749,6 +2829,10 @@
   },
   {
     "type": "ansii_c_string",
+    "named": true
+  },
+  {
+    "type": "number",
     "named": true
   },
   {

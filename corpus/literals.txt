@@ -88,7 +88,7 @@ F="${G%% *}"
 (program
   (variable_assignment
     (variable_name)
-    (string (expansion (subscript (variable_name) (word)))))
+    (string (expansion (subscript (variable_name) (number)))))
   (variable_assignment
     (variable_name)
     (string (expansion (variable_name) (regex))))
@@ -326,12 +326,12 @@ a+=(foo "bar" $(baz))
 
 (program
   (variable_assignment (variable_name) (array))
-  (variable_assignment (variable_name) (array (word) (word) (word)))
+  (variable_assignment (variable_name) (array (number) (number) (number)))
   (command (command_name (word)) (expansion (subscript (variable_name) (word))))
   (command (command_name (word)) (expansion (subscript (variable_name) (word))))
   (variable_assignment
     (subscript (variable_name) (simple_expansion (variable_name)))
-    (word))
+    (number))
   (variable_assignment
     (variable_name)
     (array
@@ -351,3 +351,20 @@ echo -ne "\033k$1\033\\" > /dev/stderr
   (redirected_statement
     (command (command_name (word)) (word) (string (simple_expansion (variable_name))))
     (file_redirect (word))))
+
+==============================
+Numbers
+==============================
+
+decimal = 100
+octal = 032
+hexadecimal = 0x32
+custom = 60#10 # Custom base
+
+---
+
+(program
+  (command (command_name (word)) (word) (number))
+  (command (command_name (word)) (word) (number))
+  (command (command_name (word)) (word) (number))
+  (command (command_name (word)) (word) (number)) (comment))
