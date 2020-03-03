@@ -14,12 +14,12 @@ Install the dependencies:
 
 Build and run the tests:
 
-    npm run build
+    npx tree-sitter generate
     npm run test
 
 Run the build and tests in watch mode:
 
-    npm run test:watch
+    npx nodemon --exec 'npx tree-sitter generate && npm run test' --ext js,txt,sh
 
 #### References
 
