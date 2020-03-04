@@ -12,6 +12,13 @@ Install the dependencies:
 
     npm install
 
+
+Pull down bash-it examples:
+
+    git submodule init
+    git submodule update
+
+
 Build and run the tests:
 
     npx tree-sitter generate
