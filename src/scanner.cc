@@ -64,15 +64,13 @@ struct Scanner {
     started_heredoc = false;
     heredoc_delimiter.clear();
 
-    if (lexer->lookahead == '\\') {
-      heredoc_is_raw = 1;
-      advance(lexer);
-    }
-
     int32_t quote = 0;
     if (heredoc_is_raw || lexer->lookahead == '"') {
       heredoc_is_raw = 1;
       quote = lexer->lookahead;
+      advance(lexer);
+    } else if (lexer->lookahead == '\\') {
+      heredoc_is_raw = 1;
       advance(lexer);
     }
 
