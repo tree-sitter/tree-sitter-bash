@@ -125,11 +125,13 @@ module.exports = grammar({
     c_style_for_statement: $ => seq(
       'for',
       '((',
-      field('initializer', optional($._expression)),
+      field('initializer', optional(repeat($.variable_assignment))),
       $._terminator,
       field('condition', optional($._expression)),
       $._terminator,
-      field('update', optional($._expression)),
+      field('update', optional(repeat(
+        prec(1, $._expression)
+      ))),
       '))',
       optional(';'),
       field('body', choice(

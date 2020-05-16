@@ -135,8 +135,12 @@ do
 done
 
 for (( c=1; c<=5; c++ )) {
-	echo $c
+  echo $c
 }
+
+for (( i=0, j=0 ; i < 100 ; i+=10, j-- )) do
+  echo $i
+done
 
 for (( ; ; ))
 do
@@ -147,16 +151,23 @@ done
 
 (program
   (c_style_for_statement
-    (word)
+    (variable_assignment (variable_name) (word))
     (binary_expression (word) (word))
     (word)
     (do_group
       (command (command_name (word)) (simple_expansion (variable_name)))))
   (c_style_for_statement
-    (word)
+    (variable_assignment (variable_name) (word))
     (binary_expression (word) (word))
     (word)
     (compound_statement
+      (command (command_name (word)) (simple_expansion (variable_name)))))
+  (c_style_for_statement
+    (variable_assignment (variable_name) (word))
+    (variable_assignment (variable_name) (word))
+    (binary_expression (word) (word))
+    (word) (word)
+    (do_group
       (command (command_name (word)) (simple_expansion (variable_name)))))
   (c_style_for_statement
     (do_group

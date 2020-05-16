@@ -297,17 +297,17 @@
         ]
       },
       "initializer": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
-            "type": "_expression",
+            "type": "variable_assignment",
             "named": true
           }
         ]
       },
       "update": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
