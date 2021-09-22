@@ -450,9 +450,10 @@ module.exports = grammar({
 
     _special_character: $ => token(prec(-1, choice('{', '}', '[', ']'))),
 
-    string: $ => seq(
-      '"',
-      repeat(seq(
+    string: $ => seq('"', field('content', optional($.str)), '"'),
+
+    str: $ => seq(
+      repeat1(seq(
         choice(
           seq(optional('$'), $._string_content),
           $.expansion,
@@ -462,7 +463,6 @@ module.exports = grammar({
         optional($._concat)
       )),
       optional('$'),
-      '"'
     ),
 
     _string_content: $ => token(prec(-1, /([^"`$\\]|\\(.|\n))+/)),
@@ -473,9 +473,9 @@ module.exports = grammar({
       ')'
     ),
 
-    raw_string: $ => /'[^']*'/,
+    raw_string: $ => seq("'", field('content', optional(alias(/[^']+/, $.str))), "'"),
 
-    ansii_c_string: $ => /\$'([^']|\\')*'/,
+    ansii_c_string: $ => seq("\$'", field('content', optional(alias(/([^']|\\')+/, $.str))), "'"),
 
     simple_expansion: $ => seq(
       '$',
