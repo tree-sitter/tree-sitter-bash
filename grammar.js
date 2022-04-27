@@ -488,7 +488,7 @@ module.exports = grammar({
       )
     ),
 
-    string_expansion: $ => seq('$', choice($.string, $.raw_string)),
+    string_expansion: $ => seq('$', $.string),
 
     expansion: $ => seq(
       '${',
