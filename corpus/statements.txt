@@ -470,6 +470,28 @@ function do_yet_another_thing {
     (file_redirect (file_descriptor) (word))))
 
 =========================================
+Variable assignment: simple command
+=========================================
+
+var1=
+var2=something
+var3= var33= set
+var4=; var44=; set
+
+---
+
+(program
+  (variable_assignment (variable_name))
+  (variable_assignment (variable_name) (word))
+  (command
+    (variable_assignment (variable_name))
+    (variable_assignment (variable_name))
+    (command_name (word)))
+  (variable_assignment (variable_name))
+  (variable_assignment (variable_name))
+  (command (command_name (word))))
+
+=========================================
 Variable declaration: declare & typeset
 =========================================
 

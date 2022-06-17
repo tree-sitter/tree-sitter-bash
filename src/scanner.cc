@@ -191,7 +191,7 @@ struct Scanner {
     }
 
     if (valid_symbols[EMPTY_VALUE]) {
-      if (iswspace(lexer->lookahead)) {
+      if (iswspace(lexer->lookahead) || lexer->lookahead == ';') {
         lexer->result_symbol = EMPTY_VALUE;
         return true;
       }
