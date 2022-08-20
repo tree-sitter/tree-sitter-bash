@@ -15,6 +15,7 @@ enum TokenType {
   FILE_DESCRIPTOR,
   EMPTY_VALUE,
   CONCAT,
+  CONCAT_OCT,
   VARIABLE_NAME,
   REGEX,
   CLOSING_BRACE,
@@ -181,10 +182,21 @@ struct Scanner {
         lexer->lookahead == '&' ||
         lexer->lookahead == '|' ||
         lexer->lookahead == '`' ||
-        lexer->lookahead == '#' ||
         (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) ||
         (lexer->lookahead == ']' && valid_symbols[CLOSING_BRACKET])
       )) {
+        if (lexer->lookahead == '#') {
+            while (lexer->lookahead == '#') {
+                lexer->advance(lexer, false);
+            }
+
+            if (iswspace(lexer->lookahead) || !iswalnum(lexer->lookahead)) {
+                lexer->result_symbol = CONCAT_OCT;
+                return true;
+            }
+        }
+        
+
         lexer->result_symbol = CONCAT;
         return true;
       }

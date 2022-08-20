@@ -14,6 +14,7 @@ module.exports = grammar({
   name: 'bash',
 
   inline: $ => [
+    $._any_concat,
     $._statement,
     $._terminator,
     $._literal,
@@ -32,6 +33,7 @@ module.exports = grammar({
     $.file_descriptor,
     $._empty_value,
     $._concat,
+    $._concat_oct,
     $.variable_name, // Variable name followed by an operator like '=' or '+='
     $.regex,
     '}',
@@ -323,9 +325,9 @@ module.exports = grammar({
       field('name', $.variable_name),
       '[',
       field('index', $._literal),
-      optional($._concat),
+      optional($._any_concat),
       ']',
-      optional($._concat)
+      optional($._any_concat)
     ),
 
     file_redirect: $ => prec.left(seq(
@@ -439,13 +441,18 @@ module.exports = grammar({
         $._primary_expression,
         $._special_character,
       ),
-      repeat1(prec(-1, seq(
-        $._concat,
-        choice(
-          $._primary_expression,
-          $._special_character,
-        )
-      ))),
+      repeat1(prec(-1, 
+          choice(
+              $._concat_oct,
+              seq(
+                $._concat,
+                choice(
+                  $._primary_expression,
+                  $._special_character,
+                )
+              ),
+          ),
+      )),
       optional(seq($._concat, '$'))
     )),
 
@@ -460,11 +467,13 @@ module.exports = grammar({
           $.simple_expansion,
           $.command_substitution
         ),
-        optional($._concat)
+        optional($._any_concat)
       )),
       optional('$'),
       '"'
     ),
+
+    _any_concat: $ => choice($._concat, $._concat_oct),
 
     _string_content: $ => token(prec(-1, /([^"`$\\]|\\(.|\r?\n))+/)),
 

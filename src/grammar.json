@@ -1351,7 +1351,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "_concat"
+              "name": "_any_concat"
             },
             {
               "type": "BLANK"
@@ -1367,7 +1367,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "_concat"
+              "name": "_any_concat"
             },
             {
               "type": "BLANK"
@@ -1894,22 +1894,31 @@
               "type": "PREC",
               "value": -1,
               "content": {
-                "type": "SEQ",
+                "type": "CHOICE",
                 "members": [
                   {
                     "type": "SYMBOL",
-                    "name": "_concat"
+                    "name": "_concat_oct"
                   },
                   {
-                    "type": "CHOICE",
+                    "type": "SEQ",
                     "members": [
                       {
                         "type": "SYMBOL",
-                        "name": "_primary_expression"
+                        "name": "_concat"
                       },
                       {
-                        "type": "SYMBOL",
-                        "name": "_special_character"
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "SYMBOL",
+                            "name": "_primary_expression"
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "_special_character"
+                          }
+                        ]
                       }
                     ]
                   }
@@ -2024,7 +2033,7 @@
                 "members": [
                   {
                     "type": "SYMBOL",
-                    "name": "_concat"
+                    "name": "_any_concat"
                   },
                   {
                     "type": "BLANK"
@@ -2049,6 +2058,19 @@
         {
           "type": "STRING",
           "value": "\""
+        }
+      ]
+    },
+    "_any_concat": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_concat"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_concat_oct"
         }
       ]
     },
@@ -2651,6 +2673,10 @@
     },
     {
       "type": "SYMBOL",
+      "name": "_concat_oct"
+    },
+    {
+      "type": "SYMBOL",
       "name": "variable_name"
     },
     {
@@ -2679,6 +2705,7 @@
     }
   ],
   "inline": [
+    "_any_concat",
     "_statement",
     "_terminator",
     "_literal",

@@ -5,11 +5,49 @@ Comments
 #!/bin/bash
 # hi
 
+echo 'word'#not-comment
+echo $(uname -a)#not-comment
+echo `uname -a`#not-comment
+echo $hey####not-comment
+
 ---
 
 (program
   (comment)
-  (comment))
+  (comment)
+  (command
+    (command_name
+      (word))
+    (concatenation
+      (raw_string)
+      (word)))
+  (command
+    (command_name
+      (word))
+    (concatenation
+      (command_substitution
+        (command
+          (command_name
+            (word))
+          (word)))
+      (word)))
+  (command
+    (command_name
+      (word))
+    (concatenation
+      (command_substitution
+        (command
+          (command_name
+            (word))
+          (word)))
+      (word)))
+  (command
+    (command_name
+      (word))
+    (concatenation
+      (simple_expansion
+        (variable_name))
+      (word))))
 
 ===============================
 Escaped newlines
