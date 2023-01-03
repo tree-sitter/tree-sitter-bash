@@ -367,10 +367,12 @@ struct Scanner {
 
     while (lexer->lookahead && ! (quote ? lexer->lookahead == quote :
                                   iswspace(lexer->lookahead))) {
-      if (lexer->lookahead != '\\') {
-        empty = false;
-        unquoted_word += lexer->lookahead;
+      if (lexer->lookahead == '\\') {
+        advance(lexer);
+        if (! lexer->lookahead) return false;
       }
+      empty = false;
+      unquoted_word += lexer->lookahead;
       advance(lexer);
     }
 

@@ -337,9 +337,19 @@ node <<!HEREDOC!
 Hello.
 !HEREDOC!
 
+node <<\'
+Hello.
+'
+
+node <<\\
+Hello.
+\
+
 ---
 
 (program
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body)
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body)
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body)
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body)
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start))) (heredoc_body))
