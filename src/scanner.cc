@@ -359,19 +359,18 @@ struct Scanner {
   bool advance_word(TSLexer *lexer, string& unquoted_word) {
     bool empty = true;
 
-    if (lexer->lookahead == '\\') {
-      advance(lexer);
-    }
-
     int32_t quote = 0;
     if (lexer->lookahead == '\'' || lexer->lookahead == '"') {
       quote = lexer->lookahead;
       advance(lexer);
     }
 
-    while (iswalpha(lexer->lookahead) || (quote != 0 && iswspace(lexer->lookahead))) {
-      unquoted_word += lexer->lookahead;
-      empty = false;
+    while (lexer->lookahead && ! (quote ? lexer->lookahead == quote :
+                                  iswspace(lexer->lookahead))) {
+      if (lexer->lookahead != '\\') {
+        empty = false;
+        unquoted_word += lexer->lookahead;
+      }
       advance(lexer);
     }
 
