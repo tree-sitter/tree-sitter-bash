@@ -63,7 +63,12 @@ struct Scanner {
     heredoc_is_raw = lexer->lookahead == '\'';
     started_heredoc = false;
     heredoc_delimiter.clear();
-    return advance_word(lexer, heredoc_delimiter);
+
+    string delimiter;
+    bool found_delimiter = advance_word(lexer, delimiter);
+    if (found_delimiter) heredoc_delimiter.assign(delimiter);
+
+    return found_delimiter;
   }
 
   bool scan_heredoc_end_identifier(TSLexer *lexer) {
