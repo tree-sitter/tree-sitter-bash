@@ -57,27 +57,37 @@ echo $# $* $@ $!
 Variable expansions
 =============================
 
-echo ${}
 echo ${#}
 echo ${var1#*#}
 echo ${!abc}
+echo ${!#}
+echo ${!##/}
 echo ${abc}
 echo ${abc:-def}
+echo ${abc:+ghi}
 echo ${abc:- }
 echo ${abc:
 }
+echo ${abc,?}
+echo ${abc^^b}
+echo ${abc@U}
 
 ---
 
 (program
-  (command (command_name (word)) (expansion))
-  (command (command_name (word)) (expansion))
+  (command (command_name (word)) (expansion (special_variable_name)))
+  (command (command_name (word)) (expansion (variable_name) (word)))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (special_variable_name)))
+  (command (command_name (word)) (expansion (special_variable_name) (word)))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (variable_name) (word)))
   (command (command_name (word)) (expansion (variable_name) (word)))
   (command (command_name (word)) (expansion (variable_name)))
   (command (command_name (word)) (expansion (variable_name)))
   (command (command_name (word)) (expansion (variable_name) (word)))
-  (command (command_name (word)) (expansion (variable_name)))
-  (command (command_name (word)) (expansion (variable_name))))
+  (command (command_name (word)) (expansion (variable_name) (word)))
+  (command (command_name (word)) (expansion (variable_name) (word))))
 
 ===================================
 Variable expansions with operators

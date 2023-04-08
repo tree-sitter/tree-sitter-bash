@@ -482,22 +482,20 @@ module.exports = grammar({
 
     ansi_c_string: $ => /\$'([^']|\\')*'/,
 
-    simple_expansion: $ => seq(
+    simple_expansion: $ => prec.left(seq(
       '$',
       choice(
         $._simple_variable_name,
-        $._special_variable_name,
-        alias('!', $.special_variable_name),
-        alias('#', $.special_variable_name)
+        $._special_variable_name
       )
-    ),
+    )),
 
     string_expansion: $ => seq('$', $.string),
 
     expansion: $ => seq(
       '${',
       optional(choice('#', '!')),
-      optional(choice(
+      choice(
         seq(
           $.variable_name,
           '=',
@@ -513,12 +511,12 @@ module.exports = grammar({
             token(prec(1, '/')),
             optional($.regex)
           )),
-          repeat(choice(
+          repeat(prec.left(1, choice(
             $._literal,
-            ':', ':?', '=', ':-', '%', '-', '#'
-          ))
+            ':', ':?', '=', ':-', '%', '-', '#', '@', ',', '^'
+          )))
         ),
-      )),
+      ),
       '}'
     ),
 
@@ -538,7 +536,7 @@ module.exports = grammar({
 
     _simple_variable_name: $ => alias(/\w+/, $.variable_name),
 
-    _special_variable_name: $ => alias(choice('*', '@', '?', '-', '$', '0', '_'), $.special_variable_name),
+    _special_variable_name: $ => alias(choice('*', '@', '?', '!', '#', '-', '$', '0', '_'), $.special_variable_name),
 
     word: $ => token(seq(
       choice(

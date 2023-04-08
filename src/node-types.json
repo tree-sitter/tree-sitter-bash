@@ -628,7 +628,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "_primary_expression",
@@ -1414,6 +1414,10 @@
     "named": false
   },
   {
+    "type": ",",
+    "named": false
+  },
+  {
     "type": "-",
     "named": false
   },
@@ -1526,6 +1530,10 @@
     "named": false
   },
   {
+    "type": "@",
+    "named": false
+  },
+  {
     "type": "[",
     "named": false
   },
@@ -1539,6 +1547,10 @@
   },
   {
     "type": "]]",
+    "named": false
+  },
+  {
+    "type": "^",
     "named": false
   },
   {
