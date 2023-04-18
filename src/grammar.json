@@ -2540,17 +2540,8 @@
                 "value": "[^#'\"<>{}\\[\\]()`$|&;\\\\\\s]"
               },
               {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "\\"
-                  },
-                  {
-                    "type": "PATTERN",
-                    "value": "[^\\s]"
-                  }
-                ]
+                "type": "PATTERN",
+                "value": "\\\\."
               }
             ]
           },
@@ -2564,17 +2555,8 @@
                   "value": "[^'\"<>{}\\[\\]()`$|&;\\\\\\s]"
                 },
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": "\\"
-                    },
-                    {
-                      "type": "PATTERN",
-                      "value": "[^\\s]"
-                    }
-                  ]
+                  "type": "PATTERN",
+                  "value": "\\\\."
                 }
               ]
             }

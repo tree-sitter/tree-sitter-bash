@@ -545,11 +545,11 @@ module.exports = grammar({
     word: $ => token(seq(
       choice(
         noneOf('#', ...SPECIAL_CHARACTERS),
-        seq('\\', noneOf('\\s'))
+        /\\./
       ),
       repeat(choice(
         noneOf(...SPECIAL_CHARACTERS),
-        seq('\\', noneOf('\\s'))
+        /\\./
       ))
     )),
 

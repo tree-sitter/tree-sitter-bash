@@ -628,3 +628,46 @@ a () {
   (redirected_statement
     (compound_statement (command (command_name (word)) (string)) (command (command_name (word)) (string)))
     (file_redirect (word))))
+
+===========================================
+Backslash escapes
+===========================================
+
+echo foo\
+bar
+
+case "$1" in
+  foo\ bar)
+    echo "$1"
+    ;;
+  *)
+    ;;
+esac
+
+var=word1\ word2
+
+---
+
+(program
+  (command
+    (command_name
+      (word))
+    (word)
+    (word))
+  (case_statement
+    (string
+      (simple_expansion
+        (variable_name)))
+    (case_item
+      (word)
+      (command
+        (command_name
+          (word))
+        (string
+          (simple_expansion
+            (variable_name)))))
+    (case_item
+      (word)))
+  (variable_assignment
+    (variable_name)
+    (word)))
