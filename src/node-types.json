@@ -210,10 +210,6 @@
           "named": true
         },
         {
-          "type": "test_operator",
-          "named": true
-        },
-        {
           "type": "unary_expression",
           "named": true
         },
@@ -272,10 +268,6 @@
             "named": true
           },
           {
-            "type": "test_operator",
-            "named": true
-          },
-          {
             "type": "variable_name",
             "named": true
           }
@@ -283,7 +275,7 @@
       },
       "operator": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "!=",
@@ -315,6 +307,10 @@
           },
           {
             "type": "**",
+            "named": false
+          },
+          {
+            "type": "**=",
             "named": false
           },
           {
@@ -441,10 +437,6 @@
           },
           {
             "type": "subscript",
-            "named": true
-          },
-          {
-            "type": "test_operator",
             "named": true
           },
           {
@@ -910,6 +902,10 @@
         {
           "type": "_primary_expression",
           "named": true
+        },
+        {
+          "type": "variable_name",
+          "named": true
         }
       ]
     }
@@ -991,9 +987,13 @@
     "named": true,
     "fields": {
       "operator": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
+          {
+            "type": "!",
+            "named": false
+          },
           {
             "type": "#",
             "named": false
@@ -1011,11 +1011,43 @@
             "named": false
           },
           {
+            "type": "*",
+            "named": false
+          },
+          {
             "type": "+",
             "named": false
           },
           {
+            "type": ",",
+            "named": false
+          },
+          {
+            "type": ",,",
+            "named": false
+          },
+          {
             "type": "-",
+            "named": false
+          },
+          {
+            "type": "/",
+            "named": false
+          },
+          {
+            "type": "/#",
+            "named": false
+          },
+          {
+            "type": "/%",
+            "named": false
+          },
+          {
+            "type": "//",
+            "named": false
+          },
+          {
+            "type": ":",
             "named": false
           },
           {
@@ -1040,6 +1072,10 @@
           },
           {
             "type": "?",
+            "named": false
+          },
+          {
+            "type": "@",
             "named": false
           },
           {
@@ -1071,6 +1107,14 @@
             "named": false
           },
           {
+            "type": "^",
+            "named": false
+          },
+          {
+            "type": "^^",
+            "named": false
+          },
+          {
             "type": "a",
             "named": false
           },
@@ -1099,6 +1143,10 @@
         },
         {
           "type": "concatenation",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
           "named": true
         },
         {
@@ -1541,10 +1589,6 @@
           "named": true
         },
         {
-          "type": "test_operator",
-          "named": true
-        },
-        {
           "type": "variable_assignment",
           "named": true
         },
@@ -1573,7 +1617,22 @@
   {
     "type": "postfix_expression",
     "named": true,
-    "fields": {},
+    "fields": {
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "++",
+            "named": false
+          },
+          {
+            "type": "--",
+            "named": false
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": false,
       "required": true,
@@ -1604,10 +1663,6 @@
         },
         {
           "type": "subscript",
-          "named": true
-        },
-        {
-          "type": "test_operator",
           "named": true
         },
         {
@@ -1823,10 +1878,6 @@
             "named": true
           },
           {
-            "type": "test_operator",
-            "named": true
-          },
-          {
             "type": "variable_name",
             "named": true
           }
@@ -1857,10 +1908,6 @@
             "named": true
           },
           {
-            "type": "test_operator",
-            "named": true
-          },
-          {
             "type": "variable_name",
             "named": true
           }
@@ -1888,10 +1935,6 @@
           },
           {
             "type": "subscript",
-            "named": true
-          },
-          {
-            "type": "test_operator",
             "named": true
           },
           {
@@ -1939,9 +1982,44 @@
   {
     "type": "unary_expression",
     "named": true,
-    "fields": {},
+    "fields": {
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "!",
+            "named": false
+          },
+          {
+            "type": "+",
+            "named": false
+          },
+          {
+            "type": "++",
+            "named": false
+          },
+          {
+            "type": "-",
+            "named": false
+          },
+          {
+            "type": "--",
+            "named": false
+          },
+          {
+            "type": "test_operator",
+            "named": true
+          },
+          {
+            "type": "~",
+            "named": false
+          }
+        ]
+      }
+    },
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
@@ -1970,10 +2048,6 @@
         },
         {
           "type": "subscript",
-          "named": true
-        },
-        {
-          "type": "test_operator",
           "named": true
         },
         {
@@ -2738,6 +2812,10 @@
   },
   {
     "type": "}",
+    "named": false
+  },
+  {
+    "type": "~",
     "named": false
   }
 ]
