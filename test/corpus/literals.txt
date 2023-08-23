@@ -142,7 +142,8 @@ echo ${abc:
     (command_name
       (word))
     (expansion
-      (variable_name)))
+      (variable_name)
+      (word)))
   (command
     (command_name
       (word))
@@ -180,7 +181,8 @@ J=${K^^[L]}
       (expansion
         (subscript
           (variable_name)
-          (number)))))
+          (number))
+            (regex))))
   (variable_assignment
     (variable_name)
     (string
@@ -362,7 +364,8 @@ ${MATRIX:$(($RANDOM%${#MATRIX})):1}
         (variable_name)
         (arithmetic_expansion
           (binary_expression
-            (variable_name)
+            (simple_expansion
+              (variable_name))
             (expansion
               (variable_name))))
         (number)))))
@@ -923,8 +926,7 @@ component_type="${1}" item_name="${2?}"
       (variable_name)
       (string
         (expansion
-          (variable_name)
-          (word))))))
+          (variable_name))))))
 
 ================================================================================
 Arithmetic expansions

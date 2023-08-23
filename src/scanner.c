@@ -53,6 +53,10 @@ enum TokenType {
     EXTGLOB_PATTERN,
     BARE_DOLLAR,
     BRACE_START,
+    IMMEDIATE_DOUBLE_HASH,
+    EXTERNAL_EXPANSION_SYM_HASH,
+    EXTERNAL_EXPANSION_SYM_BANG,
+    EXTERNAL_EXPANSION_SYM_EQUAL,
     CLOSING_BRACE,
     CLOSING_BRACKET,
     HEREDOC_ARROW,
@@ -288,14 +292,16 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[CONCAT]) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) ||
-              lexer->lookahead == '\\' || lexer->lookahead == '>' ||
-              lexer->lookahead == '<' || lexer->lookahead == ')' ||
-              lexer->lookahead == '(' || lexer->lookahead == ';' ||
-              lexer->lookahead == '&' || lexer->lookahead == '|' ||
+              lexer->lookahead == '>' || lexer->lookahead == '<' ||
+              lexer->lookahead == ')' || lexer->lookahead == '(' ||
+              lexer->lookahead == ';' || lexer->lookahead == '&' ||
+              lexer->lookahead == '|' ||
               (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) ||
               (lexer->lookahead == ']' && valid_symbols[CLOSING_BRACKET]))) {
             lexer->result_symbol = CONCAT;
-            // This sucks
+            // So for a`b`, we want to return a concat. We check if the 2nd
+            // backtick has whitespace after it, and if it does we return
+            // concat.
             if (lexer->lookahead == '`') {
                 lexer->mark_end(lexer);
                 advance(lexer);
@@ -310,7 +316,63 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
                 return iswspace(lexer->lookahead) || lexer->eof(lexer);
             }
+            // strings w/ expansions that contains escaped quotes or backslashes
+            // need this to return a concat
+            if (lexer->lookahead == '\\') {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                if (lexer->lookahead == '"' || lexer->lookahead == '\'' ||
+                    lexer->lookahead == '\\') {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE]) {
+            lexer->result_symbol = CONCAT;
             return true;
+        }
+    }
+
+    if (valid_symbols[IMMEDIATE_DOUBLE_HASH] &&
+        !in_error_recovery(valid_symbols)) {
+        // advance two # and ensure not } after
+        if (lexer->lookahead == '#') {
+            lexer->mark_end(lexer);
+            advance(lexer);
+            if (lexer->lookahead == '#') {
+                advance(lexer);
+                if (lexer->lookahead != '}') {
+                    lexer->result_symbol = IMMEDIATE_DOUBLE_HASH;
+                    lexer->mark_end(lexer);
+                    return true;
+                }
+            }
+        }
+    }
+
+    if (valid_symbols[EXTERNAL_EXPANSION_SYM_HASH] &&
+        !in_error_recovery(valid_symbols)) {
+        if (lexer->lookahead == '#' || lexer->lookahead == '=' ||
+            lexer->lookahead == '!') {
+            lexer->result_symbol =
+                lexer->lookahead == '#'   ? EXTERNAL_EXPANSION_SYM_HASH
+                : lexer->lookahead == '!' ? EXTERNAL_EXPANSION_SYM_BANG
+                                          : EXTERNAL_EXPANSION_SYM_EQUAL;
+            advance(lexer);
+            lexer->mark_end(lexer);
+            while (lexer->lookahead == '#' || lexer->lookahead == '=' ||
+                   lexer->lookahead == '!') {
+                advance(lexer);
+            }
+            while (iswspace(lexer->lookahead)) {
+                skip(lexer);
+            }
+            if (lexer->lookahead == '}') {
+                return true;
+            }
+            return false;
         }
     }
 
@@ -387,15 +449,16 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         // no '*', '@', '?', '-', '$', '0', '_'
         if (lexer->lookahead == '*' || lexer->lookahead == '@' ||
             lexer->lookahead == '?' || lexer->lookahead == '-' ||
-            lexer->lookahead == '$' || lexer->lookahead == '0' ||
-            lexer->lookahead == '_') {
+            lexer->lookahead == '0' || lexer->lookahead == '_') {
             lexer->mark_end(lexer);
+            bool was_dollar = lexer->lookahead == '$';
             advance(lexer);
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
                 lexer->lookahead == ':' || lexer->lookahead == '-' ||
                 lexer->lookahead == '%' || lexer->lookahead == '#' ||
-                lexer->lookahead == '/')
+                lexer->lookahead == '/') {
                 return false;
+            }
         }
 
         if (valid_symbols[HEREDOC_ARROW] && lexer->lookahead == '<') {
@@ -461,6 +524,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
                 lexer->lookahead == ':' || lexer->lookahead == '%' ||
                 (lexer->lookahead == '#' && !is_number) ||
+                lexer->lookahead == '@' ||
+                (lexer->lookahead == '-' && valid_symbols[CLOSING_BRACE]) ||
                 lexer->lookahead == '/') {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = VARIABLE_NAME;
