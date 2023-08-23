@@ -31,7 +31,6 @@ module.exports = grammar({
     [$.compound_statement],
     [$.redirected_statement, $.command],
     [$.redirected_statement, $.command_substitution],
-    [$._expansion_body],
   ],
 
   inline: $ => [
@@ -45,6 +44,7 @@ module.exports = grammar({
     $._special_variable_name,
     $._c_word,
     $._statement_not_subshell,
+    $._expansion_syms,
   ],
 
   externals: $ => [
@@ -63,6 +63,10 @@ module.exports = grammar({
     $.extglob_pattern,
     $._bare_dollar,
     $._brace_start,
+    $._immediate_double_hash,
+    $._external_expansion_sym_hash,
+    $._external_expansion_sym_bang,
+    $._external_expansion_sym_equal,
     '}',
     ']',
     '<<',
@@ -715,74 +719,152 @@ module.exports = grammar({
 
     expansion: $ => seq(
       '${',
-      repeat(choice('#', '!', '=')),
       optional($._expansion_body),
       '}',
     ),
     _expansion_body: $ => choice(
-      seq(
-        choice($.variable_name, $._special_variable_name),
+      // ${!##} ${!#}
+      repeat1(field(
+        'operator',
         choice(
-          seq(
-            field('operator', choice('=', ':=', '-', ':-', '+', ':+', '?', ':?')),
-            repeat(choice($._literal, $.array)),
-          ),
-          seq(
-            field('operator', choice('#', '##', '%', '%%')),
-            choice($.regex, alias(')', $.regex), $.string, $.raw_string),
-          ),
-          seq(
-            choice('/', '//', '/#', '/%'),
-            alias($._regex_no_slash, $.regex),
-            // This can be elided
-            optional(seq(
-              '/',
-              optional(seq(
-                $._literal,
-                optional('/'),
-              )),
-            )),
-          ),
-          seq(
-            choice(',', ',,', '^', '^^'),
-            $.regex,
-          ),
-          seq(
-            ':',
-            choice($._simple_variable_name, $.number, $.arithmetic_expansion, $.expansion, '\n'),
-            optional(seq(
-              ':',
-              optional(choice($._simple_variable_name, $.number, $.arithmetic_expansion, '\n')),
-            )),
-          ),
-          seq(
-            '@',
-            field('operator', choice('U', 'u', 'L', 'Q', 'E', 'P', 'A', 'K', 'a', 'k')),
-          ),
+          alias($._external_expansion_sym_hash, '#'),
+          alias($._external_expansion_sym_bang, '!'),
+          alias($._external_expansion_sym_equal, '='),
+        ),
+      )),
+      seq(
+        optional(field('operator', token.immediate('!'))),
+        choice($.variable_name, $._simple_variable_name, $._special_variable_name, $.subscript),
+        choice(
+          $._expansion_expression,
+          $._expansion_regex,
+          $._expansion_regex_replacement,
+          $._expansion_regex_removal,
+          $._expansion_max_length,
+          $._expansion_operator,
         ),
       ),
       seq(
+        field('operator', token.immediate('!')),
+        choice($._simple_variable_name, $.variable_name),
+        optional(field('operator', choice(
+          token.immediate('@'),
+          token.immediate('*'),
+        ))),
+      ),
+      seq(
+        optional(field('operator', immediateLiterals('#', '!', '='))),
         choice(
           $.subscript,
           $._simple_variable_name,
           $._special_variable_name,
           $.command_substitution,
         ),
-        optional(seq(
+        repeat(field(
+          'operator',
           choice(
-            alias(token(prec(1, ',')), ','),
-            alias(token(prec(1, ',,')), ',,'),
-            alias(token(prec(1, '^')), '^'),
-            alias(token(prec(1, '^^')), '^^'),
+            alias($._external_expansion_sym_hash, '#'),
+            alias($._external_expansion_sym_bang, '!'),
+            alias($._external_expansion_sym_equal, '='),
           ),
-          optional($.regex),
         )),
-        repeat(prec.right(choice(
-          $._literal, $.array,
-          ':', ':?', '=', ':-', '%', '-', '#', ';', '|', '(', ')', '<', '>',
-        ))),
       ),
     ),
+
+    _expansion_syms: _ => repeat1(field('operator',
+      immediateLiterals('#', '!', '='),
+    )),
+
+    _expansion_expression: $ => prec(1, seq(
+      field('operator', immediateLiterals('=', ':=', '-', ':-', '+', ':+', '?', ':?')),
+      optional(seq(
+        choice(
+          alias($._concatenation_in_expansion, $.concatenation),
+          // $._simple_variable_name,
+          $.command_substitution,
+          $.word,
+          $.expansion,
+          $.simple_expansion,
+          $.array,
+          $.string,
+          $.raw_string,
+          $.ansi_c_string,
+          alias(/[\s]+[\w]*/, $.word),
+        ),
+      )),
+    )),
+
+    _expansion_regex: $ => seq(
+      field('operator', choice('#', alias($._immediate_double_hash, '##'), '%', '%%')),
+      choice($.regex, alias(')', $.regex), $.string, $.raw_string, alias(/\s+/, $.regex)),
+    ),
+
+    _expansion_regex_replacement: $ => seq(
+      field('operator', choice('/', '//', '/#', '/%')),
+      alias($._regex_no_slash, $.regex),
+      // This can be elided
+      optional(seq(
+        field('operator', '/'),
+        optional(seq(
+          $._literal,
+          field('operator', optional('/')),
+        )),
+      )),
+    ),
+
+    _expansion_regex_removal: $ => seq(
+      field('operator', choice(',', ',,', '^', '^^')),
+      optional($.regex),
+    ),
+
+    _expansion_max_length: $ => seq(
+      field('operator', ':'),
+      choice(
+        $._simple_variable_name,
+        $.number,
+        $.arithmetic_expansion,
+        $.expansion,
+        $.parenthesized_expression,
+        '\n',
+      ),
+      optional(seq(
+        field('operator', ':'),
+        optional(choice(
+          $._simple_variable_name,
+          $.number,
+          $.arithmetic_expansion,
+          '\n',
+        )),
+      )),
+    ),
+
+    _expansion_operator: $ => seq(
+      field('operator', token.immediate('@')),
+      field('operator', immediateLiterals('U', 'u', 'L', 'Q', 'E', 'P', 'A', 'K', 'a', 'k')),
+    ),
+
+    _concatenation_in_expansion: $ => prec(-2, seq(
+      choice(
+        $.word,
+        $.variable_name,
+        $.simple_expansion,
+        $.expansion,
+        $.string,
+        $.raw_string,
+      ),
+      repeat1(seq(
+        choice($._concat, alias(/`\s*`/, '``')),
+        choice(
+          $.word,
+          $.variable_name,
+          $.simple_expansion,
+          $.expansion,
+          $.string,
+          $.raw_string,
+          alias($._comment_word, $.word),
+        ),
+      )),
+    )),
 
     command_substitution: $ => choice(
       seq('$(', $._statements, ')'),
@@ -816,7 +898,7 @@ module.exports = grammar({
       $.variable_name,
     ),
 
-    _special_variable_name: $ => alias(choice('*', '@', '?', '-', '$', '0', '_'), $.special_variable_name),
+    _special_variable_name: $ => alias(choice('*', '@', '?', '!', '#', '-', '$', '0', '_'), $.special_variable_name),
 
     word: _ => token(seq(
       choice(
@@ -873,4 +955,16 @@ function commaSep(rule) {
  */
 function commaSep1(rule) {
   return seq(rule, repeat(seq(',', rule)));
+}
+
+/**
+ *
+ * Turns a list of rules into a choice of immediate rule
+ *
+ * @param {(RegExp|String)[]} literals
+ *
+ * @return {ChoiceRule}
+ */
+function immediateLiterals(...literals) {
+  return choice(...literals.map(l => token.immediate(l)));
 }
