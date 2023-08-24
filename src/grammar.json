@@ -2116,8 +2116,8 @@
           ]
         },
         {
-          "type": "STRING",
-          "value": "\n"
+          "type": "PATTERN",
+          "value": "\\n"
         },
         {
           "type": "CHOICE",
@@ -4378,8 +4378,8 @@
               "name": "parenthesized_expression"
             },
             {
-              "type": "STRING",
-              "value": "\n"
+              "type": "PATTERN",
+              "value": "\\n"
             }
           ]
         },
@@ -4416,8 +4416,8 @@
                           "name": "arithmetic_expansion"
                         },
                         {
-                          "type": "STRING",
-                          "value": "\n"
+                          "type": "PATTERN",
+                          "value": "\\n"
                         }
                       ]
                     },
@@ -4967,8 +4967,8 @@
           "value": ";"
         },
         {
-          "type": "STRING",
-          "value": "\n"
+          "type": "PATTERN",
+          "value": "\\n"
         },
         {
           "type": "STRING",
@@ -4988,8 +4988,8 @@
           "value": ";;"
         },
         {
-          "type": "STRING",
-          "value": "\n"
+          "type": "PATTERN",
+          "value": "\\n"
         },
         {
           "type": "STRING",
@@ -5132,8 +5132,8 @@
       "value": "<<-"
     },
     {
-      "type": "STRING",
-      "value": "\n"
+      "type": "PATTERN",
+      "value": "\\n"
     }
   ],
   "inline": [
