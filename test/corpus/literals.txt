@@ -101,54 +101,29 @@ echo ${var1#*#}
 echo ${!abc}
 echo ${abc}
 echo ${abc:-def}
+echo ${abc:+ghi}
 echo ${abc:- }
 echo ${abc:
 }
+echo ${abc,?}
+echo ${abc^^b}
+echo ${abc@U}
 
 --------------------------------------------------------------------------------
 
 (program
-  (command
-    (command_name
-      (word))
-    (expansion))
-  (command
-    (command_name
-      (word))
-    (expansion))
-  (command
-    (command_name
-      (word))
-    (expansion
-      (variable_name)
-      (regex)))
-  (command
-    (command_name
-      (word))
-    (expansion
-      (variable_name)))
-  (command
-    (command_name
-      (word))
-    (expansion
-      (variable_name)))
-  (command
-    (command_name
-      (word))
-    (expansion
-      (variable_name)
-      (word)))
-  (command
-    (command_name
-      (word))
-    (expansion
-      (variable_name)
-      (word)))
-  (command
-    (command_name
-      (word))
-    (expansion
-      (variable_name))))
+  (command (command_name (word)) (expansion))
+  (command (command_name (word)) (expansion))
+  (command (command_name (word)) (expansion (variable_name) (regex)))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (variable_name) (word)))
+  (command (command_name (word)) (expansion (variable_name) (word)))
+  (command (command_name (word)) (expansion (variable_name) (word)))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (variable_name) (regex)))
+  (command (command_name (word)) (expansion (variable_name) (regex)))
+  (command (command_name (word)) (expansion (variable_name))))
 
 ================================================================================
 Variable expansions with operators
@@ -456,6 +431,131 @@ cat ${BAR} ${ABC=def} ${GHI:?jkl}
         (expansion
           (variable_name)
           (regex))))))
+
+================================================================================
+Variable Expansions: Length
+================================================================================
+
+${parameter:-1}
+
+${parameter: -1}
+
+${parameter:(-1)}
+
+${matrix:$(($random%${#matrix})):1}
+
+"${_component_to_single:${len}:2}"
+
+--------------------------------------------------------------------------------
+
+(program
+  (command (command_name (expansion (variable_name) (word))))
+  (command (command_name (expansion (variable_name) (number))))
+  (command
+    (command_name
+      (expansion (variable_name) (parenthesized_expression (unary_expression (number))))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (arithmetic_expansion
+          (binary_expression (simple_expansion (variable_name)) (expansion (variable_name))))
+        (number))))
+  (command (command_name (string (expansion (variable_name) (expansion (variable_name)) (number))))))
+
+================================================================================
+Variable Expansions with operators
+================================================================================
+
+${parameter-default}
+${parameter- default}
+${!varprefix*}
+${!varprefix@}
+${parameter@U}
+
+--------------------------------------------------------------------------------
+
+(program
+  (command (command_name (expansion (variable_name) (word))))
+  (command (command_name (expansion (variable_name) (word))))
+  (command (command_name (expansion (variable_name))))
+  (command (command_name (expansion (variable_name))))
+  (command (command_name (expansion (variable_name)))))
+
+================================================================================
+Variable Expansions: Bizarre Cases
+================================================================================
+
+${!#}
+${!# }
+${!##}
+${!## }
+${!##/}
+
+--------------------------------------------------------------------------------
+
+(program
+  (command (command_name (expansion)))
+  (command (command_name (expansion)))
+  (command (command_name (expansion)))
+  (command (command_name (expansion)))
+  (command (command_name (expansion (special_variable_name) (regex)))))
+
+================================================================================
+Variable Expansions: Weird Cases
+================================================================================
+
+${completions[*]}
+${=1}
+${2?}
+${p_key#*=}
+${abc:- }
+${B[0]# }
+${to_enables[0]##*/}
+exec "${0#-}" --rcfile "${BASH_IT_BASHRC:-${HOME?}/.bashrc}"
+recho "TDEFAULTS = ${selvecs:+-DSELECT_VECS=\"$selvecs\"}"
+local msg="${2:-command '$1' does not exist}"
+
+--------------------------------------------------------------------------------
+
+(program
+  (command (command_name (expansion (subscript (variable_name) (word)))))
+  (command (command_name (expansion (variable_name))))
+  (command (command_name (expansion (variable_name))))
+  (command (command_name (expansion (variable_name) (regex))))
+  (command (command_name (expansion (variable_name) (word))))
+  (command (command_name (expansion (subscript (variable_name) (number)) (regex))))
+  (command (command_name (expansion (subscript (variable_name) (number)) (regex))))
+  (command
+    (command_name (word))
+    (string (expansion (special_variable_name) (regex)))
+    (word)
+    (string (expansion (variable_name) (concatenation (expansion (variable_name)) (word)))))
+  (command
+    (command_name (word))
+    (string
+      (expansion (variable_name) (concatenation (variable_name) (word) (simple_expansion (variable_name)) (word)))))
+  (declaration_command
+    (variable_assignment
+      (variable_name)
+      (string (expansion (variable_name) (concatenation (word) (raw_string) (word) (word) (word)))))))
+
+================================================================================
+Variable Expansions: Regex
+================================================================================
+
+A=${B//:;;/$'\n'}
+C="${D/#* -E /}"
+BASH_IT_GIT_URL="${BASH_IT_GIT_URL/git@/https://}"
+10#${command_start##*.}
+
+--------------------------------------------------------------------------------
+
+(program
+  (variable_assignment (variable_name) (expansion (variable_name) (regex) (ansi_c_string)))
+  (variable_assignment (variable_name) (string (expansion (variable_name) (regex))))
+  (variable_assignment (variable_name) (string (expansion (variable_name) (regex) (word))))
+  (command (command_name (number (expansion (variable_name) (regex))))))
 
 ================================================================================
 Words ending with '$'
