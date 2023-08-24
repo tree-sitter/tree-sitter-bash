@@ -239,6 +239,34 @@ wc -l $tmpfile
       (variable_name))))
 
 =================================
+Heredocs with many file redirects
+=================================
+
+FOO=bar echo <<EOF 2> err.txt > hello.txt
+hello
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (variable_assignment
+        (variable_name)
+        (word))
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (file_redirect
+        (file_descriptor)
+        (word))
+      (file_redirect
+        (word))
+      (simple_heredoc_body)
+      (heredoc_end))))
+
+=================================
 Heredocs with pipes
 =================================
 

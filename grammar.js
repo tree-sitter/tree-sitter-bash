@@ -433,7 +433,7 @@ module.exports = grammar({
     file_redirect: $ => prec.left(seq(
       field('descriptor', optional($.file_descriptor)),
       choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-      field('destination', repeat1($._literal)),
+      field('destination', $._literal),
     )),
 
     heredoc_redirect: $ => seq(
@@ -441,7 +441,7 @@ module.exports = grammar({
       choice('<<', '<<-'),
       $.heredoc_start,
       optional(seq(
-        choice(alias($._heredoc_pipeline, $.pipeline), $.file_redirect),
+        choice(alias($._heredoc_pipeline, $.pipeline), repeat1($.file_redirect)),
       )),
       '\n',
       choice($._heredoc_body, $._simple_heredoc_body),
