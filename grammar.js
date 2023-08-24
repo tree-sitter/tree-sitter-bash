@@ -71,7 +71,7 @@ module.exports = grammar({
     ']',
     '<<',
     '<<-',
-    '\n',
+    /\n/,
   ],
 
   extras: $ => [
@@ -443,7 +443,7 @@ module.exports = grammar({
       optional(seq(
         choice(alias($._heredoc_pipeline, $.pipeline), repeat1($.file_redirect)),
       )),
-      '\n',
+      /\n/,
       choice($._heredoc_body, $._simple_heredoc_body),
     ),
 
@@ -823,7 +823,7 @@ module.exports = grammar({
         $.arithmetic_expansion,
         $.expansion,
         $.parenthesized_expression,
-        '\n',
+        /\n/,
       ),
       optional(seq(
         field('operator', ':'),
@@ -831,7 +831,7 @@ module.exports = grammar({
           $._simple_variable_name,
           $.number,
           $.arithmetic_expansion,
-          '\n',
+          /\n/,
         )),
       )),
     ),
@@ -912,8 +912,8 @@ module.exports = grammar({
 
     test_operator: _ => token(prec(1, seq('-', /[a-zA-Z]+/))),
 
-    _c_terminator: _ => choice(';', '\n', '&'),
-    _terminator: _ => choice(';', ';;', '\n', '&'),
+    _c_terminator: _ => choice(';', /\n/, '&'),
+    _terminator: _ => choice(';', ';;', /\n/, '&'),
   },
 });
 
