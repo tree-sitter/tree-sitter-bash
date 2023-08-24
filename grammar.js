@@ -203,24 +203,24 @@ module.exports = grammar({
       $._c_expression,
     ),
     _c_unary_expression: $ => prec.left(seq(
-      choice('++', '--'),
+      field('operator', choice('++', '--')),
       $._c_expression_not_assignment,
     )),
     _c_binary_expression: $ => prec.right(seq(
       $._c_expression_not_assignment,
-      choice(
+      field('operator', choice(
         '+=', '-=', '*=', '/=', '%=', '**=',
         '<<=', '>>=', '&=', '^=', '|=',
         '==', '!=', '<=', '>=', '&&', '||',
         '<<', '>>',
         '+', '-', '*', '/', '%', '**',
         '<', '>',
-      ),
+      )),
       $._c_expression_not_assignment,
     )),
     _c_postfix_expression: $ => seq(
       $._c_expression_not_assignment,
-      choice('++', '--'),
+      field('operator', choice('++', '--')),
     ),
     _c_parenthesized_expression: $ => seq(
       '(',
@@ -525,18 +525,18 @@ module.exports = grammar({
 
     unary_expression: $ => choice(
       prec(1, seq(
-        token(prec(1, choice('-', '+', '~', '++', '--'))),
+        field('operator', tokenLiterals(1, '-', '+', '~', '++', '--')),
         $._expression,
       )),
       prec.right(1, seq(
-        choice('!', $.test_operator),
+        field('operator', choice('!', $.test_operator)),
         $._expression,
       )),
     ),
 
     postfix_expression: $ => seq(
       $._expression,
-      choice('++', '--'),
+      field('operator', choice('++', '--')),
     ),
 
     parenthesized_expression: $ => seq(
@@ -590,7 +590,6 @@ module.exports = grammar({
 
     _arithmetic_literal: $ => prec(1, choice(
       $.number,
-      $.test_operator,
       $.subscript,
       $.simple_expansion,
       $.expansion,
@@ -611,7 +610,6 @@ module.exports = grammar({
           '<<', '>>', '<<=', '>>=',
           '&', '|', '^',
           '&=', '|=', '^=',
-          $.test_operator,
         )),
         field('right', $._arithmetic_expression),
       ),
@@ -629,18 +627,18 @@ module.exports = grammar({
 
     _arithmetic_unary_expression: $ => choice(
       prec(3, seq(
-        token(prec(1, choice('-', '+', '~', '++', '--'))),
+        field('operator', tokenLiterals(1, '-', '+', '~', '++', '--')),
         $._arithmetic_expression,
       )),
       prec.right(3, seq(
-        '!',
+        field('operator', '!'),
         $._arithmetic_expression,
       )),
     ),
 
     _arithmetic_postfix_expression: $ => seq(
       $._arithmetic_expression,
-      choice('++', '--'),
+      field('operator', choice('++', '--')),
     ),
 
     _arithmetic_parenthesized_expression: $ => seq(
@@ -967,4 +965,18 @@ function commaSep1(rule) {
  */
 function immediateLiterals(...literals) {
   return choice(...literals.map(l => token.immediate(l)));
+}
+
+/**
+ *
+ * Turns a list of rules into a choice of aliased token rules
+ *
+ * @param {number} precedence
+ *
+ * @param {(RegExp|String)[]} literals
+ *
+ * @return {ChoiceRule}
+ */
+function tokenLiterals(precedence, ...literals) {
+  return choice(...literals.map(l => token(prec(precedence, l))));
 }
