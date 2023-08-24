@@ -1390,10 +1390,6 @@
         "required": true,
         "types": [
           {
-            "type": "\n",
-            "named": false
-          },
-          {
             "type": "&",
             "named": false
           },
@@ -2206,10 +2202,6 @@
         "required": true,
         "types": [
           {
-            "type": "\n",
-            "named": false
-          },
-          {
             "type": "&",
             "named": false
           },
@@ -2297,10 +2289,6 @@
     "type": "word",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "\n",
-    "named": false
   },
   {
     "type": "!",
