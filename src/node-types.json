@@ -1183,7 +1183,7 @@
         ]
       },
       "destination": {
-        "multiple": true,
+        "multiple": false,
         "required": true,
         "types": [
           {
