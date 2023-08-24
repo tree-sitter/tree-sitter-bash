@@ -2038,11 +2038,8 @@
             "type": "FIELD",
             "name": "destination",
             "content": {
-              "type": "REPEAT1",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_literal"
-              }
+              "type": "SYMBOL",
+              "name": "_literal"
             }
           }
         ]
@@ -2103,8 +2100,11 @@
                       "value": "pipeline"
                     },
                     {
-                      "type": "SYMBOL",
-                      "name": "file_redirect"
+                      "type": "REPEAT1",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "file_redirect"
+                      }
                     }
                   ]
                 }
