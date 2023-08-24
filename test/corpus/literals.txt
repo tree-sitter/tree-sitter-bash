@@ -1115,7 +1115,8 @@ echo $((foo-- || bar++))
         (binary_expression
           (binary_expression
             (unary_expression
-              (test_operator))
+              (unary_expression
+                (variable_name)))
             (unary_expression
               (unary_expression
                 (variable_name))))
