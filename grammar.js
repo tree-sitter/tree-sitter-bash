@@ -813,12 +813,7 @@ module.exports = grammar({
     ),
 
     _expansion_regex_removal: $ => seq(
-      field('operator', choice(
-        alias(token(prec(1, ',')), ','),
-        alias(token(prec(1, ',,')), ',,'),
-        alias(token(prec(1, '^')), '^'),
-        alias(token(prec(1, '^^')), '^^'),
-      )),
+      field('operator', choice(',', ',,', '^', '^^')),
       optional($.regex),
     ),
 
