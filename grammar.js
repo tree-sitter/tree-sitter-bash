@@ -147,7 +147,7 @@ module.exports = grammar({
           $.herestring_redirect,
         ))),
       ),
-      repeat1($.file_redirect),
+      field('redirect', repeat1($.file_redirect)),
     ))),
 
     for_statement: $ => seq(
@@ -320,7 +320,7 @@ module.exports = grammar({
           $.subshell,
           $.test_command),
       ),
-      optional($.file_redirect),
+      field('redirect', optional($.file_redirect)),
     )),
 
     compound_statement: $ => seq(
@@ -387,7 +387,7 @@ module.exports = grammar({
     command: $ => prec.left(seq(
       repeat(choice(
         $.variable_assignment,
-        $.file_redirect,
+        field('redirect', $.file_redirect),
       )),
       field('name', $.command_name),
       repeat(field('argument', choice(
@@ -441,7 +441,7 @@ module.exports = grammar({
       choice('<<', '<<-'),
       $.heredoc_start,
       optional(seq(
-        choice(alias($._heredoc_pipeline, $.pipeline), repeat1($.file_redirect)),
+        choice(alias($._heredoc_pipeline, $.pipeline), field('redirect', repeat1($.file_redirect))),
       )),
       /\n/,
       choice($._heredoc_body, $._simple_heredoc_body),
@@ -866,7 +866,7 @@ module.exports = grammar({
 
     command_substitution: $ => choice(
       seq('$(', $._statements, ')'),
-      seq('$(', $.file_redirect, ')'),
+      seq('$(', field('redirect', $.file_redirect), ')'),
       prec(1, seq('`', $._statements, '`')),
       seq('$`', $._statements, '`'),
     ),
