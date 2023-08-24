@@ -821,16 +821,22 @@
             "named": true
           }
         ]
+      },
+      "redirect": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "file_redirect",
+            "named": true
+          }
+        ]
       }
     },
     "children": {
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "file_redirect",
-          "named": true
-        },
         {
           "type": "variable_assignment",
           "named": true
@@ -860,17 +866,24 @@
   {
     "type": "command_substitution",
     "named": true,
-    "fields": {},
+    "fields": {
+      "redirect": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "file_redirect",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_statement",
-          "named": true
-        },
-        {
-          "type": "file_redirect",
           "named": true
         }
       ]
@@ -1269,17 +1282,17 @@
             "named": true
           }
         ]
+      },
+      "redirect": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "file_redirect",
+            "named": true
+          }
+        ]
       }
-    },
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "file_redirect",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -1318,16 +1331,22 @@
             "named": true
           }
         ]
+      },
+      "redirect": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "file_redirect",
+            "named": true
+          }
+        ]
       }
     },
     "children": {
       "multiple": true,
       "required": true,
       "types": [
-        {
-          "type": "file_redirect",
-          "named": true
-        },
         {
           "type": "heredoc_body",
           "named": true
@@ -1714,7 +1733,7 @@
       },
       "redirect": {
         "multiple": true,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "file_redirect",
@@ -1730,16 +1749,6 @@
           }
         ]
       }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "file_redirect",
-          "named": true
-        }
-      ]
     }
   },
   {

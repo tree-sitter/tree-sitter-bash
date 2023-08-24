@@ -217,10 +217,14 @@
               ]
             },
             {
-              "type": "REPEAT1",
+              "type": "FIELD",
+              "name": "redirect",
               "content": {
-                "type": "SYMBOL",
-                "name": "file_redirect"
+                "type": "REPEAT1",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "file_redirect"
+                }
               }
             }
           ]
@@ -1370,16 +1374,20 @@
             }
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "file_redirect"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
+            "type": "FIELD",
+            "name": "redirect",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "file_redirect"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
           }
         ]
       }
@@ -1747,8 +1755,12 @@
                   "name": "variable_assignment"
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "file_redirect"
+                  "type": "FIELD",
+                  "name": "redirect",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "file_redirect"
+                  }
                 }
               ]
             }
@@ -2100,10 +2112,14 @@
                       "value": "pipeline"
                     },
                     {
-                      "type": "REPEAT1",
+                      "type": "FIELD",
+                      "name": "redirect",
                       "content": {
-                        "type": "SYMBOL",
-                        "name": "file_redirect"
+                        "type": "REPEAT1",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "file_redirect"
+                        }
                       }
                     }
                   ]
@@ -4660,8 +4676,12 @@
               "value": "$("
             },
             {
-              "type": "SYMBOL",
-              "name": "file_redirect"
+              "type": "FIELD",
+              "name": "redirect",
+              "content": {
+                "type": "SYMBOL",
+                "name": "file_redirect"
+              }
             },
             {
               "type": "STRING",
