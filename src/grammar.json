@@ -2222,8 +2222,13 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "simple_heredoc_body"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "simple_heredoc_body"
+          },
+          "named": true,
+          "value": "heredoc_body"
         },
         {
           "type": "SYMBOL",
@@ -3979,39 +3984,6 @@
         }
       ]
     },
-    "_expansion_syms": {
-      "type": "REPEAT1",
-      "content": {
-        "type": "FIELD",
-        "name": "operator",
-        "content": {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "IMMEDIATE_TOKEN",
-              "content": {
-                "type": "STRING",
-                "value": "#"
-              }
-            },
-            {
-              "type": "IMMEDIATE_TOKEN",
-              "content": {
-                "type": "STRING",
-                "value": "!"
-              }
-            },
-            {
-              "type": "IMMEDIATE_TOKEN",
-              "content": {
-                "type": "STRING",
-                "value": "="
-              }
-            }
-          ]
-        }
-      }
-    },
     "_expansion_expression": {
       "type": "PREC",
       "value": 1,
@@ -5166,8 +5138,7 @@
     "_multiline_variable_name",
     "_special_variable_name",
     "_c_word",
-    "_statement_not_subshell",
-    "_expansion_syms"
+    "_statement_not_subshell"
   ],
   "supertypes": [
     "_statement",

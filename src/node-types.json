@@ -1362,10 +1362,6 @@
         {
           "type": "pipeline",
           "named": true
-        },
-        {
-          "type": "simple_heredoc_body",
-          "named": true
         }
       ]
     }
@@ -2742,10 +2738,6 @@
   {
     "type": "select",
     "named": false
-  },
-  {
-    "type": "simple_heredoc_body",
-    "named": true
   },
   {
     "type": "special_variable_name",
