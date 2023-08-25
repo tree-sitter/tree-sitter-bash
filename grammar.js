@@ -37,7 +37,7 @@ module.exports = grammar({
     $._statement,
     $._terminator,
     $._literal,
-    $._statements2,
+    $._terminated_statement,
     $._primary_expression,
     $._simple_variable_name,
     $._multiline_variable_name,
@@ -100,12 +100,12 @@ module.exports = grammar({
       optional($._terminator),
     )),
 
-    _statements2: $ => repeat1(seq(
+    _terminated_statement: $ => repeat1(seq(
       $._statement,
       $._terminator,
     )),
 
-    _terminated_statement: $ => seq(
+    _terminated_statement_not_subshell: $ => seq(
       $._statement_not_subshell,
       $._terminator,
     ),
@@ -230,21 +230,21 @@ module.exports = grammar({
 
     while_statement: $ => seq(
       choice('while', 'until'),
-      field('condition', repeat1($._terminated_statement)),
+      field('condition', repeat1($._terminated_statement_not_subshell)),
       field('body', $.do_group),
     ),
 
     do_group: $ => seq(
       'do',
-      optional($._statements2),
+      optional($._terminated_statement),
       'done',
     ),
 
     if_statement: $ => seq(
       'if',
-      field('condition', $._terminated_statement),
+      field('condition', $._terminated_statement_not_subshell),
       'then',
-      optional($._statements2),
+      optional($._terminated_statement),
       repeat($.elif_clause),
       optional($.else_clause),
       'fi',
@@ -252,14 +252,14 @@ module.exports = grammar({
 
     elif_clause: $ => seq(
       'elif',
-      $._terminated_statement,
+      $._terminated_statement_not_subshell,
       'then',
-      optional($._statements2),
+      optional($._terminated_statement),
     ),
 
     else_clause: $ => seq(
       'else',
-      optional($._statements2),
+      optional($._terminated_statement),
     ),
 
     case_statement: $ => seq(
@@ -324,7 +324,7 @@ module.exports = grammar({
 
     compound_statement: $ => seq(
       '{',
-      optional(choice($._statements2, seq($._statement, $._terminator))),
+      optional(choice($._terminated_statement, seq($._statement, $._terminator))),
       token(prec(-1, '}')),
     ),
 
