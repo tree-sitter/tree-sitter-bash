@@ -1419,3 +1419,57 @@ a () {
         (string)))
     (file_redirect
       (number))))
+
+================================================================================
+If condition with subshell
+================================================================================
+
+if (echo $BASHPID; true); then echo $BASHPID; fi
+
+--------------------------------------------------------------------------------
+
+(program
+  (if_statement
+    (subshell
+      (command
+        (command_name
+          (word))
+        (simple_expansion
+          (variable_name)))
+      (command
+        (command_name
+          (word))))
+    (command
+      (command_name
+        (word))
+      (simple_expansion
+        (variable_name)))))
+
+================================================================================
+While condition with subshell
+================================================================================
+
+while (echo $BASHPID; true); do echo $BASHPID; break; done
+
+--------------------------------------------------------------------------------
+
+(program
+  (while_statement
+    (subshell
+      (command
+        (command_name
+          (word))
+        (simple_expansion
+          (variable_name)))
+      (command
+        (command_name
+          (word))))
+    (do_group
+      (command
+        (command_name
+          (word))
+        (simple_expansion
+          (variable_name)))
+      (command
+        (command_name
+          (word))))))
