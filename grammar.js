@@ -468,7 +468,7 @@ module.exports = grammar({
     ),
 
     _simple_heredoc_body: $ => seq(
-      $.simple_heredoc_body,
+      alias($.simple_heredoc_body, $.heredoc_body),
       $.heredoc_end,
     ),
 
