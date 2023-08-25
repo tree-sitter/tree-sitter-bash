@@ -1,6 +1,6 @@
 # tree-sitter-bash
 
-[![CI](https://github.com/tree-sitter/tree-sitter-c/actions/workflows/ci.yml/badge.svg)](https://github.com/tree-sitter/tree-sitter-c/actions/workflows/ci.yml)
+[![CI](https://github.com/tree-sitter/tree-sitter-bash/actions/workflows/ci.yml/badge.svg)](https://github.com/tree-sitter/tree-sitter-bash/actions/workflows/ci.yml)
 
 Bash grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter).
 
