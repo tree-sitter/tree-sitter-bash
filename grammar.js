@@ -28,7 +28,6 @@ module.exports = grammar({
   conflicts: $ => [
     [$._expression, $.command_name],
     [$.command, $.variable_assignments],
-    [$.compound_statement],
     [$.redirected_statement, $.command],
     [$.redirected_statement, $.command_substitution],
   ],
@@ -324,7 +323,7 @@ module.exports = grammar({
 
     compound_statement: $ => seq(
       '{',
-      optional(choice($._terminated_statement, seq($._statement, $._terminator))),
+      optional($._terminated_statement),
       token(prec(-1, '}')),
     ),
 
