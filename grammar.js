@@ -104,11 +104,6 @@ module.exports = grammar({
       $._terminator,
     )),
 
-    _terminated_statement_not_subshell: $ => seq(
-      $._statement_not_subshell,
-      $._terminator,
-    ),
-
     // Statements
 
     _statement: $ => choice(
@@ -229,7 +224,7 @@ module.exports = grammar({
 
     while_statement: $ => seq(
       choice('while', 'until'),
-      field('condition', repeat1($._terminated_statement_not_subshell)),
+      field('condition', $._terminated_statement),
       field('body', $.do_group),
     ),
 
@@ -241,7 +236,7 @@ module.exports = grammar({
 
     if_statement: $ => seq(
       'if',
-      field('condition', $._terminated_statement_not_subshell),
+      field('condition', $._terminated_statement),
       'then',
       optional($._terminated_statement),
       repeat($.elif_clause),
@@ -251,7 +246,7 @@ module.exports = grammar({
 
     elif_clause: $ => seq(
       'elif',
-      $._terminated_statement_not_subshell,
+      $._terminated_statement,
       'then',
       optional($._terminated_statement),
     ),
