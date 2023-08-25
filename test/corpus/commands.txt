@@ -162,7 +162,7 @@ JS
         (word)))
     (heredoc_redirect
       (heredoc_start)
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end)))
   (redirected_statement
     (command
@@ -171,7 +171,7 @@ JS
       (word))
     (heredoc_redirect
       (heredoc_start)
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end))))
 
 ===============================
@@ -263,7 +263,7 @@ EOF
         destination: (word))
       redirect: (file_redirect
         destination: (word))
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end))))
 
 =================================
@@ -288,7 +288,7 @@ EOF
           (command_name
             (word))
           (word)))
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end))))
 
 ======================================
@@ -301,7 +301,7 @@ EOF
 
 ---
 
-(program (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end))))
+(program (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
 
 ======================================
 Quoted Heredocs
@@ -326,10 +326,10 @@ EOF
 ---
 
 (program
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end))))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
 
 ==========================================
 Heredocs with indented closing delimiters
@@ -378,7 +378,7 @@ EOF
         (word)))
     redirect: (heredoc_redirect
       (heredoc_start)
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end)))
   (redirected_statement
     body: (command
@@ -386,7 +386,7 @@ EOF
         (word)))
     redirect: (heredoc_redirect
       (heredoc_start)
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end)))
   (function_definition
     name: (word)
@@ -397,7 +397,7 @@ EOF
             (word)))
         redirect: (heredoc_redirect
           (heredoc_start)
-          (simple_heredoc_body)
+          (heredoc_body)
           (heredoc_end)))))
   (redirected_statement
     body: (command
@@ -407,7 +407,7 @@ EOF
       (heredoc_start)
       redirect: (file_redirect
         destination: (word))
-      (simple_heredoc_body)
+      (heredoc_body)
       (heredoc_end))))
 
 ==========================================
@@ -437,11 +437,11 @@ Hello.
 ---
 
 (program
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end)))
-  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (simple_heredoc_body) (heredoc_end))))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
 
 ==========================================
 Herestrings
