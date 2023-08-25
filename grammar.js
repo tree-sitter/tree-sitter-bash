@@ -44,7 +44,6 @@ module.exports = grammar({
     $._special_variable_name,
     $._c_word,
     $._statement_not_subshell,
-    $._expansion_syms,
   ],
 
   externals: $ => [
@@ -768,10 +767,6 @@ module.exports = grammar({
         )),
       ),
     ),
-
-    _expansion_syms: _ => repeat1(field('operator',
-      immediateLiterals('#', '!', '='),
-    )),
 
     _expansion_expression: $ => prec(1, seq(
       field('operator', immediateLiterals('=', ':=', '-', ':-', '+', ':+', '?', ':?')),
