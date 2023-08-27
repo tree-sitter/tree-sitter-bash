@@ -452,7 +452,6 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             lexer->lookahead == '?' || lexer->lookahead == '-' ||
             lexer->lookahead == '0' || lexer->lookahead == '_') {
             lexer->mark_end(lexer);
-            bool was_dollar = lexer->lookahead == '$';
             advance(lexer);
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
                 lexer->lookahead == ':' || lexer->lookahead == '-' ||
@@ -544,15 +543,16 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return false;
     }
 
-    if (valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] ||
-        valid_symbols[REGEX_NO_SPACE] && !in_error_recovery(valid_symbols)) {
+    if ((valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] ||
+         valid_symbols[REGEX_NO_SPACE]) &&
+        !in_error_recovery(valid_symbols)) {
         if (valid_symbols[REGEX] || valid_symbols[REGEX_NO_SPACE]) {
             while (iswspace(lexer->lookahead)) {
                 skip(lexer);
             }
         }
 
-        if (lexer->lookahead != '"' && lexer->lookahead != '\'' ||
+        if ((lexer->lookahead != '"' && lexer->lookahead != '\'') ||
             (lexer->lookahead == '$' && valid_symbols[REGEX_NO_SLASH])) {
             typedef struct {
                 bool done;
