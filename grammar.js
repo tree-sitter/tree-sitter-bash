@@ -579,6 +579,7 @@ module.exports = grammar({
       alias($._arithmetic_binary_expression, $.binary_expression),
       alias($._arithmetic_postfix_expression, $.postfix_expression),
       alias($._arithmetic_parenthesized_expression, $.parenthesized_expression),
+      $.command_substitution,
     ),
 
     _arithmetic_literal: $ => prec(1, choice(
