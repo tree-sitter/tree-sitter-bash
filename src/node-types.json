@@ -2023,7 +2023,7 @@
     "fields": {
       "name": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "subscript",
@@ -2037,7 +2037,7 @@
       },
       "value": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "_primary_expression",
@@ -2048,65 +2048,31 @@
             "named": true
           },
           {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
             "type": "concatenation",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "postfix_expression",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "variable_assignment",
             "named": true
           }
         ]
       }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "command_substitution",
-          "named": true
-        },
-        {
-          "type": "expansion",
-          "named": true
-        },
-        {
-          "type": "number",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "postfix_expression",
-          "named": true
-        },
-        {
-          "type": "simple_expansion",
-          "named": true
-        },
-        {
-          "type": "string",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        },
-        {
-          "type": "variable_assignment",
-          "named": true
-        },
-        {
-          "type": "variable_name",
-          "named": true
-        },
-        {
-          "type": "word",
-          "named": true
-        }
-      ]
     }
   },
   {
