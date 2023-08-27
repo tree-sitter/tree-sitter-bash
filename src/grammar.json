@@ -2919,6 +2919,10 @@
           },
           "named": true,
           "value": "parenthesized_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "command_substitution"
         }
       ]
     },
@@ -4905,26 +4909,6 @@
         ]
       }
     },
-    "test_operator": {
-      "type": "TOKEN",
-      "content": {
-        "type": "PREC",
-        "value": 1,
-        "content": {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "-"
-            },
-            {
-              "type": "PATTERN",
-              "value": "[a-zA-Z]+"
-            }
-          ]
-        }
-      }
-    },
     "_c_terminator": {
       "type": "CHOICE",
       "members": [
@@ -5037,6 +5021,10 @@
     {
       "type": "SYMBOL",
       "name": "variable_name"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "test_operator"
     },
     {
       "type": "SYMBOL",
