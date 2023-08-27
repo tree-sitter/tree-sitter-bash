@@ -48,6 +48,7 @@ enum TokenType {
     EMPTY_VALUE,
     CONCAT,
     VARIABLE_NAME,
+    TEST_OPERATOR,
     REGEX,
     REGEX_NO_SLASH,
     REGEX_NO_SPACE,
@@ -424,6 +425,26 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return scan_heredoc_start(scanner, lexer);
     }
 
+    if (valid_symbols[TEST_OPERATOR]) {
+        while (iswspace(lexer->lookahead) && lexer->lookahead != '\n') {
+            skip(lexer);
+        }
+
+        if (lexer->lookahead == '-') {
+            advance(lexer);
+
+            while (isalpha(lexer->lookahead)) {
+                advance(lexer);
+            }
+
+            if (iswspace(lexer->lookahead)) {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = TEST_OPERATOR;
+                return true;
+            }
+        }
+    }
+
     if ((valid_symbols[VARIABLE_NAME] || valid_symbols[FILE_DESCRIPTOR] ||
          valid_symbols[HEREDOC_ARROW]) &&
         !valid_symbols[REGEX_NO_SLASH]) {
@@ -521,7 +542,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
                 return false;
             }
-            if (lexer->lookahead == '/') return false;
+            if (lexer->lookahead == '/') {
+                return false;
+            }
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
                 lexer->lookahead == ':' || lexer->lookahead == '%' ||
                 (lexer->lookahead == '#' && !is_number) ||
