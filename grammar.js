@@ -55,6 +55,7 @@ module.exports = grammar({
     $._empty_value,
     $._concat,
     $.variable_name, // Variable name followed by an operator like '=' or '+='
+    $.test_operator,
     $.regex,
     $._regex_no_slash,
     $._regex_no_space,
@@ -899,8 +900,6 @@ module.exports = grammar({
         '\\ ',
       )),
     )),
-
-    test_operator: _ => token(prec(1, seq('-', /[a-zA-Z]+/))),
 
     _c_terminator: _ => choice(';', /\n/, '&'),
     _terminator: _ => choice(';', ';;', /\n/, '&'),
