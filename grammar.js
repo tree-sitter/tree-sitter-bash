@@ -191,9 +191,9 @@ module.exports = grammar({
     ),
 
     _c_variable_assignment: $ => seq(
-      alias($._c_word, $.variable_name),
+      field('name', alias($._c_word, $.variable_name)),
       '=',
-      $._c_expression,
+      field('value', $._c_expression),
     ),
     _c_unary_expression: $ => prec.left(seq(
       field('operator', choice('++', '--')),
