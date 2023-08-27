@@ -521,12 +521,12 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
                 return false;
             }
+            if (lexer->lookahead == '/') return false;
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
                 lexer->lookahead == ':' || lexer->lookahead == '%' ||
                 (lexer->lookahead == '#' && !is_number) ||
                 lexer->lookahead == '@' ||
-                (lexer->lookahead == '-' && valid_symbols[CLOSING_BRACE]) ||
-                lexer->lookahead == '/') {
+                (lexer->lookahead == '-' && valid_symbols[CLOSING_BRACE])) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = VARIABLE_NAME;
                 return true;

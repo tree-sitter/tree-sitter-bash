@@ -538,3 +538,18 @@ $(( $( ver_cut 2 ) - 1 ))
                 (word))
               (number)))
           (number))))))
+
+
+==========================================
+Ralative path without dots
+==========================================
+
+bin/ls /usr/bin
+
+---
+
+(program
+  (command
+    (command_name
+      (word))
+    (word)))
