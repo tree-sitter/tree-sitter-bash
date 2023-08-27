@@ -550,21 +550,29 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "ALIAS",
+          "type": "FIELD",
+          "name": "name",
           "content": {
-            "type": "SYMBOL",
-            "name": "_c_word"
-          },
-          "named": true,
-          "value": "variable_name"
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_c_word"
+            },
+            "named": true,
+            "value": "variable_name"
+          }
         },
         {
           "type": "STRING",
           "value": "="
         },
         {
-          "type": "SYMBOL",
-          "name": "_c_expression"
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_c_expression"
+          }
         }
       ]
     },
