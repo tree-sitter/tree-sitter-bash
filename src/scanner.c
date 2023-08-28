@@ -471,6 +471,16 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
             if (iswspace(lexer->lookahead)) {
                 lexer->mark_end(lexer);
+                advance(lexer);
+                if (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) {
+                    if (valid_symbols[WORD_IN_REPLACEMENT]) {
+                        lexer->mark_end(lexer);
+                        lexer->result_symbol = WORD_IN_REPLACEMENT;
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
                 lexer->result_symbol = TEST_OPERATOR;
                 return true;
             }
