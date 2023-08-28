@@ -59,6 +59,7 @@ module.exports = grammar({
     $.regex,
     $._regex_no_slash,
     $._regex_no_space,
+    $._word_in_replacement,
     $.extglob_pattern,
     $._bare_dollar,
     $._brace_start,
@@ -806,12 +807,15 @@ module.exports = grammar({
 
     _expansion_regex_replacement: $ => seq(
       field('operator', choice('/', '//', '/#', '/%')),
-      alias($._regex_no_slash, $.regex),
+      optional(alias($._regex_no_slash, $.regex)),
       // This can be elided
       optional(seq(
         field('operator', '/'),
         optional(seq(
-          choice($._literal, alias(/[\w\.]+\s+/, $.word)),
+          choice(
+            $._literal,
+            alias($._word_in_replacement, $.word),
+          ),
           field('operator', optional('/')),
         )),
       )),
@@ -843,7 +847,7 @@ module.exports = grammar({
       )),
     ),
 
-    _expansion_operator: $ => seq(
+    _expansion_operator: _ => seq(
       field('operator', token.immediate('@')),
       field('operator', immediateLiterals('U', 'u', 'L', 'Q', 'E', 'P', 'A', 'K', 'a', 'k')),
     ),

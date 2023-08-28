@@ -52,6 +52,7 @@ enum TokenType {
     REGEX,
     REGEX_NO_SLASH,
     REGEX_NO_SPACE,
+    WORD_IN_REPLACEMENT,
     EXTGLOB_PATTERN,
     BARE_DOLLAR,
     BRACE_START,
@@ -639,10 +640,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         if (lexer->lookahead == '/') {
                             lexer->mark_end(lexer);
                             lexer->result_symbol = REGEX_NO_SLASH;
-                            return true;
+                            return state.advanced_once;
                         }
                         if (lexer->lookahead == '\\') {
                             advance(lexer);
+                            state.advanced_once = true;
                             if (!lexer->eof(lexer) && lexer->lookahead != '[' &&
                                 lexer->lookahead != '/') {
                                 advance(lexer);
@@ -651,6 +653,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         } else {
                             bool was_space = iswspace(lexer->lookahead);
                             advance(lexer);
+                            state.advanced_once = true;
                             if (!was_space) {
                                 lexer->mark_end(lexer);
                             }
@@ -795,6 +798,31 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
 
         return false;
+    }
+
+    if (valid_symbols[WORD_IN_REPLACEMENT]) {
+        bool advanced_once = false;
+        for (;;) {
+            if (lexer->lookahead == '\"') {
+                return false;
+            }
+            if (lexer->lookahead == '$') {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                advanced_once = true;
+                if (lexer->lookahead == '{' || lexer->lookahead == '\'') {
+                    return false;
+                }
+            }
+
+            if (lexer->lookahead == '}') {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = WORD_IN_REPLACEMENT;
+                return advanced_once;
+            }
+            advance(lexer);
+            advanced_once = true;
+        }
     }
 
 brace_start:
