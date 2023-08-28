@@ -444,6 +444,26 @@ Hello.
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
 
 ==========================================
+Heredocs with a rhs statement
+==========================================
+
+cat <<-_EOF_ || die "cat EOF failed"
+	#!/bin/sh
+	echo hello
+_EOF_
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (command (command_name (word)) (string))
+      (heredoc_body)
+      (heredoc_end))))
+
+==========================================
 Herestrings
 ==========================================
 
