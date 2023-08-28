@@ -108,6 +108,7 @@ echo ${abc:
 echo ${abc,?}
 echo ${abc^^b}
 echo ${abc@U}
+echo ${abc:- -quiet}
 
 --------------------------------------------------------------------------------
 
@@ -123,7 +124,8 @@ echo ${abc@U}
   (command (command_name (word)) (expansion (variable_name)))
   (command (command_name (word)) (expansion (variable_name) (regex)))
   (command (command_name (word)) (expansion (variable_name) (regex)))
-  (command (command_name (word)) (expansion (variable_name))))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (variable_name) (word))))
 
 ================================================================================
 Variable expansions with operators
