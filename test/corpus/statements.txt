@@ -920,6 +920,8 @@ fi
 
 [[ ${f} != */@(default).vim ]]
 
+[[ "${MY_LOCALES}" != *en_US* || a != 2 ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -963,7 +965,15 @@ fi
     (binary_expression
       (expansion
         (variable_name))
-      (extglob_pattern))))
+      (extglob_pattern)))
+  (test_command
+    (binary_expression
+      (binary_expression
+        (binary_expression
+          (string (expansion (variable_name)))
+          (extglob_pattern))
+        (word))
+      (number))))
 
 ================================================================================
 Test commands with ternary

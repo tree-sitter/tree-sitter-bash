@@ -772,6 +772,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
                 if (!state.done) {
                     bool was_space = iswspace(lexer->lookahead);
+                    if (was_space) {
+                        lexer->mark_end(lexer);
+                        lexer->result_symbol = EXTGLOB_PATTERN;
+                        return true;
+                    }
                     if (lexer->lookahead == '"') {
                         lexer->mark_end(lexer);
                         lexer->result_symbol = EXTGLOB_PATTERN;
