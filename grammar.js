@@ -838,6 +838,7 @@ module.exports = grammar({
         $.arithmetic_expansion,
         $.expansion,
         $.parenthesized_expression,
+        $.command_substitution,
         /\n/,
       )),
       optional(seq(
