@@ -544,6 +544,7 @@ exec "${0#-}" --rcfile "${BASH_IT_BASHRC:-${HOME?}/.bashrc}"
 recho "TDEFAULTS = ${selvecs:+-DSELECT_VECS=\"$selvecs\"}"
 local msg="${2:-command '$1' does not exist}"
 ${cdir:+#}
+${dict_langs:+;}
 
 --------------------------------------------------------------------------------
 
@@ -568,6 +569,7 @@ ${cdir:+#}
     (variable_assignment
       (variable_name)
       (string (expansion (variable_name) (concatenation (word) (raw_string) (word) (word) (word))))))
+  (command (command_name (expansion (variable_name) (word))))
   (command (command_name (expansion (variable_name) (word)))))
 
 ================================================================================

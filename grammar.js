@@ -794,7 +794,7 @@ module.exports = grammar({
           $.raw_string,
           $.ansi_c_string,
           alias(/[\s]+[\w]*/, $.word),
-          alias($._comment_word, $.word),
+          alias($._expansion_word, $.word),
         ),
       )),
     )),
@@ -868,7 +868,7 @@ module.exports = grammar({
           $.string,
           $.raw_string,
           $.command_substitution,
-          alias($._comment_word, $.word),
+          alias($._expansion_word, $.word),
         ),
       )),
     )),
@@ -892,7 +892,20 @@ module.exports = grammar({
     ),
 
     comment: _ => token(prec(-10, /#.*/)),
-    _comment_word: _ => token(prec(-9, seq(
+
+    _expansion_word: _ => token(prec(-9, seq(
+      choice(
+        noneOf(...['$', '"', '{', '}', '(', ')', '\'', '\\s']),
+        seq('\\', noneOf('\\s')),
+      ),
+      repeat(choice(
+        noneOf(...['$', '"', '{', '}', '(', ')', '\'', '\\s']),
+        seq('\\', noneOf('\\s')),
+        '\\ ',
+      )),
+    ))),
+
+    _comment_word: _ => token(prec(-8, seq(
       choice(
         noneOf(...SPECIAL_CHARACTERS),
         seq('\\', noneOf('\\s')),
