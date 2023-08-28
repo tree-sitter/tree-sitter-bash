@@ -359,7 +359,7 @@ module.exports = grammar({
       choice(
         seq('[', optional(choice($._expression, $.redirected_statement)), ']'),
         seq('[[', $._expression, ']]'),
-        seq('(', '(', optional($._expression), '))'),
+        seq('((', optional($._expression), '))'),
       ),
     ),
 
@@ -601,7 +601,7 @@ module.exports = grammar({
       token.immediate('}'),
     ),
 
-    _arithmetic_expression: $ => choice(
+    _arithmetic_expression: $ => prec(1, choice(
       $._arithmetic_literal,
       alias($._arithmetic_unary_expression, $.unary_expression),
       alias($._arithmetic_ternary_expression, $.ternary_expression),
@@ -609,7 +609,7 @@ module.exports = grammar({
       alias($._arithmetic_postfix_expression, $.postfix_expression),
       alias($._arithmetic_parenthesized_expression, $.parenthesized_expression),
       $.command_substitution,
-    ),
+    )),
 
     _arithmetic_literal: $ => prec(1, choice(
       $.number,

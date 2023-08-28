@@ -927,6 +927,8 @@ fi
 [[ -f "${EROOT}/usr/share/php/.packagexml/${MY_P}.xml" && \
 	-x "${EROOT}/usr/bin/peardev" ]]
 
+(("${MULTIBUILD_VARIANTS}" > 1))
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1000,7 +1002,9 @@ fi
           (expansion (variable_name)))
         (unary_expression
           (test_operator)
-          (string (expansion (variable_name))))))))
+          (string (expansion (variable_name)))))))
+  (test_command
+    (binary_expression (string (expansion (variable_name))) (number))))
 
 ================================================================================
 Test commands with ternary
