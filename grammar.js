@@ -794,6 +794,7 @@ module.exports = grammar({
           $.raw_string,
           $.ansi_c_string,
           alias(/[\s]+[\w]*/, $.word),
+          alias($._comment_word, $.word),
         ),
       )),
     )),
