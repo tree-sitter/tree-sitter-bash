@@ -924,6 +924,9 @@ fi
 
 [[ $(LC_ALL=C $(tc-getCC) ${LDFLAGS} -Wl,--version 2>/dev/null) != @(LLD|GNU\ ld)* ]]
 
+[[ -f "${EROOT}/usr/share/php/.packagexml/${MY_P}.xml" && \
+	-x "${EROOT}/usr/bin/peardev" ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -987,7 +990,17 @@ fi
             (expansion (variable_name))
             (word))
           (file_redirect (file_descriptor) (word))))
-      (extglob_pattern))))
+      (extglob_pattern)))
+  (test_command
+    (unary_expression
+      (test_operator)
+      (binary_expression
+        (string
+          (expansion (variable_name))
+          (expansion (variable_name)))
+        (unary_expression
+          (test_operator)
+          (string (expansion (variable_name))))))))
 
 ================================================================================
 Test commands with ternary

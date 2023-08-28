@@ -436,6 +436,32 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             skip(lexer);
         }
 
+        if (lexer->lookahead == '\\') {
+            skip(lexer);
+            if (lexer->lookahead == '\r') {
+                skip(lexer);
+                if (lexer->lookahead == '\n') {
+                    skip(lexer);
+                }
+            } else if (lexer->lookahead == '\n') {
+                skip(lexer);
+            } else {
+                return false;
+            }
+
+            while (iswspace(lexer->lookahead)) {
+                skip(lexer);
+            }
+        }
+
+        if (lexer->lookahead == '\n' && !valid_symbols[NEWLINE]) {
+            skip(lexer);
+
+            while (iswspace(lexer->lookahead)) {
+                skip(lexer);
+            }
+        }
+
         if (lexer->lookahead == '-') {
             advance(lexer);
 
