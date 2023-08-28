@@ -895,7 +895,7 @@ module.exports = grammar({
 
     _extglob_blob: $ => choice(
       $.extglob_pattern,
-      seq($.extglob_pattern, choice($.string, $.expansion), $.extglob_pattern),
+      seq($.extglob_pattern, choice($.string, $.expansion), optional($.extglob_pattern)),
     ),
 
     comment: _ => token(prec(-10, /#.*/)),

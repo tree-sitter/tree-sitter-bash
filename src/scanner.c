@@ -486,6 +486,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 lexer->lookahead == '%' || lexer->lookahead == '#' ||
                 lexer->lookahead == '/') {
                 return false;
+            } else if (valid_symbols[EXTGLOB_PATTERN] &&
+                       iswspace(lexer->lookahead)) {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = EXTGLOB_PATTERN;
+                return true;
             }
         }
 
