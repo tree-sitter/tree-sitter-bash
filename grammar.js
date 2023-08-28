@@ -807,7 +807,7 @@ module.exports = grammar({
 
     _expansion_regex_replacement: $ => seq(
       field('operator', choice('/', '//', '/#', '/%')),
-      optional(alias($._regex_no_slash, $.regex)),
+      optional(choice(alias($._regex_no_slash, $.regex), $.string)),
       // This can be elided
       optional(seq(
         field('operator', '/'),

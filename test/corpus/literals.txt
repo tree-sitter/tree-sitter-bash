@@ -401,6 +401,7 @@ MOFILES=${LINGUAS// /.po }.po
 MY_P="${PN/aspell/aspell"${ASPELL_VERSION}"}"
 pyc=${pyc//*\/}
 ${pv/\.}
+${new_test_cp//"${old_ver_cp}"/}
 
 --------------------------------------------------------------------------------
 
@@ -432,7 +433,10 @@ ${pv/\.}
   (variable_assignment
     (variable_name)
     (expansion (variable_name) (regex)))
-  (command (command_name (expansion (variable_name) (regex)))))
+  (command (command_name (expansion (variable_name) (regex))))
+  (command
+    (command_name
+      (expansion (variable_name) (string (expansion (variable_name)))))))
 
 ================================================================================
 Other variable expansion operators
