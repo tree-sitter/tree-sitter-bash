@@ -643,7 +643,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         }
                         if (lexer->lookahead == '\\') {
                             advance(lexer);
-                            if (!lexer->eof(lexer)) {
+                            if (!lexer->eof(lexer) && lexer->lookahead != '[') {
                                 advance(lexer);
                             }
                         } else {

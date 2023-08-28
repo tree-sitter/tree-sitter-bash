@@ -548,6 +548,7 @@ A=${B//:;;/$'\n'}
 C="${D/#* -E /}"
 BASH_IT_GIT_URL="${BASH_IT_GIT_URL/git@/https://}"
 10#${command_start##*.}
+echo ${LIB_DEPEND//\[static-libs(+)]}
 
 --------------------------------------------------------------------------------
 
@@ -555,7 +556,8 @@ BASH_IT_GIT_URL="${BASH_IT_GIT_URL/git@/https://}"
   (variable_assignment (variable_name) (expansion (variable_name) (regex) (ansi_c_string)))
   (variable_assignment (variable_name) (string (expansion (variable_name) (regex))))
   (variable_assignment (variable_name) (string (expansion (variable_name) (regex) (word))))
-  (command (command_name (number (expansion (variable_name) (regex))))))
+  (command (command_name (number (expansion (variable_name) (regex)))))
+  (command (command_name (word)) (expansion (variable_name) (regex))))
 
 ================================================================================
 Words ending with '$'
