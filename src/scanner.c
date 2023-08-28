@@ -717,6 +717,12 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                             if (lexer->lookahead == '(') {
                                 return false;
                             }
+                            // end $ always means regex, e.g. 99999999$
+                            if (iswspace(lexer->lookahead)) {
+                                lexer->result_symbol = REGEX_NO_SPACE;
+                                lexer->mark_end(lexer);
+                                return true;
+                            }
                         } else {
                             if (iswspace(lexer->lookahead)) {
                                 lexer->mark_end(lexer);

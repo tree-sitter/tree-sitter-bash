@@ -1085,76 +1085,35 @@ Test commands with regexes
 [[ "$server" =~ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} ]]
 [[ "$primary_wins" =~ ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}) ]]
 [[ -f ${x} && $(od -t x1 -N 4 "${x}") == *"7f 45 4c 46"* ]]
+[[ ${PV} =~ 99999999$ ]]
 
 --------------------------------------------------------------------------------
 
 (program
-  (test_command
-    (binary_expression
-      (string)
-      (regex)))
-  (test_command
-    (binary_expression
-      (simple_expansion
-        (variable_name))
-      (regex)))
+  (test_command (binary_expression (string) (regex)))
+  (test_command (binary_expression (simple_expansion (variable_name)) (regex)))
   (test_command
     (unary_expression
       (binary_expression
-        (string
-          (expansion
-            (subscript
-              (variable_name)
-              (word))))
-        (string
-          (simple_expansion
-            (variable_name))))))
-  (negated_command
-    (test_command
-      (binary_expression
-        (string
-          (simple_expansion
-            (variable_name)))
-        (regex))))
+        (string (expansion (subscript (variable_name) (word))))
+        (string (simple_expansion (variable_name))))))
+  (negated_command (test_command (binary_expression (string (simple_expansion (variable_name))) (regex))))
+  (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
+  (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
   (test_command
     (binary_expression
-      (string
-        (simple_expansion
-          (variable_name)))
-      (regex)))
-  (test_command
-    (binary_expression
-      (string
-        (simple_expansion
-          (variable_name)))
-      (regex)))
-  (test_command
-    (binary_expression
-      (expansion
-        (variable_name))
+      (expansion (variable_name))
       (extglob_pattern)
-      (expansion
-        (variable_name))
+      (expansion (variable_name))
       (extglob_pattern)))
-  (test_command
-    (binary_expression
-      (string
-        (simple_expansion
-          (variable_name)))
-      (regex)))
-  (test_command
-    (binary_expression
-      (string
-        (simple_expansion
-          (variable_name)))
-      (regex)))
+  (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
+  (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
   (test_command
     (unary_expression
       (test_operator)
       (binary_expression
         (binary_expression
-          (expansion
-            (variable_name))
+          (expansion (variable_name))
           (command_substitution
             (command
               (command_name (word))
@@ -1165,7 +1124,8 @@ Test commands with regexes
               (string (expansion (variable_name))))))
         (extglob_pattern)
         (string)
-        (extglob_pattern)))))
+        (extglob_pattern))))
+  (test_command (binary_expression (expansion (variable_name)) (regex))))
 
 ================================================================================
 Subshells
