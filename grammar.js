@@ -818,13 +818,17 @@ module.exports = grammar({
 
     _expansion_regex_replacement: $ => seq(
       field('operator', choice('/', '//', '/#', '/%')),
-      optional(choice(alias($._regex_no_slash, $.regex), $.string)),
+      optional(choice(alias($._regex_no_slash, $.regex), $.string, $.command_substitution)),
       // This can be elided
       optional(seq(
         field('operator', '/'),
         optional(seq(
           choice(
             $._literal,
+            seq(
+              $.command_substitution,
+              alias($._word_in_replacement, $.word),
+            ),
             alias($._word_in_replacement, $.word),
           ),
           field('operator', optional('/')),
@@ -908,7 +912,11 @@ module.exports = grammar({
 
     _extglob_blob: $ => choice(
       $.extglob_pattern,
-      seq($.extglob_pattern, choice($.string, $.expansion), optional($.extglob_pattern)),
+      seq(
+        $.extglob_pattern,
+        choice($.string, $.expansion, $.command_substitution),
+        optional($.extglob_pattern),
+      ),
     ),
 
     comment: _ => token(prec(-10, /#.*/)),

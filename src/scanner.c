@@ -337,7 +337,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return true;
             }
         }
-        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE]) {
+        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] &&
+            !valid_symbols[WORD_IN_REPLACEMENT]) {
             lexer->result_symbol = CONCAT;
             return true;
         }
@@ -563,6 +564,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (valid_symbols[WORD_IN_REPLACEMENT]) {
                 goto word_in_replacement;
             }
+            if (valid_symbols[EXTGLOB_PATTERN]) {
+                goto extglob_pattern;
+            }
             return false;
         }
 
@@ -637,6 +641,14 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 uint32_t bracket_depth;
                 uint32_t brace_depth;
             } State;
+
+            if (lexer->lookahead == '$' && valid_symbols[REGEX_NO_SLASH]) {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                if (lexer->lookahead == '(') {
+                    return false;
+                }
+            }
 
             lexer->mark_end(lexer);
 
@@ -753,6 +765,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
     }
 
+extglob_pattern:
     if (valid_symbols[EXTGLOB_PATTERN]) {
         // first skip ws, then check for ? * + @ !
         while (iswspace(lexer->lookahead)) {
@@ -761,7 +774,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
         if (lexer->lookahead == '?' || lexer->lookahead == '*' ||
             lexer->lookahead == '+' || lexer->lookahead == '@' ||
-            lexer->lookahead == '!' || lexer->lookahead == '-') {
+            lexer->lookahead == '!' || lexer->lookahead == '-' ||
+            lexer->lookahead == ')') {
             lexer->mark_end(lexer);
             advance(lexer);
 
@@ -832,6 +846,14 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         advance(lexer);
                         if (iswspace(lexer->lookahead)) {
                             advance(lexer);
+                        }
+                    }
+                    if (lexer->lookahead == '$') {
+                        lexer->mark_end(lexer);
+                        advance(lexer);
+                        if (lexer->lookahead == '(') {
+                            lexer->result_symbol = EXTGLOB_PATTERN;
+                            return true;
                         }
                     }
                     if (was_space) {

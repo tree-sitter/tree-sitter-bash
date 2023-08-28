@@ -929,6 +929,8 @@ fi
 
 (("${MULTIBUILD_VARIANTS}" > 1))
 
+[[ ${test} == @($(IFS='|'; echo "${skip[*]}")) ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1004,7 +1006,17 @@ fi
           (test_operator)
           (string (expansion (variable_name)))))))
   (test_command
-    (binary_expression (string (expansion (variable_name))) (number))))
+    (binary_expression (string (expansion (variable_name))) (number)))
+  (test_command
+    (binary_expression
+      (expansion (variable_name))
+      (extglob_pattern)
+      (command_substitution
+        (variable_assignment (variable_name) (raw_string))
+        (command
+          (command_name (word))
+          (string (expansion (subscript (variable_name) (word))))))
+      (extglob_pattern))))
 
 ================================================================================
 Test commands with ternary
