@@ -805,7 +805,7 @@ module.exports = grammar({
       optional(seq(
         field('operator', '/'),
         optional(seq(
-          $._literal,
+          choice($._literal, alias(/[\w\.]+\s+/, $.word)),
           field('operator', optional('/')),
         )),
       )),

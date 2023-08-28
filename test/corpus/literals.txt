@@ -384,6 +384,8 @@ A=${B//:;;/$'\n'}
 
 # escaped space
 C=${D/;\ *;|}
+MOFILES=${LINGUAS// /.po }.po
+MY_P="${PN/aspell/aspell"${ASPELL_VERSION}"}"
 
 --------------------------------------------------------------------------------
 
@@ -397,9 +399,21 @@ C=${D/;\ *;|}
   (comment)
   (variable_assignment
     (variable_name)
-    (expansion
-      (variable_name)
-      (regex))))
+    (expansion (variable_name) (regex)))
+  (variable_assignment
+    (variable_name)
+    (concatenation
+      (expansion (variable_name) (regex) (word))
+      (word)))
+  (variable_assignment
+    (variable_name)
+    (string
+      (expansion
+        (variable_name)
+        (regex)
+        (concatenation
+          (word)
+          (string (expansion (variable_name))))))))
 
 ================================================================================
 Other variable expansion operators
