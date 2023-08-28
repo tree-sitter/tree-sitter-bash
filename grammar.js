@@ -30,6 +30,7 @@ module.exports = grammar({
     [$.command, $.variable_assignments],
     [$.redirected_statement, $.command],
     [$.redirected_statement, $.command_substitution],
+    [$.function_definition, $.command_name],
   ],
 
   inline: $ => [
@@ -385,14 +386,17 @@ module.exports = grammar({
         field('redirect', $.file_redirect),
       )),
       field('name', $.command_name),
-      repeat(field('argument', choice(
-        $._literal,
-        alias($._bare_dollar, '$'),
-        seq(
-          choice('=~', '=='),
-          choice($._literal, $.regex),
-        ),
-      ))),
+      choice(
+        repeat(field('argument', choice(
+          $._literal,
+          alias($._bare_dollar, '$'),
+          seq(
+            choice('=~', '=='),
+            choice($._literal, $.regex),
+          ),
+        ))),
+        $.subshell,
+      ),
     )),
 
     command_name: $ => $._literal,

@@ -1162,14 +1162,18 @@ Subshells
   ./start-server --port=80
 ) &
 
+time ( cd tests && sh run-tests.sh )
+
 --------------------------------------------------------------------------------
 
 (program
-  (subshell
-    (command
-      (command_name
-        (word))
-      (word))))
+  (subshell (command (command_name (word)) (word)))
+  (command
+    (command_name (word))
+    (subshell
+      (list
+        (command (command_name (word)) (word))
+        (command (command_name (word)) (word))))))
 
 ================================================================================
 Function definitions
