@@ -916,6 +916,8 @@ if [[ "$lsb_dist" != 'Ubuntu' || $(ver_to_int "$lsb_release") < $(ver_to_int '14
 	return 1
 fi
 
+[[ ${PV} != $(sed -n -e 's/^Version: //p' "${ED}/usr/$(get_libdir)/pkgconfig/tss2-tcti-tabrmd.pc" || die) ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -940,10 +942,21 @@ fi
             (command_name
               (word))
             (raw_string)))))
-    (command
-      (command_name
-        (word))
-      (number))))
+    (command (command_name (word)) (number)))
+  (test_command
+    (binary_expression
+      (expansion (variable_name))
+      (command_substitution
+        (list
+          (command
+            (command_name (word))
+            (word)
+            (word)
+            (raw_string)
+            (string
+              (expansion (variable_name))
+              (command_substitution (command (command_name (word))))))
+          (command (command_name (word))))))))
 
 ================================================================================
 Test commands with ternary

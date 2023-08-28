@@ -660,6 +660,13 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                             if (!lexer->eof(lexer)) {
                                 advance(lexer);
                             }
+                        } else if (lexer->lookahead == '$') {
+                            lexer->mark_end(lexer);
+                            advance(lexer);
+                            // do not parse a command substitution
+                            if (lexer->lookahead == '(') {
+                                return false;
+                            }
                         } else {
                             if (iswspace(lexer->lookahead)) {
                                 lexer->mark_end(lexer);
