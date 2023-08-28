@@ -96,6 +96,9 @@ if [ ]; then
 	>aa >bb
 fi
 
+exec {VIRTWL[0]} {VIRTWL[1]} <&- >&-
+exec {VIRTWL[0]}<&- {VIRTWL[1]}>&-
+
 ---
 
 (program
@@ -122,7 +125,21 @@ fi
     (test_command)
     (redirected_statement
       (file_redirect (word))
-      (file_redirect (word)))))
+      (file_redirect (word))))
+      (redirected_statement
+    (command
+      (command_name (word))
+      (concatenation (word) (word) (word) (number) (word) (word))
+      (concatenation (word) (word) (word) (number) (word) (word)))
+    (file_redirect)
+    (file_redirect))
+  (redirected_statement
+    (command
+      (command_name (word))
+      (concatenation (word) (word) (word) (number) (word) (word)))
+    (file_redirect
+      (concatenation (word) (word) (word) (number) (word) (word)))
+    (file_redirect)))
 
 ===============================
 File redirects (noclobber override)

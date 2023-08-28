@@ -431,8 +431,16 @@ module.exports = grammar({
 
     file_redirect: $ => prec.left(seq(
       field('descriptor', optional($.file_descriptor)),
-      choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-      field('destination', $._literal),
+      choice(
+        seq(
+          choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
+          field('destination', $._literal),
+        ),
+        seq(
+          choice('<&-', '>&-'), // close file descriptor
+          optional(field('destination', $._literal)),
+        ),
+      ),
     )),
 
     heredoc_redirect: $ => seq(
