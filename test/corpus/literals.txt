@@ -577,6 +577,7 @@ local msg="${2:-command '$1' does not exist}"
 ${cdir:+#}
 ${dict_langs:+;}
 ${UTIL_LINUX_LIBC[@]/%/? ( sys-apps/util-linux )}
+${id}${2+ ${2}}
 
 --------------------------------------------------------------------------------
 
@@ -603,7 +604,10 @@ ${UTIL_LINUX_LIBC[@]/%/? ( sys-apps/util-linux )}
       (string (expansion (variable_name) (concatenation (word) (raw_string) (word))))))
   (command (command_name (expansion (variable_name) (word))))
   (command (command_name (expansion (variable_name) (word))))
-  (command (command_name (expansion (subscript (variable_name) (word)) (word)))))
+  (command (command_name (expansion (subscript (variable_name) (word)) (word))))
+  (command
+    (command_name
+      (concatenation (expansion (variable_name)) (expansion (variable_name) (expansion (variable_name)))))))
 
 ================================================================================
 Variable Expansions: Regex
