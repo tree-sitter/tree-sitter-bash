@@ -643,8 +643,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         }
                         if (lexer->lookahead == '\\') {
                             advance(lexer);
-                            if (!lexer->eof(lexer) && lexer->lookahead != '[' && lexer->lookahead != '/') {
+                            if (!lexer->eof(lexer) && lexer->lookahead != '[' &&
+                                lexer->lookahead != '/') {
                                 advance(lexer);
+                                lexer->mark_end(lexer);
                             }
                         } else {
                             bool was_space = iswspace(lexer->lookahead);
@@ -673,7 +675,6 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                                 lexer->result_symbol = REGEX_NO_SPACE;
                                 return state.found_non_alnumdollarunderdash;
                             }
-                            /* state. = true; */
                             if (!iswalnum(lexer->lookahead) &&
                                 lexer->lookahead != '$' &&
                                 lexer->lookahead != '-' &&
