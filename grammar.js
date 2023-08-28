@@ -785,7 +785,6 @@ module.exports = grammar({
       optional(seq(
         choice(
           alias($._concatenation_in_expansion, $.concatenation),
-          // $._simple_variable_name,
           $.command_substitution,
           $.word,
           $.expansion,
@@ -796,6 +795,7 @@ module.exports = grammar({
           $.ansi_c_string,
           alias(/[\s]+[\w\-]*/, $.word),
           alias($._expansion_word, $.word),
+          alias($._word_in_replacement, $.word),
         ),
       )),
     )),
@@ -861,6 +861,8 @@ module.exports = grammar({
         $.string,
         $.raw_string,
         $.command_substitution,
+        alias($._expansion_word, $.word),
+        alias($._word_in_replacement, $.word),
       ),
       repeat1(seq(
         choice($._concat, alias(/`\s*`/, '``')),
@@ -873,6 +875,7 @@ module.exports = grammar({
           $.raw_string,
           $.command_substitution,
           alias($._expansion_word, $.word),
+          alias($._word_in_replacement, $.word),
         ),
       )),
     )),

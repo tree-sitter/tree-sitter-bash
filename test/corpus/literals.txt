@@ -527,6 +527,8 @@ ${!# }
 ${!##}
 ${!## }
 ${!##/}
+# here be dragons
+echo "${kw}? ( ${cond:+${cond}? (} ${baseuri}-${ver}-${kw}.${suff} ${cond:+) })"
 
 --------------------------------------------------------------------------------
 
@@ -535,7 +537,20 @@ ${!##/}
   (command (command_name (expansion)))
   (command (command_name (expansion)))
   (command (command_name (expansion)))
-  (command (command_name (expansion (special_variable_name) (regex)))))
+  (command (command_name (expansion (special_variable_name) (regex))))
+  (comment)
+  (command
+    (command_name (word))
+    (string
+      (expansion (variable_name))
+      (expansion
+        (variable_name)
+        (concatenation (expansion (variable_name)) (word)))
+      (expansion (variable_name))
+      (expansion (variable_name))
+      (expansion (variable_name))
+      (expansion (variable_name))
+      (expansion (variable_name) (word)))))
 
 ================================================================================
 Variable Expansions: Weird Cases
@@ -577,7 +592,7 @@ ${UTIL_LINUX_LIBC[@]/%/? ( sys-apps/util-linux )}
   (declaration_command
     (variable_assignment
       (variable_name)
-      (string (expansion (variable_name) (concatenation (word) (raw_string) (word) (word) (word))))))
+      (string (expansion (variable_name) (concatenation (word) (raw_string) (word))))))
   (command (command_name (expansion (variable_name) (word))))
   (command (command_name (expansion (variable_name) (word))))
   (command (command_name (expansion (subscript (variable_name) (word)) (word)))))

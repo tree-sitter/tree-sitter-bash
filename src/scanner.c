@@ -455,9 +455,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
          valid_symbols[HEREDOC_ARROW]) &&
         !valid_symbols[REGEX_NO_SLASH]) {
         for (;;) {
-            if (lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
-                lexer->lookahead == '\r' ||
-                (lexer->lookahead == '\n' && !valid_symbols[NEWLINE])) {
+            if ((lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
+                 lexer->lookahead == '\r' ||
+                 (lexer->lookahead == '\n' && !valid_symbols[NEWLINE])) &&
+                !valid_symbols[WORD_IN_REPLACEMENT]) {
                 skip(lexer);
             } else if (lexer->lookahead == '\\') {
                 skip(lexer);
@@ -516,6 +517,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         } else {
             if (lexer->lookahead == '{') {
                 goto brace_start;
+            }
+            if (valid_symbols[WORD_IN_REPLACEMENT]) {
+                goto word_in_replacement;
             }
             return false;
         }
@@ -806,6 +810,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return false;
     }
 
+word_in_replacement:
     if (valid_symbols[WORD_IN_REPLACEMENT]) {
         bool advanced_once = false;
         for (;;) {
@@ -816,7 +821,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 advanced_once = true;
-                if (lexer->lookahead == '{' || lexer->lookahead == '\'') {
+                if (lexer->lookahead == '{' || lexer->lookahead == '(' ||
+                    lexer->lookahead == '\'' || iswalnum(lexer->lookahead)) {
                     return false;
                 }
             }
@@ -825,6 +831,18 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = WORD_IN_REPLACEMENT;
                 return advanced_once;
+            }
+
+            if (lexer->lookahead == '(' && !advanced_once) {
+                return false;
+            }
+
+            if (lexer->lookahead == '\'') {
+                return false;
+            }
+
+            if (lexer->eof(lexer)) {
+                return false;
             }
             advance(lexer);
             advanced_once = true;
