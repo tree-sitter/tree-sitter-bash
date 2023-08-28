@@ -397,6 +397,7 @@ A=${B//:;;/$'\n'}
 C=${D/;\ *;|}
 MOFILES=${LINGUAS// /.po }.po
 MY_P="${PN/aspell/aspell"${ASPELL_VERSION}"}"
+pyc=${pyc//*\/}
 
 --------------------------------------------------------------------------------
 
@@ -424,7 +425,10 @@ MY_P="${PN/aspell/aspell"${ASPELL_VERSION}"}"
         (regex)
         (concatenation
           (word)
-          (string (expansion (variable_name))))))))
+          (string (expansion (variable_name)))))))
+  (variable_assignment
+    (variable_name)
+    (expansion (variable_name) (regex))))
 
 ================================================================================
 Other variable expansion operators
