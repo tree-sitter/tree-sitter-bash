@@ -206,6 +206,10 @@
           "named": true
         },
         {
+          "type": "string",
+          "named": true
+        },
+        {
           "type": "subscript",
           "named": true
         },
@@ -269,6 +273,10 @@
           },
           {
             "type": "simple_expansion",
+            "named": true
+          },
+          {
+            "type": "string",
             "named": true
           },
           {
@@ -339,6 +347,14 @@
           },
           {
             "type": "-=",
+            "named": false
+          },
+          {
+            "type": "-a",
+            "named": false
+          },
+          {
+            "type": "-o",
             "named": false
           },
           {
@@ -420,7 +436,7 @@
         ]
       },
       "right": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -436,6 +452,10 @@
             "named": true
           },
           {
+            "type": "extglob_pattern",
+            "named": true
+          },
+          {
             "type": "number",
             "named": true
           },
@@ -445,6 +465,10 @@
           },
           {
             "type": "simple_expansion",
+            "named": true
+          },
+          {
+            "type": "string",
             "named": true
           },
           {
@@ -467,10 +491,6 @@
           "named": true
         },
         {
-          "type": "command_substitution",
-          "named": true
-        },
-        {
           "type": "expansion",
           "named": true
         },
@@ -479,27 +499,7 @@
           "named": true
         },
         {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
-          "type": "postfix_expression",
-          "named": true
-        },
-        {
-          "type": "simple_expansion",
-          "named": true
-        },
-        {
-          "type": "string",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
-          "named": true
-        },
-        {
-          "type": "word",
+          "type": "variable_name",
           "named": true
         }
       ]
@@ -841,6 +841,10 @@
           {
             "type": "file_redirect",
             "named": true
+          },
+          {
+            "type": "herestring_redirect",
+            "named": true
           }
         ]
       }
@@ -849,6 +853,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "subshell",
+          "named": true
+        },
         {
           "type": "variable_assignment",
           "named": true
@@ -926,6 +934,10 @@
       "types": [
         {
           "type": "_primary_expression",
+          "named": true
+        },
+        {
+          "type": "array",
           "named": true
         },
         {
@@ -1167,6 +1179,10 @@
           "named": true
         },
         {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
           "type": "concatenation",
           "named": true
         },
@@ -1208,8 +1224,8 @@
         ]
       },
       "destination": {
-        "multiple": false,
-        "required": true,
+        "multiple": true,
+        "required": false,
         "types": [
           {
             "type": "_primary_expression",
@@ -1324,6 +1340,10 @@
           "named": true
         },
         {
+          "type": "heredoc_content",
+          "named": true
+        },
+        {
           "type": "simple_expansion",
           "named": true
         }
@@ -1334,6 +1354,20 @@
     "type": "heredoc_redirect",
     "named": true,
     "fields": {
+      "argument": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_primary_expression",
+            "named": true
+          },
+          {
+            "type": "concatenation",
+            "named": true
+          }
+        ]
+      },
       "descriptor": {
         "multiple": false,
         "required": false,
@@ -1344,12 +1378,36 @@
           }
         ]
       },
+      "operator": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "&&",
+            "named": false
+          },
+          {
+            "type": "||",
+            "named": false
+          }
+        ]
+      },
       "redirect": {
         "multiple": true,
         "required": false,
         "types": [
           {
             "type": "file_redirect",
+            "named": true
+          }
+        ]
+      },
+      "right": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "_statement",
             "named": true
           }
         ]
@@ -1677,7 +1735,7 @@
       },
       "redirect": {
         "multiple": true,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "file_redirect",
@@ -1686,13 +1744,19 @@
           {
             "type": "heredoc_redirect",
             "named": true
-          },
-          {
-            "type": "herestring_redirect",
-            "named": true
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "herestring_redirect",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -1736,6 +1800,10 @@
         },
         {
           "type": "simple_expansion",
+          "named": true
+        },
+        {
+          "type": "string_content",
           "named": true
         }
       ]
@@ -1827,6 +1895,10 @@
             "named": true
           },
           {
+            "type": "string",
+            "named": true
+          },
+          {
             "type": "subscript",
             "named": true
           },
@@ -1861,6 +1933,10 @@
             "named": true
           },
           {
+            "type": "string",
+            "named": true
+          },
+          {
             "type": "subscript",
             "named": true
           },
@@ -1892,6 +1968,10 @@
           },
           {
             "type": "simple_expansion",
+            "named": true
+          },
+          {
+            "type": "string",
             "named": true
           },
           {
@@ -2190,6 +2270,10 @@
     "named": false
   },
   {
+    "type": "$[",
+    "named": false
+  },
+  {
     "type": "$`",
     "named": false
   },
@@ -2294,6 +2378,14 @@
     "named": false
   },
   {
+    "type": "-a",
+    "named": false
+  },
+  {
+    "type": "-o",
+    "named": false
+  },
+  {
     "type": "..",
     "named": false
   },
@@ -2362,6 +2454,10 @@
     "named": false
   },
   {
+    "type": "<&-",
+    "named": false
+  },
+  {
     "type": "<(",
     "named": false
   },
@@ -2403,6 +2499,10 @@
   },
   {
     "type": ">&",
+    "named": false
+  },
+  {
+    "type": ">&-",
     "named": false
   },
   {
@@ -2562,6 +2662,10 @@
     "named": false
   },
   {
+    "type": "heredoc_content",
+    "named": true
+  },
+  {
     "type": "heredoc_end",
     "named": true
   },
@@ -2603,6 +2707,10 @@
   },
   {
     "type": "special_variable_name",
+    "named": true
+  },
+  {
+    "type": "string_content",
     "named": true
   },
   {
