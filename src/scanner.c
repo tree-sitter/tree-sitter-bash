@@ -723,9 +723,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
             }
 
-            if (lexer->lookahead != '(' && lexer->lookahead != '"' &&
-                !isalnum(lexer->lookahead) && lexer->lookahead != '[' &&
-                lexer->lookahead != '?') {
+            if (!isalnum(lexer->lookahead) && lexer->lookahead != '(' &&
+                lexer->lookahead != '"' && lexer->lookahead != '[' &&
+                lexer->lookahead != '?' && lexer->lookahead != '/') {
                 return false;
             }
 
