@@ -931,6 +931,8 @@ fi
 
 [[ ${test} == @($(IFS='|'; echo "${skip[*]}")) ]]
 
+[[ ${SRC_URI} == */${a}* ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1016,7 +1018,13 @@ fi
         (command
           (command_name (word))
           (string (expansion (subscript (variable_name) (word))))))
-      (extglob_pattern))))
+      (extglob_pattern)))
+  (test_command
+    (binary_expression
+      (expansion (variable_name))
+      (extglob_pattern)
+      (expansion (variable_name))
+        (extglob_pattern))))
 
 ================================================================================
 Test commands with ternary
