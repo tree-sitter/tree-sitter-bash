@@ -922,6 +922,8 @@ fi
 
 [[ "${MY_LOCALES}" != *en_US* || a != 2 ]]
 
+[[ $(LC_ALL=C $(tc-getCC) ${LDFLAGS} -Wl,--version 2>/dev/null) != @(LLD|GNU\ ld)* ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -973,7 +975,19 @@ fi
           (string (expansion (variable_name)))
           (extglob_pattern))
         (word))
-      (number))))
+      (number)))
+  (test_command
+    (binary_expression
+      (command_substitution
+        (redirected_statement
+          (command
+            (variable_assignment (variable_name) (word))
+            (command_name
+              (command_substitution (command (command_name (word)))))
+            (expansion (variable_name))
+            (word))
+          (file_redirect (file_descriptor) (word))))
+      (extglob_pattern))))
 
 ================================================================================
 Test commands with ternary
