@@ -481,11 +481,11 @@ module.exports = grammar({
       $.heredoc_end,
     ),
 
-    herestring_redirect: $ => seq(
+    herestring_redirect: $ => prec.left(seq(
       field('descriptor', optional($.file_descriptor)),
       '<<<',
-      $._literal,
-    ),
+      repeat1($._literal),
+    )),
 
     // Expressions
 

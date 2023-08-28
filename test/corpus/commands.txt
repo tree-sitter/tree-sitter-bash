@@ -491,6 +491,9 @@ while read -u 3 entry; do
   echo $entry
 done 3<<<"$ENTRIES"
 
+$(tc-getCC) -Werror -Wl,-l:libobjc.so.${ver} -x objective-c \
+		- <<<$'int main() {}' -o /dev/null 2> /dev/null;
+
 ---
 
 (program
@@ -499,7 +502,17 @@ done 3<<<"$ENTRIES"
     (while_statement
       (command (command_name (word)) (word) (number) (word))
       (do_group (command (command_name (word)) (simple_expansion (variable_name)))))
-    (herestring_redirect (file_descriptor) (string (simple_expansion (variable_name))))))
+    (herestring_redirect (file_descriptor) (string (simple_expansion (variable_name)))))
+  (redirected_statement
+    (command
+      (command_name (command_substitution (command (command_name (word)))))
+      (word)
+      (concatenation (word) (expansion (variable_name)))
+      (word)
+      (word)
+      (word))
+    (herestring_redirect (ansi_c_string) (word) (word))
+    (file_redirect (file_descriptor) (word))))
 
 ==========================================
 Subscripts
