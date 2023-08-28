@@ -460,6 +460,8 @@ ${matrix:$(($random%${#matrix})):1}
 
 "${_component_to_single:${len}:2}"
 
+"${PN::-1}"
+
 --------------------------------------------------------------------------------
 
 (program
@@ -475,7 +477,8 @@ ${matrix:$(($random%${#matrix})):1}
         (arithmetic_expansion
           (binary_expression (simple_expansion (variable_name)) (expansion (variable_name))))
         (number))))
-  (command (command_name (string (expansion (variable_name) (expansion (variable_name)) (number))))))
+  (command (command_name (string (expansion (variable_name) (expansion (variable_name)) (number)))))
+  (command (command_name (string (expansion (variable_name) (number))))))
 
 ================================================================================
 Variable Expansions with operators

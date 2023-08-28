@@ -818,14 +818,14 @@ module.exports = grammar({
 
     _expansion_max_length: $ => seq(
       field('operator', ':'),
-      choice(
+      optional(choice(
         $._simple_variable_name,
         $.number,
         $.arithmetic_expansion,
         $.expansion,
         $.parenthesized_expression,
         /\n/,
-      ),
+      )),
       optional(seq(
         field('operator', ':'),
         optional(choice(
