@@ -228,9 +228,14 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                     break;
                 }
                 if (did_advance) {
+                    lexer->mark_end(lexer);
                     lexer->result_symbol = middle_type;
                     scanner->started_heredoc = true;
-                    return true;
+                    advance(lexer);
+                    if (isalpha(lexer->lookahead) || lexer->lookahead == '{') {
+                        return true;
+                    }
+                    break;
                 }
                 if (middle_type == HEREDOC_BODY_BEGINNING &&
                     lexer->get_column(lexer) == 0) {
