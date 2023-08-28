@@ -465,11 +465,13 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         if (lexer->lookahead == '-') {
             advance(lexer);
 
+            bool advanced_once = false;
             while (isalpha(lexer->lookahead)) {
+                advanced_once = true;
                 advance(lexer);
             }
 
-            if (iswspace(lexer->lookahead)) {
+            if (iswspace(lexer->lookahead) && advanced_once) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 if (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) {
@@ -477,9 +479,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         lexer->mark_end(lexer);
                         lexer->result_symbol = WORD_IN_REPLACEMENT;
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
                 lexer->result_symbol = TEST_OPERATOR;
                 return true;
@@ -522,8 +523,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 lexer->lookahead == '%' || lexer->lookahead == '#' ||
                 lexer->lookahead == '/') {
                 return false;
-            } else if (valid_symbols[EXTGLOB_PATTERN] &&
-                       iswspace(lexer->lookahead)) {
+            }
+            if (valid_symbols[EXTGLOB_PATTERN] && iswspace(lexer->lookahead)) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = EXTGLOB_PATTERN;
                 return true;
@@ -760,7 +761,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
         if (lexer->lookahead == '?' || lexer->lookahead == '*' ||
             lexer->lookahead == '+' || lexer->lookahead == '@' ||
-            lexer->lookahead == '!') {
+            lexer->lookahead == '!' || lexer->lookahead == '-') {
             lexer->mark_end(lexer);
             advance(lexer);
 

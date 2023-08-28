@@ -1086,6 +1086,7 @@ Test commands with regexes
 [[ "$primary_wins" =~ ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}) ]]
 [[ -f ${x} && $(od -t x1 -N 4 "${x}") == *"7f 45 4c 46"* ]]
 [[ ${PV} =~ 99999999$ ]]
+[[ $1 == -- ]]
 
 --------------------------------------------------------------------------------
 
@@ -1125,7 +1126,8 @@ Test commands with regexes
         (extglob_pattern)
         (string)
         (extglob_pattern))))
-  (test_command (binary_expression (expansion (variable_name)) (regex))))
+  (test_command (binary_expression (expansion (variable_name)) (regex)))
+  (test_command (binary_expression (simple_expansion (variable_name)) (extglob_pattern))))
 
 ================================================================================
 Subshells
