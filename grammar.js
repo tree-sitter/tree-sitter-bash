@@ -274,8 +274,8 @@ module.exports = grammar({
       choice(
         seq(
           optional('('),
-          field('value', choice($._literal, $.extglob_pattern)),
-          repeat(seq('|', field('value', choice($._literal, $.extglob_pattern)))),
+          field('value', choice($._literal, $._extglob_blob)),
+          repeat(seq('|', field('value', choice($._literal, $._extglob_blob)))),
           ')',
         ),
       ),
@@ -288,8 +288,8 @@ module.exports = grammar({
 
     last_case_item: $ => seq(
       optional('('),
-      field('value', choice($._literal, $.extglob_pattern)),
-      repeat(seq('|', field('value', choice($._literal, $.extglob_pattern)))),
+      field('value', choice($._literal, $._extglob_blob)),
+      repeat(seq('|', field('value', choice($._literal, $._extglob_blob)))),
       ')',
       optional($._statements),
       optional(prec(1, ';;')),
@@ -512,8 +512,13 @@ module.exports = grammar({
       ),
       seq(
         field('left', $._expression),
-        field('operator', choice('==', '=~', '!=')),
+        field('operator', '=~'),
         field('right', alias($._regex_no_space, $.regex)),
+      ),
+      seq(
+        field('left', $._expression),
+        field('operator', choice('==', '!=')),
+        field('right', $._extglob_blob),
       ),
     )),
 
@@ -876,6 +881,11 @@ module.exports = grammar({
       choice('<(', '>('),
       $._statements,
       ')',
+    ),
+
+    _extglob_blob: $ => choice(
+      $.extglob_pattern,
+      seq($.extglob_pattern, choice($.string, $.expansion), $.extglob_pattern),
     ),
 
     comment: _ => token(prec(-10, /#.*/)),

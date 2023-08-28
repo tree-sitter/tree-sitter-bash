@@ -709,7 +709,23 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             lexer->mark_end(lexer);
             advance(lexer);
 
-            if (lexer->lookahead != '(') {
+            if (iswspace(lexer->lookahead)) {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = EXTGLOB_PATTERN;
+                return true;
+            }
+            if (lexer->lookahead == '$') {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                if (lexer->lookahead == '{') {
+                    lexer->result_symbol = EXTGLOB_PATTERN;
+                    return true;
+                }
+            }
+
+            if (lexer->lookahead != '(' && lexer->lookahead != '"' &&
+                !isalnum(lexer->lookahead) && lexer->lookahead != '[' &&
+                lexer->lookahead != '?') {
                 return false;
             }
 
@@ -756,6 +772,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
                 if (!state.done) {
                     bool was_space = iswspace(lexer->lookahead);
+                    if (lexer->lookahead == '"') {
+                        lexer->mark_end(lexer);
+                        lexer->result_symbol = EXTGLOB_PATTERN;
+                        return true;
+                    }
                     advance(lexer);
                     if (!was_space) {
                         lexer->mark_end(lexer);
