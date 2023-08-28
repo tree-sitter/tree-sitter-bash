@@ -839,7 +839,21 @@ word_in_replacement:
             }
 
             if (lexer->lookahead == '(' && !advanced_once) {
-                return false;
+                lexer->mark_end(lexer);
+                advance(lexer);
+                while (!isalpha(lexer->lookahead) && lexer->lookahead != ')' &&
+                       !lexer->eof(lexer)) {
+                    advanced_once = true;
+                    advance(lexer);
+                }
+                lexer->mark_end(lexer);
+                if (lexer->lookahead == ')') {
+                    advanced_once = true;
+                    advance(lexer);
+                    lexer->mark_end(lexer);
+                } else {
+                    return false;
+                }
             }
 
             if (lexer->lookahead == '\'') {

@@ -610,6 +610,7 @@ C="${D/#* -E /}"
 BASH_IT_GIT_URL="${BASH_IT_GIT_URL/git@/https://}"
 10#${command_start##*.}
 echo ${LIB_DEPEND//\[static-libs(+)]}
+${ALL_LLVM_TARGETS[@]/%/(-)?}
 
 --------------------------------------------------------------------------------
 
@@ -618,7 +619,8 @@ echo ${LIB_DEPEND//\[static-libs(+)]}
   (variable_assignment (variable_name) (string (expansion (variable_name) (regex))))
   (variable_assignment (variable_name) (string (expansion (variable_name) (regex) (word))))
   (command (command_name (number (expansion (variable_name) (regex)))))
-  (command (command_name (word)) (expansion (variable_name) (regex))))
+  (command (command_name (word)) (expansion (variable_name) (regex)))
+  (command (command_name (expansion (subscript (variable_name) (word)) (word)))))
 
 ================================================================================
 Words ending with '$'
