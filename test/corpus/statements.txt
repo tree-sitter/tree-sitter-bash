@@ -813,100 +813,49 @@ case "$arg" in
   *([0-9])([0-9])) echo "$arg"
 esac
 
+case ${lang} in
+CMakeLists.txt | \
+	cmake_modules | \
+	${PN}.pot) ;;
+*) rm -r ${lang} || die ;;
+esac
+
 --------------------------------------------------------------------------------
 
 (program
   (case_statement
     (string)
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word)))
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word)))
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word))))
+    (case_item (word) (command (command_name (word)) (word)))
+    (case_item (word) (command (command_name (word)) (word)))
+    (case_item (word) (command (command_name (word)) (word))))
   (case_statement
     (string)
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word)))
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word)))
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word))))
+    (case_item (word) (command (command_name (word)) (word)))
+    (case_item (word) (command (command_name (word)) (word)))
+    (case_item (word) (command (command_name (word)) (word))))
   (case_statement
-    (string
-      (simple_expansion
-        (variable_name)))
-    (case_item
-      (word)
-      (word)
-      (command
-        (command_name
-          (word)))))
+    (string (simple_expansion (variable_name)))
+    (case_item (word) (word) (command (command_name (word)))))
   (case_statement
-    (simple_expansion
-      (variable_name))
+    (simple_expansion (variable_name))
     (case_item
-      (concatenation
-        (word)
-        (word)
-        (number)
-        (word))
-      (command
-        (command_name
-          (word))
-        (simple_expansion
-          (special_variable_name)))))
+      (concatenation (word) (word) (number) (word))
+      (command (command_name (word)) (simple_expansion (special_variable_name)))))
+  (case_statement (word) (case_item (word) (command (command_name (word)) (word))))
+  (case_statement (word) (case_item (word) (command (command_name (word)))))
   (case_statement
-    (word)
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word))
-        (word))))
-  (case_statement
-    (word)
-    (case_item
-      (word)
-      (command
-        (command_name
-          (word)))))
-  (case_statement
-    (string
-      (simple_expansion
-        (variable_name)))
+    (string (simple_expansion (variable_name)))
     (case_item
       (extglob_pattern)
-      (command
-        (command_name
-          (word))
-        (string
-          (simple_expansion
-            (variable_name)))))))
+      (command (command_name (word)) (string (simple_expansion (variable_name))))))
+  (case_statement
+    (expansion (variable_name))
+    (case_item (word) (word) (concatenation (expansion (variable_name)) (word)))
+    (case_item
+      (extglob_pattern)
+      (list
+        (command (command_name (word)) (word) (expansion (variable_name)))
+        (command (command_name (word)))))))
 
 ================================================================================
 Test commands
