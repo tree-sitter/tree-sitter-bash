@@ -886,6 +886,7 @@ module.exports = grammar({
     _expansion_max_length_expression: $ => choice(
       $._simple_variable_name,
       $.number,
+      $.expansion,
       alias($._expansion_max_length_binary_expression, $.binary_expression),
     ),
     _expansion_max_length_binary_expression: $ => prec.left(seq(

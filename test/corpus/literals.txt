@@ -270,6 +270,7 @@ ${var:pos}
 ${var:pos:len}
 ${MATRIX:$(($RANDOM%${#MATRIX})):1}
 ${PKG_CONFIG_LIBDIR:-${ESYSROOT}/usr/$(get_libdir)/pkgconfig}
+${ver_str::${#ver_str}-${#not_match}}
 
 --------------------------------------------------------------------------------
 
@@ -355,7 +356,14 @@ ${PKG_CONFIG_LIBDIR:-${ESYSROOT}/usr/$(get_libdir)/pkgconfig}
           (word)
           (command_substitution
             (command (command_name (word))))
-          (word))))))
+          (word)))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (binary_expression
+          (expansion (variable_name))
+          (expansion (variable_name)))))))
 
 ================================================================================
 Variable expansions in strings
