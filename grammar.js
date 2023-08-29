@@ -70,7 +70,6 @@ module.exports = grammar({
     $._external_expansion_sym_equal,
     '}',
     ']',
-    ')',
     '<<',
     '<<-',
     /\n/,

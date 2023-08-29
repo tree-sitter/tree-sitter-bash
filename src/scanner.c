@@ -62,7 +62,6 @@ enum TokenType {
     EXTERNAL_EXPANSION_SYM_EQUAL,
     CLOSING_BRACE,
     CLOSING_BRACKET,
-    CLOSING_PAREN,
     HEREDOC_ARROW,
     HEREDOC_ARROW_DASH,
     NEWLINE,
@@ -83,6 +82,7 @@ typedef struct {
     bool heredoc_is_raw;
     bool started_heredoc;
     bool heredoc_allows_indent;
+    uint8_t last_glob_paren_depth;
     String heredoc_delimiter;
     String current_leading_word;
 } Scanner;
@@ -104,16 +104,17 @@ static inline void reset(Scanner *scanner) {
 }
 
 static unsigned serialize(Scanner *scanner, char *buffer) {
-    if (scanner->heredoc_delimiter.len + 3 >=
+    if (scanner->heredoc_delimiter.len + 4 >=
         TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
         return 0;
     }
     buffer[0] = (char)scanner->heredoc_is_raw;
     buffer[1] = (char)scanner->started_heredoc;
     buffer[2] = (char)scanner->heredoc_allows_indent;
-    memcpy(&buffer[3], scanner->heredoc_delimiter.data,
+    buffer[3] = (char)scanner->last_glob_paren_depth;
+    memcpy(&buffer[4], scanner->heredoc_delimiter.data,
            scanner->heredoc_delimiter.len);
-    return scanner->heredoc_delimiter.len + 3;
+    return scanner->heredoc_delimiter.len + 4;
 }
 
 static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
@@ -123,9 +124,10 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
         scanner->heredoc_is_raw = buffer[0];
         scanner->started_heredoc = buffer[1];
         scanner->heredoc_allows_indent = buffer[2];
-        scanner->heredoc_delimiter.len = length - 3;
+        scanner->last_glob_paren_depth = buffer[3];
+        scanner->heredoc_delimiter.len = length - 4;
         STRING_GROW(scanner->heredoc_delimiter, scanner->heredoc_delimiter.len);
-        memcpy(scanner->heredoc_delimiter.data, &buffer[3],
+        memcpy(scanner->heredoc_delimiter.data, &buffer[4],
                scanner->heredoc_delimiter.len);
     }
 }
@@ -315,6 +317,8 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
 }
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
+    /* printf("scan! lookahead: %c, valid_symbols[EXPANSION_WORD]: %d\n", */
+    /*        lexer->lookahead, valid_symbols[EXPANSION_WORD]); */
     if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) ||
               lexer->lookahead == '>' || lexer->lookahead == '<' ||
@@ -726,7 +730,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         bool was_space = iswspace(lexer->lookahead);
                         advance(lexer);
                         state.advanced_once = true;
-                        if (!was_space) {
+                        if (!was_space || state.paren_depth > 0) {
                             lexer->mark_end(lexer);
                         }
                     } else if (valid_symbols[REGEX_NO_SLASH]) {
@@ -774,7 +778,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                                 return true;
                             }
                         } else {
-                            if (iswspace(lexer->lookahead) && state.paren_depth == 0) {
+                            if (iswspace(lexer->lookahead) &&
+                                state.paren_depth == 0) {
                                 lexer->mark_end(lexer);
                                 lexer->result_symbol = REGEX_NO_SPACE;
                                 return state.found_non_alnumdollarunderdash;
@@ -864,7 +869,7 @@ extglob_pattern:
                 uint32_t brace_depth;
             } State;
 
-            State state = {false, 0, 0, 0};
+            State state = {false, scanner->last_glob_paren_depth, 0, 0};
             while (!state.done) {
                 switch (lexer->lookahead) {
                     case '\0':
@@ -883,10 +888,6 @@ extglob_pattern:
                             state.done = true;
                         }
                         state.paren_depth--;
-                        if (!valid_symbols[CLOSING_PAREN]) {
-                            advance(lexer);
-                            lexer->mark_end(lexer);
-                        }
                         break;
                     case ']':
                         if (state.bracket_depth == 0) {
@@ -910,17 +911,20 @@ extglob_pattern:
                         if (lexer->lookahead == '(' ||
                             lexer->lookahead == '{') {
                             lexer->result_symbol = EXTGLOB_PATTERN;
+                            scanner->last_glob_paren_depth = state.paren_depth;
                             return true;
                         }
                     }
                     if (was_space) {
                         lexer->mark_end(lexer);
                         lexer->result_symbol = EXTGLOB_PATTERN;
+                        scanner->last_glob_paren_depth = 0;
                         return true;
                     }
                     if (lexer->lookahead == '"') {
                         lexer->mark_end(lexer);
                         lexer->result_symbol = EXTGLOB_PATTERN;
+                        scanner->last_glob_paren_depth = 0;
                         return true;
                     }
                     if (lexer->lookahead == '\\') {
@@ -938,8 +942,10 @@ extglob_pattern:
             }
 
             lexer->result_symbol = EXTGLOB_PATTERN;
+            scanner->last_glob_paren_depth = 0;
             return true;
         }
+        scanner->last_glob_paren_depth = 0;
 
         return false;
     }
