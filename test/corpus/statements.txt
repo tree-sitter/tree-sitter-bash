@@ -931,6 +931,8 @@ fi
 
 [[ ${SRC_URI} == */${a}* ]]
 
+[[ a == *_@(LIB|SYMLINK) ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1020,7 +1022,8 @@ fi
       (expansion (variable_name))
       (extglob_pattern)
       (expansion (variable_name))
-        (extglob_pattern))))
+      (extglob_pattern)))
+  (test_command (binary_expression (word) (extglob_pattern))))
 
 ================================================================================
 Test commands with ternary

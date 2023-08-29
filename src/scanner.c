@@ -831,7 +831,7 @@ extglob_pattern:
             lexer->mark_end(lexer);
             advance(lexer);
 
-            // case item *) or -)
+            // case item -) or *)
             if (lexer->lookahead == ')') {
                 lexer->mark_end(lexer);
                 advance(lexer);
@@ -858,7 +858,7 @@ extglob_pattern:
             if (!isalnum(lexer->lookahead) && lexer->lookahead != '(' &&
                 lexer->lookahead != '"' && lexer->lookahead != '[' &&
                 lexer->lookahead != '?' && lexer->lookahead != '/' &&
-                lexer->lookahead != '\\') {
+                lexer->lookahead != '\\' && lexer->lookahead != '_') {
                 return false;
             }
 
