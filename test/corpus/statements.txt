@@ -1108,6 +1108,7 @@ Test commands with regexes
 [[ ${PV} =~ 99999999$ ]]
 [[ $1 == -- ]]
 [[ " ${REPLACING_VERSIONS} " != *\ ${PVR}\ * ]]
+[[ ${file} == @(*${GENTOO_PATCH_NAME}.tar.xz|*.asc|*.sig) ]]
 
 --------------------------------------------------------------------------------
 
@@ -1152,6 +1153,12 @@ Test commands with regexes
   (test_command
     (binary_expression
       (string (expansion (variable_name)))
+      (extglob_pattern)
+      (expansion (variable_name))
+      (extglob_pattern)))
+  (test_command
+    (binary_expression
+      (expansion (variable_name))
       (extglob_pattern)
       (expansion (variable_name))
       (extglob_pattern))))

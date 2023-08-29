@@ -62,6 +62,7 @@ enum TokenType {
     EXTERNAL_EXPANSION_SYM_EQUAL,
     CLOSING_BRACE,
     CLOSING_BRACKET,
+    CLOSING_PAREN,
     HEREDOC_ARROW,
     HEREDOC_ARROW_DASH,
     NEWLINE,
@@ -811,9 +812,8 @@ extglob_pattern:
         if (lexer->lookahead == '?' || lexer->lookahead == '*' ||
             lexer->lookahead == '+' || lexer->lookahead == '@' ||
             lexer->lookahead == '!' || lexer->lookahead == '-' ||
-            lexer->lookahead == ')' || lexer->lookahead == '\\') {
-            bool was_hyphen = lexer->lookahead == '-';
-
+            lexer->lookahead == ')' || lexer->lookahead == '\\' ||
+            lexer->lookahead == '.') {
             if (lexer->lookahead == '\\') {
                 advance(lexer);
                 if (iswspace(lexer->lookahead)) {
@@ -826,11 +826,14 @@ extglob_pattern:
             lexer->mark_end(lexer);
             advance(lexer);
 
-            // case item -)
-            if (was_hyphen && lexer->lookahead == ')') {
+            // case item *) or -)
+            if (lexer->lookahead == ')') {
                 lexer->mark_end(lexer);
-                lexer->result_symbol = EXTGLOB_PATTERN;
-                return true;
+                advance(lexer);
+                if (iswspace(lexer->lookahead)) {
+                    lexer->result_symbol = EXTGLOB_PATTERN;
+                    return true;
+                }
             }
 
             if (iswspace(lexer->lookahead)) {
@@ -880,6 +883,10 @@ extglob_pattern:
                             state.done = true;
                         }
                         state.paren_depth--;
+                        if (!valid_symbols[CLOSING_PAREN]) {
+                            advance(lexer);
+                            lexer->mark_end(lexer);
+                        }
                         break;
                     case ']':
                         if (state.bracket_depth == 0) {
