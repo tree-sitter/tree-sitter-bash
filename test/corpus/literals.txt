@@ -363,6 +363,7 @@ Variable expansions in strings
 
 A="${A:-$B/c}"
 A="${b=$c/$d}"
+MY_PV="${PV/_pre/$'\x7e'pre}"
 
 --------------------------------------------------------------------------------
 
@@ -386,7 +387,14 @@ A="${b=$c/$d}"
             (variable_name))
           (word)
           (simple_expansion
-            (variable_name)))))))
+            (variable_name))))))
+  (variable_assignment
+    (variable_name)
+    (string
+      (expansion
+        (variable_name)
+        (regex)
+        (concatenation (ansi_c_string) (word))))))
 
 ================================================================================
 Variable expansions with regexes
