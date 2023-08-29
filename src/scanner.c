@@ -439,7 +439,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return scan_heredoc_start(scanner, lexer);
     }
 
-    if (valid_symbols[TEST_OPERATOR]) {
+    if (valid_symbols[TEST_OPERATOR] && !valid_symbols[EXPANSION_WORD]) {
         while (iswspace(lexer->lookahead) && lexer->lookahead != '\n') {
             skip(lexer);
         }
@@ -538,9 +538,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
 
         // no '*', '@', '?', '-', '$', '0', '_'
-        if (lexer->lookahead == '*' || lexer->lookahead == '@' ||
-            lexer->lookahead == '?' || lexer->lookahead == '-' ||
-            lexer->lookahead == '0' || lexer->lookahead == '_') {
+        if (!valid_symbols[EXPANSION_WORD] &&
+            (lexer->lookahead == '*' || lexer->lookahead == '@' ||
+             lexer->lookahead == '?' || lexer->lookahead == '-' ||
+             lexer->lookahead == '0' || lexer->lookahead == '_')) {
             lexer->mark_end(lexer);
             advance(lexer);
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
@@ -626,7 +627,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return false;
             }
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
-                lexer->lookahead == ':' || lexer->lookahead == '%' ||
+                (lexer->lookahead == ':' && !valid_symbols[CLOSING_BRACE]) ||
+                lexer->lookahead == '%' ||
                 (lexer->lookahead == '#' && !is_number) ||
                 lexer->lookahead == '@' ||
                 (lexer->lookahead == '-' && valid_symbols[CLOSING_BRACE])) {
@@ -923,6 +925,7 @@ extglob_pattern:
 word_in_replacement:
     if (valid_symbols[EXPANSION_WORD]) {
         bool advanced_once = false;
+        bool advance_once_space = false;
         for (;;) {
             if (lexer->lookahead == '\"') {
                 return false;
@@ -930,25 +933,29 @@ word_in_replacement:
             if (lexer->lookahead == '$') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                advanced_once = true;
                 if (lexer->lookahead == '{' || lexer->lookahead == '(' ||
                     lexer->lookahead == '\'' || iswalnum(lexer->lookahead)) {
-                    return false;
+                    lexer->result_symbol = EXPANSION_WORD;
+                    return advanced_once;
+                } else {
+                    advanced_once = true;
                 }
             }
 
             if (lexer->lookahead == '}') {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = EXPANSION_WORD;
-                return advanced_once;
+                return advanced_once || advance_once_space;
             }
 
-            if (lexer->lookahead == '(' && !advanced_once) {
+            if (lexer->lookahead == '(' &&
+                !(advanced_once || advance_once_space)) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 while (!isalpha(lexer->lookahead) && lexer->lookahead != ')' &&
                        !lexer->eof(lexer)) {
-                    advanced_once = true;
+                    advanced_once =
+                        advanced_once || !iswspace(lexer->lookahead);
                     advance(lexer);
                 }
                 lexer->mark_end(lexer);
@@ -968,8 +975,10 @@ word_in_replacement:
             if (lexer->eof(lexer)) {
                 return false;
             }
+            advanced_once = advanced_once || !iswspace(lexer->lookahead);
+            advance_once_space =
+                advance_once_space || iswspace(lexer->lookahead);
             advance(lexer);
-            advanced_once = true;
         }
     }
 

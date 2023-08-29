@@ -826,12 +826,11 @@ module.exports = grammar({
         field('operator', '/'),
         optional(seq(
           choice(
-            $._literal,
-            seq(
-              $.command_substitution,
-              alias($._expansion_word, $.word),
-            ),
+            $._primary_expression,
+            alias(prec(-2, repeat1($._special_character)), $.word),
+            seq($.command_substitution, alias($._expansion_word, $.word)),
             alias($._expansion_word, $.word),
+            alias($._concatenation_in_expansion, $.concatenation),
           ),
           field('operator', optional('/')),
         )),

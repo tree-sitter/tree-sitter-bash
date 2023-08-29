@@ -578,6 +578,7 @@ ${cdir:+#}
 ${dict_langs:+;}
 ${UTIL_LINUX_LIBC[@]/%/? ( sys-apps/util-linux )}
 ${id}${2+ ${2}}
+${BRANDING_GCC_PKGVERSION/(/(Gentoo ${PVR}${extvers}, } # look at that parenthesis!
 
 --------------------------------------------------------------------------------
 
@@ -597,7 +598,7 @@ ${id}${2+ ${2}}
   (command
     (command_name (word))
     (string
-      (expansion (variable_name) (concatenation (variable_name) (word) (simple_expansion (variable_name)) (word)))))
+      (expansion (variable_name) (concatenation (word) (simple_expansion (variable_name)) (word)))))
   (declaration_command
     (variable_assignment
       (variable_name)
@@ -607,7 +608,14 @@ ${id}${2+ ${2}}
   (command (command_name (expansion (subscript (variable_name) (word)) (word))))
   (command
     (command_name
-      (concatenation (expansion (variable_name)) (expansion (variable_name) (expansion (variable_name)))))))
+      (concatenation (expansion (variable_name)) (expansion (variable_name) (expansion (variable_name))))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (regex)
+        (concatenation (word) (expansion (variable_name)) (expansion (variable_name)) (word)))))
+  (comment))
 
 ================================================================================
 Variable Expansions: Regex
