@@ -409,6 +409,7 @@ MY_P="${PN/aspell/aspell"${ASPELL_VERSION}"}"
 pyc=${pyc//*\/}
 ${pv/\.}
 ${new_test_cp//"${old_ver_cp}"/}
+${tests_to_run//"${classes}"\/}
 
 --------------------------------------------------------------------------------
 
@@ -443,7 +444,10 @@ ${new_test_cp//"${old_ver_cp}"/}
   (command (command_name (expansion (variable_name) (regex))))
   (command
     (command_name
-      (expansion (variable_name) (string (expansion (variable_name)))))))
+      (expansion (variable_name) (string (expansion (variable_name))))))
+  (command
+    (command_name
+      (expansion (variable_name) (string (expansion (variable_name))) (regex)))))
 
 ================================================================================
 Other variable expansion operators

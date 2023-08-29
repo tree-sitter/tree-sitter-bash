@@ -1,6 +1,6 @@
 /**
  * @file Bash grammar for tree-sitter
- * @author Max Brunsfeld
+ * @author Max Brunsfeld <maxbrunsfeld@gmail.com>
  * @author Amaan Qureshi <amaanq12@gmail.com>
  * @license MIT
  */
@@ -825,7 +825,12 @@ module.exports = grammar({
 
     _expansion_regex_replacement: $ => seq(
       field('operator', choice('/', '//', '/#', '/%')),
-      optional(choice(alias($._regex_no_slash, $.regex), $.string, $.command_substitution)),
+      optional(choice(
+        alias($._regex_no_slash, $.regex),
+        $.string,
+        $.command_substitution,
+        seq($.string, alias($._regex_no_slash, $.regex)),
+      )),
       // This can be elided
       optional(seq(
         field('operator', '/'),
