@@ -545,6 +545,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 if (lexer->lookahead == '\n') {
                     skip(lexer);
                 } else {
+                    if (lexer->lookahead == '\\' &&
+                        valid_symbols[EXPANSION_WORD]) {
+                        goto expansion_word;
+                    }
                     return false;
                 }
             } else {
@@ -602,7 +606,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 goto brace_start;
             }
             if (valid_symbols[EXPANSION_WORD]) {
-                goto word_in_replacement;
+                goto expansion_word;
             }
             if (valid_symbols[EXTGLOB_PATTERN]) {
                 goto extglob_pattern;
@@ -998,7 +1002,7 @@ extglob_pattern:
         return false;
     }
 
-word_in_replacement:
+expansion_word:
     if (valid_symbols[EXPANSION_WORD]) {
         bool advanced_once = false;
         bool advance_once_space = false;

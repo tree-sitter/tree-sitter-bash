@@ -418,6 +418,7 @@ pyc=${pyc//*\/}
 ${pv/\.}
 ${new_test_cp//"${old_ver_cp}"/}
 ${tests_to_run//"${classes}"\/}
+${allarchives// /\\|}
 
 --------------------------------------------------------------------------------
 
@@ -455,7 +456,8 @@ ${tests_to_run//"${classes}"\/}
       (expansion (variable_name) (string (expansion (variable_name))))))
   (command
     (command_name
-      (expansion (variable_name) (string (expansion (variable_name))) (regex)))))
+      (expansion (variable_name) (string (expansion (variable_name))) (regex))))
+  (command (command_name (expansion (variable_name) (regex) (word)))))
 
 ================================================================================
 Other variable expansion operators
