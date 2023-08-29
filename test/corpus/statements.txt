@@ -1134,6 +1134,54 @@ Test commands with regexes
     (binary_expression (string (expansion (subscript (variable_name) (number)) (regex))) (regex))))
 
 ================================================================================
+Test command paren statefulness with a case glob
+================================================================================
+
+[[ ${test} == @($(IFS='|'; echo "${skip[*]}")) ]]
+
+case ${out} in
+*"not supported"*|\
+*"operation not supported"*)
+	;;
+esac
+
+case $1 in
+-o)
+	owner=$2
+	shift
+	;;
+-g) ;;
+esac
+
+---
+
+(program
+  (test_command
+    (binary_expression
+      (expansion (variable_name))
+      (extglob_pattern)
+      (command_substitution
+        (variable_assignment (variable_name) (raw_string))
+        (command
+        (command_name (word))
+          (string (expansion (subscript (variable_name) (word))))))
+      (extglob_pattern)))
+  (case_statement
+    (expansion (variable_name))
+    (case_item
+      (extglob_pattern)
+      (string)
+      (extglob_pattern)
+      (concatenation (word) (string) (word))))
+  (case_statement
+    (simple_expansion (variable_name))
+    (case_item
+      (extglob_pattern)
+      (variable_assignment (variable_name) (simple_expansion (variable_name)))
+      (command (command_name (word))))
+    (case_item (word))))
+
+================================================================================
 Subshells
 ================================================================================
 

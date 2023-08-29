@@ -833,11 +833,37 @@ extglob_pattern:
                 }
             }
 
+            if (lexer->lookahead == ')' &&
+                scanner->last_glob_paren_depth == 0) {
+                lexer->mark_end(lexer);
+                advance(lexer);
+
+                if (iswspace(lexer->lookahead)) {
+                    return false;
+                }
+            }
+
             lexer->mark_end(lexer);
             advance(lexer);
 
+            // -\w is just a word, find something else special
+            if (lexer->lookahead == '-') {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                while (isalnum(lexer->lookahead)) {
+                    advance(lexer);
+                }
+
+                if (lexer->lookahead == ')' || lexer->lookahead == '\\' ||
+                    lexer->lookahead == '.') {
+                    return false;
+                }
+                lexer->mark_end(lexer);
+            }
+
             // case item -) or *)
-            if (lexer->lookahead == ')') {
+            if (lexer->lookahead == ')' &&
+                scanner->last_glob_paren_depth == 0) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 if (iswspace(lexer->lookahead)) {
@@ -849,12 +875,24 @@ extglob_pattern:
             if (iswspace(lexer->lookahead)) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = EXTGLOB_PATTERN;
+                scanner->last_glob_paren_depth = 0;
                 return true;
             }
+
             if (lexer->lookahead == '$') {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 if (lexer->lookahead == '{' || lexer->lookahead == '(') {
+                    lexer->result_symbol = EXTGLOB_PATTERN;
+                    return true;
+                }
+            }
+
+            if (lexer->lookahead == '|') {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                if (lexer->lookahead == '\\' || lexer->lookahead == '\r' ||
+                    lexer->lookahead == '\n') {
                     lexer->result_symbol = EXTGLOB_PATTERN;
                     return true;
                 }
