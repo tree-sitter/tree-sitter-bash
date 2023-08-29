@@ -525,6 +525,8 @@ done 3<<<"$ENTRIES"
 $(tc-getCC) -Werror -Wl,-l:libobjc.so.${ver} -x objective-c \
 		- <<<$'int main() {}' -o /dev/null 2> /dev/null;
 
+<<<string cmd arg
+
 ---
 
 (program
@@ -543,7 +545,8 @@ $(tc-getCC) -Werror -Wl,-l:libobjc.so.${ver} -x objective-c \
       (word)
       (word))
     (herestring_redirect (ansi_c_string) (word) (word))
-    (file_redirect (file_descriptor) (word))))
+    (file_redirect (file_descriptor) (word)))
+    (redirected_statement (herestring_redirect (word) (word) (word))))
 
 ==========================================
 Subscripts

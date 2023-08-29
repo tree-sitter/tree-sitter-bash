@@ -146,6 +146,7 @@ module.exports = grammar({
         ))),
       ),
       field('redirect', repeat1($.file_redirect)),
+      $.herestring_redirect,
     ))),
 
     for_statement: $ => seq(
