@@ -774,7 +774,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                                 return true;
                             }
                         } else {
-                            if (iswspace(lexer->lookahead)) {
+                            if (iswspace(lexer->lookahead) && state.paren_depth == 0) {
                                 lexer->mark_end(lexer);
                                 lexer->result_symbol = REGEX_NO_SPACE;
                                 return state.found_non_alnumdollarunderdash;

@@ -1110,6 +1110,7 @@ Test commands with regexes
 [[ " ${REPLACING_VERSIONS} " != *\ ${PVR}\ * ]]
 [[ ${file} == @(*${GENTOO_PATCH_NAME}.tar.xz|*.asc|*.sig) ]]
 [[ $RUBY_TARGETS != *$( eselect ruby show | awk 'NR==2' | tr  -d ' '  )* ]]
+[[ " ${m[0]##*/}" =~ ^(\ ${skip_files[*]/%/.*|\\} ) ]]
 
 --------------------------------------------------------------------------------
 
@@ -1173,7 +1174,9 @@ Test commands with regexes
             (command (command_name (word)) (word) (word))
             (command (command_name (word)) (raw_string)))
           (command (command_name (word)) (word) (raw_string))))
-      (extglob_pattern))))
+      (extglob_pattern)))
+  (test_command
+    (binary_expression (string (expansion (subscript (variable_name) (number)) (regex))) (regex))))
 
 ================================================================================
 Subshells
