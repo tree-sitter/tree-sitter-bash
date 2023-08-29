@@ -434,7 +434,7 @@ module.exports = grammar({
       choice(
         seq(
           choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-          field('destination', $._literal),
+          field('destination', repeat1($._literal)),
         ),
         seq(
           choice('<&-', '>&-'), // close file descriptor
