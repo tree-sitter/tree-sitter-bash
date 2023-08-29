@@ -825,8 +825,8 @@ extglob_pattern:
             lexer->lookahead == '.') {
             if (lexer->lookahead == '\\') {
                 advance(lexer);
-                if (iswspace(lexer->lookahead) && lexer->lookahead != '\r' &&
-                    lexer->lookahead != '\n') {
+                if ((iswspace(lexer->lookahead) || lexer->lookahead == '"') &&
+                    lexer->lookahead != '\r' && lexer->lookahead != '\n') {
                     advance(lexer);
                 } else {
                     return false;
@@ -972,7 +972,8 @@ extglob_pattern:
                     }
                     if (lexer->lookahead == '\\') {
                         advance(lexer);
-                        if (iswspace(lexer->lookahead)) {
+                        if (iswspace(lexer->lookahead) ||
+                            lexer->lookahead == '"') {
                             advance(lexer);
                         }
                     } else {

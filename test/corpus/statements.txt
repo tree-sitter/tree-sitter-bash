@@ -1153,6 +1153,8 @@ case $1 in
 -g) ;;
 esac
 
+[[ a == \"+(?)\" ]]
+
 ---
 
 (program
@@ -1179,7 +1181,8 @@ esac
       (extglob_pattern)
       (variable_assignment (variable_name) (simple_expansion (variable_name)))
       (command (command_name (word))))
-    (case_item (word))))
+    (case_item (word)))
+  (test_command (binary_expression (word) (extglob_pattern))))
 
 ================================================================================
 Subshells
