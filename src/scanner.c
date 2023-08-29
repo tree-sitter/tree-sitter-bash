@@ -453,6 +453,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (valid_symbols[EXTGLOB_PATTERN]) {
                 goto extglob_pattern;
             }
+            if (valid_symbols[REGEX_NO_SPACE]) {
+                goto regex;
+            }
             skip(lexer);
 
             if (lexer->eof(lexer)) {
@@ -661,6 +664,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return true;
     }
 
+regex:
     if ((valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] ||
          valid_symbols[REGEX_NO_SPACE]) &&
         !in_error_recovery(valid_symbols)) {
@@ -1007,6 +1011,9 @@ word_in_replacement:
                     advanced_once = true;
                     advance(lexer);
                     lexer->mark_end(lexer);
+                    if (lexer->lookahead == '}') {
+                        return false;
+                    }
                 } else {
                     return false;
                 }

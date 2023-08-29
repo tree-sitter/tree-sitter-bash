@@ -933,6 +933,8 @@ fi
 
 [[ a == *_@(LIB|SYMLINK) ]]
 
+[[ ${1} =~ \.(lisp|lsp|cl)$ ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1023,7 +1025,8 @@ fi
       (extglob_pattern)
       (expansion (variable_name))
       (extglob_pattern)))
-  (test_command (binary_expression (word) (extglob_pattern))))
+  (test_command (binary_expression (word) (extglob_pattern)))
+  (test_command (binary_expression (expansion (variable_name)) (regex))))
 
 ================================================================================
 Test commands with ternary
