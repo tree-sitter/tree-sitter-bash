@@ -1109,6 +1109,7 @@ Test commands with regexes
 [[ $1 == -- ]]
 [[ " ${REPLACING_VERSIONS} " != *\ ${PVR}\ * ]]
 [[ ${file} == @(*${GENTOO_PATCH_NAME}.tar.xz|*.asc|*.sig) ]]
+[[ $RUBY_TARGETS != *$( eselect ruby show | awk 'NR==2' | tr  -d ' '  )* ]]
 
 --------------------------------------------------------------------------------
 
@@ -1161,6 +1162,17 @@ Test commands with regexes
       (expansion (variable_name))
       (extglob_pattern)
       (expansion (variable_name))
+      (extglob_pattern)))
+  (test_command
+    (binary_expression
+      (simple_expansion (variable_name))
+      (extglob_pattern)
+      (command_substitution
+        (pipeline
+          (pipeline
+            (command (command_name (word)) (word) (word))
+            (command (command_name (word)) (raw_string)))
+          (command (command_name (word)) (word) (raw_string))))
       (extglob_pattern))))
 
 ================================================================================

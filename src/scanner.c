@@ -844,7 +844,7 @@ extglob_pattern:
             if (lexer->lookahead == '$') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                if (lexer->lookahead == '{') {
+                if (lexer->lookahead == '{' || lexer->lookahead == '(') {
                     lexer->result_symbol = EXTGLOB_PATTERN;
                     return true;
                 }
