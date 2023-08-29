@@ -676,6 +676,7 @@ module.exports = grammar({
       choice(
         $._primary_expression,
         alias($._special_character, $.word),
+        alias($._bare_dollar, '$'),
       ),
       repeat1(seq(
         choice($._concat, alias(/`\s*`/, '``')),
@@ -683,6 +684,7 @@ module.exports = grammar({
           $._primary_expression,
           alias($._special_character, $.word),
           alias($._comment_word, $.word),
+          alias($._bare_dollar, '$'),
         ),
       )),
       optional(seq($._concat, '$')),
