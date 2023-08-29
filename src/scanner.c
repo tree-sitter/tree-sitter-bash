@@ -777,8 +777,16 @@ extglob_pattern:
             lexer->lookahead == '+' || lexer->lookahead == '@' ||
             lexer->lookahead == '!' || lexer->lookahead == '-' ||
             lexer->lookahead == ')') {
+            bool was_hyphen = lexer->lookahead == '-';
             lexer->mark_end(lexer);
             advance(lexer);
+
+            // case item -)
+            if (was_hyphen && lexer->lookahead == ')') {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = EXTGLOB_PATTERN;
+                return true;
+            }
 
             if (iswspace(lexer->lookahead)) {
                 lexer->mark_end(lexer);
