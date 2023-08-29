@@ -1149,6 +1149,7 @@ echo $((! -a || ~ +b || ++c || --d))
 echo $((foo-- || bar++))
 (("${MULTIBUILD_VARIANTS}" > 1))
 $(("$(stat --printf '%05a' "${save_file}")" & 07177))
+soft_errors_count=$[soft_errors_count + 1]
 
 --------------------------------------------------------------------------------
 
@@ -1259,7 +1260,11 @@ $(("$(stat --printf '%05a' "${save_file}")" & 07177))
                 (word)
                 (raw_string)
                 (string (expansion (variable_name))))))
-          (number))))))
+          (number)))))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (binary_expression (variable_name) (number)))))
 
 ================================================================================
 Concatenation with double backticks

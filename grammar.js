@@ -597,7 +597,10 @@ module.exports = grammar({
       $.brace_expression,
     ),
 
-    arithmetic_expansion: $ => seq(choice('$((', '(('), commaSep1($._arithmetic_expression), '))'),
+    arithmetic_expansion: $ => choice(
+      seq(choice('$((', '(('), commaSep1($._arithmetic_expression), '))'),
+      seq('$[', $._arithmetic_expression, ']'),
+    ),
 
     brace_expression: $ => seq(
       alias($._brace_start, '{'),
