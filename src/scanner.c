@@ -65,6 +65,7 @@ enum TokenType {
     HEREDOC_ARROW,
     HEREDOC_ARROW_DASH,
     NEWLINE,
+    ERROR_RECOVERY,
 };
 
 typedef struct {
@@ -91,9 +92,7 @@ static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
 
 static inline bool in_error_recovery(const bool *valid_symbols) {
-    return valid_symbols[HEREDOC_START] && valid_symbols[HEREDOC_END] &&
-           valid_symbols[FILE_DESCRIPTOR] && valid_symbols[EMPTY_VALUE] &&
-           valid_symbols[CONCAT] && valid_symbols[REGEX];
+    return valid_symbols[ERROR_RECOVERY];
 }
 
 static inline void reset(Scanner *scanner) {
@@ -164,6 +163,22 @@ static bool advance_word(TSLexer *lexer, String *unquoted_word) {
     }
 
     return !empty;
+}
+
+static inline bool scan_bare_dollar(TSLexer *lexer) {
+    while (iswspace(lexer->lookahead) && lexer->lookahead != '\n' &&
+           !lexer->eof(lexer)) {
+        skip(lexer);
+    }
+
+    if (lexer->lookahead == '$') {
+        advance(lexer);
+        lexer->result_symbol = BARE_DOLLAR;
+        lexer->mark_end(lexer);
+        return iswspace(lexer->lookahead) || lexer->eof(lexer);
+    }
+
+    return false;
 }
 
 static bool scan_heredoc_start(Scanner *scanner, TSLexer *lexer) {
@@ -299,7 +314,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
 }
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
-    if (valid_symbols[CONCAT]) {
+    if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) ||
               lexer->lookahead == '>' || lexer->lookahead == '<' ||
               lexer->lookahead == ')' || lexer->lookahead == '(' ||
@@ -333,6 +348,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 if (lexer->lookahead == '"' || lexer->lookahead == '\'' ||
                     lexer->lookahead == '\\') {
                     return true;
+                }
+                if (lexer->eof(lexer)) {
+                    return false;
                 }
             } else {
                 return true;
@@ -386,18 +404,6 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
     }
 
-    if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols)) {
-        while (iswspace(lexer->lookahead)) {
-            skip(lexer);
-        }
-
-        if (lexer->lookahead == '$') {
-            advance(lexer);
-            lexer->result_symbol = BARE_DOLLAR;
-            return iswspace(lexer->lookahead) || lexer->eof(lexer);
-        }
-    }
-
     if (valid_symbols[EMPTY_VALUE]) {
         if (iswspace(lexer->lookahead) || lexer->eof(lexer) ||
             lexer->lookahead == ';' || lexer->lookahead == '&') {
@@ -440,6 +446,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
         if (lexer->lookahead == '\\') {
             skip(lexer);
+
+            if (lexer->eof(lexer)) {
+                return false;
+            }
+
             if (lexer->lookahead == '\r') {
                 skip(lexer);
                 if (lexer->lookahead == '\n') {
@@ -488,11 +499,16 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return true;
             }
         }
+
+        if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols) &&
+            scan_bare_dollar(lexer)) {
+            return true;
+        }
     }
 
     if ((valid_symbols[VARIABLE_NAME] || valid_symbols[FILE_DESCRIPTOR] ||
          valid_symbols[HEREDOC_ARROW]) &&
-        !valid_symbols[REGEX_NO_SLASH]) {
+        !valid_symbols[REGEX_NO_SLASH] && !in_error_recovery(valid_symbols)) {
         for (;;) {
             if ((lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
                  lexer->lookahead == '\r' ||
@@ -501,6 +517,13 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 skip(lexer);
             } else if (lexer->lookahead == '\\') {
                 skip(lexer);
+
+                if (lexer->eof(lexer)) {
+                    lexer->mark_end(lexer);
+                    lexer->result_symbol = VARIABLE_NAME;
+                    return true;
+                }
+
                 if (lexer->lookahead == '\r') {
                     skip(lexer);
                 }
@@ -623,6 +646,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return false;
     }
 
+    if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols) &&
+        scan_bare_dollar(lexer)) {
+        return true;
+    }
+
     if ((valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] ||
          valid_symbols[REGEX_NO_SPACE]) &&
         !in_error_recovery(valid_symbols)) {
@@ -727,11 +755,13 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         } else if (lexer->lookahead == '$') {
                             lexer->mark_end(lexer);
                             advance(lexer);
-                            // do not parse a command substitution
+                            // do not parse a command
+                            // substitution
                             if (lexer->lookahead == '(') {
                                 return false;
                             }
-                            // end $ always means regex, e.g. 99999999$
+                            // end $ always means regex, e.g.
+                            // 99999999$
                             if (iswspace(lexer->lookahead)) {
                                 lexer->result_symbol = REGEX_NO_SPACE;
                                 lexer->mark_end(lexer);

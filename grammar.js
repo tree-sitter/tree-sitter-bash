@@ -73,6 +73,7 @@ module.exports = grammar({
     '<<',
     '<<-',
     /\n/,
+    $.__error_recovery,
   ],
 
   extras: $ => [
@@ -676,7 +677,6 @@ module.exports = grammar({
       choice(
         $._primary_expression,
         alias($._special_character, $.word),
-        alias($._bare_dollar, '$'),
       ),
       repeat1(seq(
         choice($._concat, alias(/`\s*`/, '``')),

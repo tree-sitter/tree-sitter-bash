@@ -583,14 +583,19 @@ Bare $
 ==========================================
 
 echo $
+echo "${module}"$
+echo $$
 
 ---
 
 (program
+  (command (command_name (word)))
   (command
-    (command_name
-      (word))))
-
+    (command_name (word))
+    (concatenation (string (expansion (variable_name)))))
+  (command
+    (command_name (word))
+    (simple_expansion (special_variable_name))))
 
 ==========================================
 Arithmetic with command substitution
