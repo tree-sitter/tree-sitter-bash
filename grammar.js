@@ -1,6 +1,7 @@
 /**
  * @file Bash grammar for tree-sitter
  * @author Max Brunsfeld
+ * @author Amaan Qureshi <amaanq12@gmail.com>
  * @license MIT
  */
 
@@ -855,7 +856,7 @@ module.exports = grammar({
         $.expansion,
         $.parenthesized_expression,
         $.command_substitution,
-        seq($.number, '-', $.number),
+        alias($._expansion_max_length_binary_expression, $.binary_expression),
         /\n/,
       )),
       optional(seq(
@@ -864,10 +865,25 @@ module.exports = grammar({
           $._simple_variable_name,
           $.number,
           $.arithmetic_expansion,
+          $.expansion,
+          $.parenthesized_expression,
+          $.command_substitution,
+          alias($._expansion_max_length_binary_expression, $.binary_expression),
           /\n/,
         )),
       )),
     ),
+
+    _expansion_max_length_expression: $ => choice(
+      $._simple_variable_name,
+      $.number,
+      alias($._expansion_max_length_binary_expression, $.binary_expression),
+    ),
+    _expansion_max_length_binary_expression: $ => prec.left(seq(
+      $._expansion_max_length_expression,
+      field('operator', choice('+', '-', '*', '/', '%')),
+      $._expansion_max_length_expression,
+    )),
 
     _expansion_operator: _ => seq(
       field('operator', token.immediate('@')),
