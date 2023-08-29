@@ -884,6 +884,8 @@ fi
 
 [[ ${1} =~ \.(lisp|lsp|cl)$ ]]
 
+[[ a == - ]]
+
 --------------------------------------------------------------------------------
 
 (program
@@ -975,7 +977,8 @@ fi
       (expansion (variable_name))
       (extglob_pattern)))
   (test_command (binary_expression (word) (extglob_pattern)))
-  (test_command (binary_expression (expansion (variable_name)) (regex))))
+  (test_command (binary_expression (expansion (variable_name)) (regex)))
+  (test_command (binary_expression (word) (extglob_pattern))))
 
 ================================================================================
 Test commands with ternary

@@ -508,6 +508,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
                 lexer->result_symbol = TEST_OPERATOR;
                 return true;
+            } else if (iswspace(lexer->lookahead) &&
+                       valid_symbols[EXTGLOB_PATTERN]) {
+                lexer->result_symbol = EXTGLOB_PATTERN;
+                return true;
             }
         }
 
