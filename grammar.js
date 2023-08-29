@@ -60,7 +60,7 @@ module.exports = grammar({
     $.regex,
     $._regex_no_slash,
     $._regex_no_space,
-    $._word_in_replacement,
+    $._expansion_word,
     $.extglob_pattern,
     $._bare_dollar,
     $._brace_start,
@@ -618,6 +618,7 @@ module.exports = grammar({
       $.expansion,
       $._simple_variable_name,
       $.variable_name,
+      $.string,
     )),
 
     _arithmetic_binary_expression: $ => prec.left(2, choice(
@@ -806,7 +807,6 @@ module.exports = grammar({
           $.raw_string,
           $.ansi_c_string,
           alias($._expansion_word, $.word),
-          alias($._word_in_replacement, $.word),
         ),
       )),
     )),
@@ -827,9 +827,9 @@ module.exports = grammar({
             $._literal,
             seq(
               $.command_substitution,
-              alias($._word_in_replacement, $.word),
+              alias($._expansion_word, $.word),
             ),
-            alias($._word_in_replacement, $.word),
+            alias($._expansion_word, $.word),
           ),
           field('operator', optional('/')),
         )),
@@ -879,7 +879,7 @@ module.exports = grammar({
         $.raw_string,
         $.command_substitution,
         alias($._expansion_word, $.word),
-        alias($._word_in_replacement, $.word),
+        $.array,
       ),
       repeat1(seq(
         choice($._concat, alias(/`\s*`/, '``')),
@@ -892,7 +892,7 @@ module.exports = grammar({
           $.raw_string,
           $.command_substitution,
           alias($._expansion_word, $.word),
-          alias($._word_in_replacement, $.word),
+          $.array,
         ),
       )),
     )),
@@ -920,18 +920,6 @@ module.exports = grammar({
     ),
 
     comment: _ => token(prec(-10, /#.*/)),
-
-    _expansion_word: _ => token(prec(-9, seq(
-      choice(
-        noneOf(...['$', '"', '{', '}', '(', ')', '\'', '\\s']),
-        seq('\\', noneOf('\\s')),
-      ),
-      repeat(choice(
-        noneOf(...['$', '"', '{', '}', '(', ')', '\'', '\\s']),
-        seq('\\', noneOf('\\s')),
-        '\\ ',
-      )),
-    ))),
 
     _comment_word: _ => token(prec(-8, seq(
       choice(

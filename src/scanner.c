@@ -52,7 +52,7 @@ enum TokenType {
     REGEX,
     REGEX_NO_SLASH,
     REGEX_NO_SPACE,
-    WORD_IN_REPLACEMENT,
+    EXPANSION_WORD,
     EXTGLOB_PATTERN,
     BARE_DOLLAR,
     BRACE_START,
@@ -88,6 +88,7 @@ typedef struct {
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
+
 
 static inline bool in_error_recovery(const bool *valid_symbols) {
     return valid_symbols[HEREDOC_START] && valid_symbols[HEREDOC_END] &&
@@ -338,7 +339,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             }
         }
         if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] &&
-            !valid_symbols[WORD_IN_REPLACEMENT]) {
+            !valid_symbols[EXPANSION_WORD]) {
             lexer->result_symbol = CONCAT;
             return true;
         }
@@ -476,9 +477,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 if (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) {
-                    if (valid_symbols[WORD_IN_REPLACEMENT]) {
+                    if (valid_symbols[EXPANSION_WORD]) {
                         lexer->mark_end(lexer);
-                        lexer->result_symbol = WORD_IN_REPLACEMENT;
+                        lexer->result_symbol = EXPANSION_WORD;
                         return true;
                     }
                     return false;
@@ -496,7 +497,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if ((lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
                  lexer->lookahead == '\r' ||
                  (lexer->lookahead == '\n' && !valid_symbols[NEWLINE])) &&
-                !valid_symbols[WORD_IN_REPLACEMENT]) {
+                !valid_symbols[EXPANSION_WORD]) {
                 skip(lexer);
             } else if (lexer->lookahead == '\\') {
                 skip(lexer);
@@ -561,7 +562,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (lexer->lookahead == '{') {
                 goto brace_start;
             }
-            if (valid_symbols[WORD_IN_REPLACEMENT]) {
+            if (valid_symbols[EXPANSION_WORD]) {
                 goto word_in_replacement;
             }
             if (valid_symbols[EXTGLOB_PATTERN]) {
@@ -882,7 +883,7 @@ extglob_pattern:
     }
 
 word_in_replacement:
-    if (valid_symbols[WORD_IN_REPLACEMENT]) {
+    if (valid_symbols[EXPANSION_WORD]) {
         bool advanced_once = false;
         for (;;) {
             if (lexer->lookahead == '\"') {
@@ -900,7 +901,7 @@ word_in_replacement:
 
             if (lexer->lookahead == '}') {
                 lexer->mark_end(lexer);
-                lexer->result_symbol = WORD_IN_REPLACEMENT;
+                lexer->result_symbol = EXPANSION_WORD;
                 return advanced_once;
             }
 

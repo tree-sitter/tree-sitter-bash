@@ -927,8 +927,6 @@ fi
 [[ -f "${EROOT}/usr/share/php/.packagexml/${MY_P}.xml" && \
 	-x "${EROOT}/usr/bin/peardev" ]]
 
-(("${MULTIBUILD_VARIANTS}" > 1))
-
 [[ ${test} == @($(IFS='|'; echo "${skip[*]}")) ]]
 
 [[ ${SRC_URI} == */${a}* ]]
@@ -1007,8 +1005,6 @@ fi
         (unary_expression
           (test_operator)
           (string (expansion (variable_name)))))))
-  (test_command
-    (binary_expression (string (expansion (variable_name))) (number)))
   (test_command
     (binary_expression
       (expansion (variable_name))
