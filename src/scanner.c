@@ -445,6 +445,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
 
         if (lexer->lookahead == '\\') {
+            if (valid_symbols[EXTGLOB_PATTERN]) {
+                goto extglob_pattern;
+            }
             skip(lexer);
 
             if (lexer->eof(lexer)) {
@@ -808,8 +811,18 @@ extglob_pattern:
         if (lexer->lookahead == '?' || lexer->lookahead == '*' ||
             lexer->lookahead == '+' || lexer->lookahead == '@' ||
             lexer->lookahead == '!' || lexer->lookahead == '-' ||
-            lexer->lookahead == ')') {
+            lexer->lookahead == ')' || lexer->lookahead == '\\') {
             bool was_hyphen = lexer->lookahead == '-';
+
+            if (lexer->lookahead == '\\') {
+                advance(lexer);
+                if (iswspace(lexer->lookahead)) {
+                    advance(lexer);
+                } else {
+                    return false;
+                }
+            }
+
             lexer->mark_end(lexer);
             advance(lexer);
 
@@ -836,7 +849,8 @@ extglob_pattern:
 
             if (!isalnum(lexer->lookahead) && lexer->lookahead != '(' &&
                 lexer->lookahead != '"' && lexer->lookahead != '[' &&
-                lexer->lookahead != '?' && lexer->lookahead != '/') {
+                lexer->lookahead != '?' && lexer->lookahead != '/' &&
+                lexer->lookahead != '\\') {
                 return false;
             }
 
@@ -883,12 +897,6 @@ extglob_pattern:
 
                 if (!state.done) {
                     bool was_space = iswspace(lexer->lookahead);
-                    if (lexer->lookahead == '\\') {
-                        advance(lexer);
-                        if (iswspace(lexer->lookahead)) {
-                            advance(lexer);
-                        }
-                    }
                     if (lexer->lookahead == '$') {
                         lexer->mark_end(lexer);
                         advance(lexer);
@@ -908,7 +916,14 @@ extglob_pattern:
                         lexer->result_symbol = EXTGLOB_PATTERN;
                         return true;
                     }
-                    advance(lexer);
+                    if (lexer->lookahead == '\\') {
+                        advance(lexer);
+                        if (iswspace(lexer->lookahead)) {
+                            advance(lexer);
+                        }
+                    } else {
+                        advance(lexer);
+                    }
                     if (!was_space) {
                         lexer->mark_end(lexer);
                     }
@@ -937,9 +952,8 @@ word_in_replacement:
                     lexer->lookahead == '\'' || iswalnum(lexer->lookahead)) {
                     lexer->result_symbol = EXPANSION_WORD;
                     return advanced_once;
-                } else {
-                    advanced_once = true;
                 }
+                advanced_once = true;
             }
 
             if (lexer->lookahead == '}') {
@@ -952,11 +966,28 @@ word_in_replacement:
                 !(advanced_once || advance_once_space)) {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                while (!isalpha(lexer->lookahead) && lexer->lookahead != ')' &&
-                       !lexer->eof(lexer)) {
-                    advanced_once =
-                        advanced_once || !iswspace(lexer->lookahead);
-                    advance(lexer);
+                while (lexer->lookahead != ')' && !lexer->eof(lexer)) {
+                    // if we find a $( or ${ assume this is valid and is a
+                    // garbage concatenation of some weird word + an expansion
+                    // I wonder where this can fail
+                    if (lexer->lookahead == '$') {
+                        lexer->mark_end(lexer);
+                        advance(lexer);
+                        if (lexer->lookahead == '{' ||
+                            lexer->lookahead == '(' ||
+                            lexer->lookahead == '\'' ||
+                            iswalnum(lexer->lookahead)) {
+                            lexer->result_symbol = EXPANSION_WORD;
+                            return advanced_once;
+                        }
+                        advanced_once = true;
+                    } else {
+                        advanced_once =
+                            advanced_once || !iswspace(lexer->lookahead);
+                        advance_once_space =
+                            advance_once_space || iswspace(lexer->lookahead);
+                        advance(lexer);
+                    }
                 }
                 lexer->mark_end(lexer);
                 if (lexer->lookahead == ')') {

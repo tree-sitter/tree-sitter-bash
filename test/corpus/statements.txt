@@ -1107,6 +1107,7 @@ Test commands with regexes
 [[ -f ${x} && $(od -t x1 -N 4 "${x}") == *"7f 45 4c 46"* ]]
 [[ ${PV} =~ 99999999$ ]]
 [[ $1 == -- ]]
+[[ " ${REPLACING_VERSIONS} " != *\ ${PVR}\ * ]]
 
 --------------------------------------------------------------------------------
 
@@ -1147,7 +1148,13 @@ Test commands with regexes
         (string)
         (extglob_pattern))))
   (test_command (binary_expression (expansion (variable_name)) (regex)))
-  (test_command (binary_expression (simple_expansion (variable_name)) (extglob_pattern))))
+  (test_command (binary_expression (simple_expansion (variable_name)) (extglob_pattern)))
+  (test_command
+    (binary_expression
+      (string (expansion (variable_name)))
+      (extglob_pattern)
+      (expansion (variable_name))
+      (extglob_pattern))))
 
 ================================================================================
 Subshells
