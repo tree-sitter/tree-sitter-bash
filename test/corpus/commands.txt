@@ -175,24 +175,33 @@ bash -c <<JS
 echo hi
 JS
 
+newins <<-EOF - org.freedesktop.Notifications.service
+	[D-BUS Service]
+	Name=org.freedesktop.Notifications
+	Exec=/usr/libexec/notification-daemon
+EOF
+
 ---
 
 (program
   (redirected_statement
-    (command
-      (command_name
-        (word)))
+    (command (command_name (word)))
     (heredoc_redirect
       (heredoc_start)
       (heredoc_body)
       (heredoc_end)))
   (redirected_statement
-    (command
-      (command_name
-        (word))
-      (word))
+    (command (command_name (word)) (word))
     (heredoc_redirect
       (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (word)
+      (word)
       (heredoc_body)
       (heredoc_end))))
 

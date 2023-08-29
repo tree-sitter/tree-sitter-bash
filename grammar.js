@@ -455,6 +455,7 @@ module.exports = grammar({
           optional($._heredoc_expression),
         ),
         $._heredoc_expression,
+        $._heredoc_command,
       )),
       /\n/,
       choice($._heredoc_body, $._simple_heredoc_body),
@@ -469,6 +470,8 @@ module.exports = grammar({
       field('operator', choice('||', '&&')),
       field('right', $._statement),
     ),
+
+    _heredoc_command: $ => repeat1(field('argument', $._literal)),
 
     _heredoc_body: $ => seq(
       $.heredoc_body,
@@ -831,6 +834,7 @@ module.exports = grammar({
             seq($.command_substitution, alias($._expansion_word, $.word)),
             alias($._expansion_word, $.word),
             alias($._concatenation_in_expansion, $.concatenation),
+            $.array,
           ),
           field('operator', optional('/')),
         )),
