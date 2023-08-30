@@ -227,8 +227,10 @@ exit
       (heredoc_body
         (simple_expansion
           (variable_name))
+        (heredoc_content)
         (expansion
-          (variable_name)))
+          (variable_name))
+        (heredoc_content))
       (heredoc_end)))
   (command
     (command_name
@@ -259,8 +261,10 @@ wc -l $tmpfile
       (heredoc_body
         (simple_expansion
           (variable_name))
+        (heredoc_content)
         (expansion
-          (variable_name)))
+          (variable_name))
+        (heredoc_content))
       (heredoc_end)))
   (command
     (command_name
@@ -380,7 +384,10 @@ usage() {
     (compound_statement
       (redirected_statement
         (command (command_name (word)))
-        (heredoc_redirect (heredoc_start) (heredoc_body (expansion (special_variable_name) (regex))) (heredoc_end))))))
+        (heredoc_redirect
+          (heredoc_start)
+          (heredoc_body (expansion (special_variable_name) (regex)) (heredoc_content))
+          (heredoc_end))))))
 
 ==========================================
 Heredocs with empty bodies

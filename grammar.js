@@ -51,7 +51,7 @@ module.exports = grammar({
     $.heredoc_start,
     $.simple_heredoc_body,
     $._heredoc_body_beginning,
-    $._heredoc_body_middle,
+    $.heredoc_content,
     $.heredoc_end,
     $.file_descriptor,
     $._empty_value,
@@ -486,7 +486,7 @@ module.exports = grammar({
         $.expansion,
         $.simple_expansion,
         $.command_substitution,
-        $._heredoc_body_middle,
+        $.heredoc_content,
       )),
     ),
 

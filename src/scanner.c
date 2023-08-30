@@ -42,7 +42,7 @@ enum TokenType {
     HEREDOC_START,
     SIMPLE_HEREDOC_BODY,
     HEREDOC_BODY_BEGINNING,
-    HEREDOC_BODY_MIDDLE,
+    HEREDOC_CONTENT,
     HEREDOC_END,
     FILE_DESCRIPTOR,
     EMPTY_VALUE,
@@ -90,7 +90,6 @@ typedef struct {
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
-
 
 static inline bool in_error_recovery(const bool *valid_symbols) {
     return valid_symbols[ERROR_RECOVERY];
@@ -433,10 +432,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
     }
 
-    if (valid_symbols[HEREDOC_BODY_MIDDLE] &&
-        scanner->heredoc_delimiter.len > 0 && scanner->started_heredoc &&
-        !in_error_recovery(valid_symbols)) {
-        return scan_heredoc_content(scanner, lexer, HEREDOC_BODY_MIDDLE,
+    if (valid_symbols[HEREDOC_CONTENT] && scanner->heredoc_delimiter.len > 0 &&
+        scanner->started_heredoc && !in_error_recovery(valid_symbols)) {
+        return scan_heredoc_content(scanner, lexer, HEREDOC_CONTENT,
                                     HEREDOC_END);
     }
 
@@ -508,8 +506,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
                 lexer->result_symbol = TEST_OPERATOR;
                 return true;
-            } else if (iswspace(lexer->lookahead) &&
-                       valid_symbols[EXTGLOB_PATTERN]) {
+            }
+            if (iswspace(lexer->lookahead) && valid_symbols[EXTGLOB_PATTERN]) {
                 lexer->result_symbol = EXTGLOB_PATTERN;
                 return true;
             }
