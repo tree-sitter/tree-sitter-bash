@@ -789,7 +789,7 @@ module.exports = grammar({
       '"',
     ),
 
-    string_content: _ => token(prec(-1, /([^"`$\\]|\\(.|\r?\n))+/)),
+    string_content: _ => token(prec(-1, /([^"`$\\\r\n]|\\(.|\r?\n))+/)),
 
     translated_string: $ => seq('$', $.string),
 
