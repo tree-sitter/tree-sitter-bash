@@ -23,6 +23,28 @@ const SPECIAL_CHARACTERS = [
   '\\s',
 ];
 
+const PREC = {
+  UPDATE: 0,
+  ASSIGN: 1,
+  TERNARY: 2,
+  LOGICAL_OR: 3,
+  LOGICAL_AND: 4,
+  BITWISE_OR: 5,
+  BITWISE_XOR: 6,
+  BITWISE_AND: 7,
+  EQUALITY: 8,
+  COMPARE: 9,
+  TEST: 10,
+  UNARY: 11,
+  SHIFT: 12,
+  ADD: 13,
+  MULTIPLY: 14,
+  EXPONENT: 15,
+  NEGATE: 16,
+  PREFIX: 17,
+  POSTFIX: 18,
+};
+
 module.exports = grammar({
   name: 'bash',
 
@@ -201,26 +223,40 @@ module.exports = grammar({
       '=',
       field('value', $._c_expression),
     ),
-    _c_unary_expression: $ => prec.left(seq(
+    _c_unary_expression: $ => prec(PREC.PREFIX, seq(
       field('operator', choice('++', '--')),
       $._c_expression_not_assignment,
     )),
-    _c_binary_expression: $ => prec.right(seq(
-      $._c_expression_not_assignment,
-      field('operator', choice(
-        '+=', '-=', '*=', '/=', '%=', '**=',
-        '<<=', '>>=', '&=', '^=', '|=',
-        '==', '!=', '<=', '>=', '&&', '||',
-        '<<', '>>',
-        '+', '-', '*', '/', '%', '**',
-        '<', '>',
-      )),
-      $._c_expression_not_assignment,
-    )),
-    _c_postfix_expression: $ => seq(
+    _c_binary_expression: $ => {
+      const table = [
+        [choice('+=', '-=', '*=', '/=', '%=', '**=', '<<=', '>>=', '&=', '^=', '|='), PREC.UPDATE],
+        [choice('||', '-o'), PREC.LOGICAL_OR],
+        [choice('&&', '-a'), PREC.LOGICAL_AND],
+        ['|', PREC.BITWISE_OR],
+        ['^', PREC.BITWISE_XOR],
+        ['&', PREC.BITWISE_AND],
+        [choice('==', '!='), PREC.EQUALITY],
+        [choice('<', '>', '<=', '>='), PREC.COMPARE],
+        [choice('<<', '>>'), PREC.SHIFT],
+        [choice('+', '-'), PREC.ADD],
+        [choice('*', '/', '%'), PREC.MULTIPLY],
+        ['**', PREC.EXPONENT],
+      ];
+
+      return choice(...table.map(([operator, precedence]) => {
+        // @ts-ignore
+        return prec[operator === '**' ? 'right' : 'left'](precedence, seq(
+          field('left', $._c_expression_not_assignment),
+          // @ts-ignore
+          field('operator', operator),
+          field('right', $._c_expression_not_assignment),
+        ));
+      }));
+    },
+    _c_postfix_expression: $ => prec(PREC.POSTFIX, seq(
       $._c_expression_not_assignment,
       field('operator', choice('++', '--')),
-    ),
+    )),
     _c_parenthesized_expression: $ => seq(
       '(',
       commaSep1($._c_expression),
@@ -512,60 +548,79 @@ module.exports = grammar({
       $.parenthesized_expression,
     ),
 
-    binary_expression: $ => prec.left(2, choice(
-      seq(
-        field('left', $._expression),
-        field('operator', choice(
-          '=', '==', '=~', '!=',
-          '+', '-', '+=', '-=',
-          '*', '/', '*=', '/=',
-          '%', '%=', '**',
-          '<', '>', '<=', '>=',
-          '||', '&&',
-          '<<', '>>', '<<=', '>>=',
-          '&', '|', '^',
-          '&=', '|=', '^=',
-          $.test_operator,
+    // https://tldp.org/LDP/abs/html/opprecedence.html
+    binary_expression: $ => {
+      const table = [
+        [choice('+=', '-=', '*=', '/=', '%=', '**=', '<<=', '>>=', '&=', '^=', '|='), PREC.UPDATE],
+        [choice('=', '=~'), PREC.ASSIGN],
+        ['||', PREC.LOGICAL_OR],
+        ['&&', PREC.LOGICAL_AND],
+        ['|', PREC.BITWISE_OR],
+        ['^', PREC.BITWISE_XOR],
+        ['&', PREC.BITWISE_AND],
+        [choice('==', '!='), PREC.EQUALITY],
+        [choice('<', '>', '<=', '>='), PREC.COMPARE],
+        [$.test_operator, PREC.TEST],
+        [choice('<<', '>>'), PREC.SHIFT],
+        [choice('+', '-'), PREC.ADD],
+        [choice('*', '/', '%'), PREC.MULTIPLY],
+        ['**', PREC.EXPONENT],
+      ];
+
+      return choice(
+        choice(...table.map(([operator, precedence]) => {
+        // @ts-ignore
+          return prec[operator === '**' ? 'right' : 'left'](precedence, seq(
+            field('left', $._expression),
+            // @ts-ignore
+            field('operator', operator),
+            field('right', $._expression),
+          ));
+        })),
+        prec(PREC.ASSIGN, seq(
+          field('left', $._expression),
+          field('operator', '=~'),
+          field('right', alias($._regex_no_space, $.regex)),
         )),
-        field('right', $._expression),
-      ),
-      seq(
-        field('left', $._expression),
-        field('operator', '=~'),
-        field('right', alias($._regex_no_space, $.regex)),
-      ),
-      seq(
-        field('left', $._expression),
-        field('operator', choice('==', '!=')),
-        field('right', $._extglob_blob),
-      ),
+        prec(PREC.EQUALITY, seq(
+          field('left', $._expression),
+          field('operator', choice('==', '!=')),
+          field('right', $._extglob_blob),
+        )),
+      );
+    },
+
+    ternary_expression: $ => prec.left(PREC.TERNARY, seq(
+      field('condition', $._expression),
+      '?',
+      field('consequence', $._expression),
+      ':',
+      field('alternative', $._expression),
     )),
 
-    ternary_expression: $ => prec.left(
-      seq(
-        field('condition', $._expression),
-        '?',
-        field('consequence', $._expression),
-        ':',
-        field('alternative', $._expression),
-      ),
-    ),
-
     unary_expression: $ => choice(
-      prec(1, seq(
-        field('operator', tokenLiterals(1, '-', '+', '~', '++', '--')),
+      prec(PREC.PREFIX, seq(
+        field('operator', tokenLiterals(1, '++', '--')),
         $._expression,
       )),
-      prec.right(1, seq(
-        field('operator', choice('!', $.test_operator)),
+      prec(PREC.UNARY, seq(
+        field('operator', tokenLiterals(1, '-', '+', '~')),
+        $._expression,
+      )),
+      prec.right(PREC.UNARY, seq(
+        field('operator', '!'),
+        $._expression,
+      )),
+      prec.right(PREC.TEST, seq(
+        field('operator', $.test_operator),
         $._expression,
       )),
     ),
 
-    postfix_expression: $ => seq(
+    postfix_expression: $ => prec(PREC.POSTFIX, seq(
       $._expression,
       field('operator', choice('++', '--')),
-    ),
+    )),
 
     parenthesized_expression: $ => seq(
       '(',
@@ -630,49 +685,61 @@ module.exports = grammar({
       $.string,
     )),
 
-    _arithmetic_binary_expression: $ => prec.left(2, choice(
-      seq(
-        field('left', $._arithmetic_expression),
-        field('operator', choice(
-          '=', '==', '=~', '!=',
-          '+', '-', '+=', '-=',
-          '*', '/', '*=', '/=',
-          '%', '%=', '**',
-          '<', '>', '<=', '>=',
-          '||', '&&',
-          '<<', '>>', '<<=', '>>=',
-          '&', '|', '^',
-          '&=', '|=', '^=',
-        )),
-        field('right', $._arithmetic_expression),
-      ),
+    _arithmetic_binary_expression: $ => {
+      const table = [
+        [choice('+=', '-=', '*=', '/=', '%=', '**=', '<<=', '>>=', '&=', '^=', '|='), PREC.UPDATE],
+        [choice('=', '=~'), PREC.ASSIGN],
+        ['||', PREC.LOGICAL_OR],
+        ['&&', PREC.LOGICAL_AND],
+        ['|', PREC.BITWISE_OR],
+        ['^', PREC.BITWISE_XOR],
+        ['&', PREC.BITWISE_AND],
+        [choice('==', '!='), PREC.EQUALITY],
+        [choice('<', '>', '<=', '>='), PREC.COMPARE],
+        [choice('<<', '>>'), PREC.SHIFT],
+        [choice('+', '-'), PREC.ADD],
+        [choice('*', '/', '%'), PREC.MULTIPLY],
+        ['**', PREC.EXPONENT],
+      ];
+
+      return choice(...table.map(([operator, precedence]) => {
+        // @ts-ignore
+        return prec.left(precedence, seq(
+          field('left', $._arithmetic_expression),
+          // @ts-ignore
+          field('operator', operator),
+          field('right', $._arithmetic_expression),
+        ));
+      }));
+    },
+
+    _arithmetic_ternary_expression: $ => prec.left(PREC.TERNARY, seq(
+      field('condition', $._arithmetic_expression),
+      '?',
+      field('consequence', $._arithmetic_expression),
+      ':',
+      field('alternative', $._arithmetic_expression),
     )),
 
-    _arithmetic_ternary_expression: $ => prec.left(
-      seq(
-        field('condition', $._arithmetic_expression),
-        '?',
-        field('consequence', $._arithmetic_expression),
-        ':',
-        field('alternative', $._arithmetic_expression),
-      ),
-    ),
-
     _arithmetic_unary_expression: $ => choice(
-      prec(3, seq(
-        field('operator', tokenLiterals(1, '-', '+', '~', '++', '--')),
+      prec(PREC.PREFIX, seq(
+        field('operator', tokenLiterals(1, '++', '--')),
         $._arithmetic_expression,
       )),
-      prec.right(3, seq(
+      prec(PREC.UNARY, seq(
+        field('operator', tokenLiterals(1, '-', '+', '~')),
+        $._arithmetic_expression,
+      )),
+      prec.right(PREC.UNARY, seq(
         field('operator', '!'),
         $._arithmetic_expression,
       )),
     ),
 
-    _arithmetic_postfix_expression: $ => seq(
+    _arithmetic_postfix_expression: $ => prec(PREC.POSTFIX, seq(
       $._arithmetic_expression,
       field('operator', choice('++', '--')),
-    ),
+    )),
 
     _arithmetic_parenthesized_expression: $ => seq(
       '(',
@@ -889,11 +956,22 @@ module.exports = grammar({
       $.expansion,
       alias($._expansion_max_length_binary_expression, $.binary_expression),
     ),
-    _expansion_max_length_binary_expression: $ => prec.left(seq(
-      $._expansion_max_length_expression,
-      field('operator', choice('+', '-', '*', '/', '%')),
-      $._expansion_max_length_expression,
-    )),
+    _expansion_max_length_binary_expression: $ => {
+      const table = [
+        [choice('+', '-'), PREC.ADD],
+        [choice('*', '/', '%'), PREC.MULTIPLY],
+      ];
+
+      return choice(...table.map(([operator, precedence]) => {
+        // @ts-ignore
+        return prec.left(precedence, seq(
+          $._expansion_max_length_expression,
+          // @ts-ignore
+          field('operator', operator),
+          $._expansion_max_length_expression,
+        ));
+      }));
+    },
 
     _expansion_operator: _ => seq(
       field('operator', token.immediate('@')),

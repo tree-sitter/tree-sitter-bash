@@ -425,9 +425,62 @@ done )
           (variable_name)
           (number))))
     (binary_expression
-      (word)
       (binary_expression
-        (number)
+        (word)
+        (number))
+      (parenthesized_expression
+        (binary_expression
+          (word)
+          (number))
+        (command_substitution
+          (redirected_statement
+            (list
+              (command
+                (command_name
+                  (arithmetic_expansion
+                    (binary_expression
+                      (variable_name)
+                      (number)))))
+              (command
+                (command_name
+                  (word))
+                (string)))
+            (file_redirect
+              (number)))
+          (command
+            (command_name
+              (word))
+            (number)))
+        (binary_expression
+          (postfix_expression
+            (word))
+          (number))))
+    (binary_expression
+      (word)
+      (word))
+    (do_group
+      (command
+        (command_name
+          (word))
+        (string
+          (simple_expansion
+            (variable_name))))))
+  (command
+    (command_name
+      (word)))
+  (subshell
+    (c_style_for_statement
+      (variable_assignment
+        (variable_name)
+        (variable_assignment
+          (variable_name)
+          (variable_assignment
+            (variable_name)
+            (number))))
+      (binary_expression
+        (binary_expression
+          (word)
+          (number))
         (parenthesized_expression
           (binary_expression
             (word)
@@ -454,60 +507,7 @@ done )
           (binary_expression
             (postfix_expression
               (word))
-            (number)))))
-    (binary_expression
-      (word)
-      (word))
-    (do_group
-      (command
-        (command_name
-          (word))
-        (string
-          (simple_expansion
-            (variable_name))))))
-  (command
-    (command_name
-      (word)))
-  (subshell
-    (c_style_for_statement
-      (variable_assignment
-        (variable_name)
-        (variable_assignment
-          (variable_name)
-          (variable_assignment
-            (variable_name)
             (number))))
-      (binary_expression
-        (word)
-        (binary_expression
-          (number)
-          (parenthesized_expression
-            (binary_expression
-              (word)
-              (number))
-            (command_substitution
-              (redirected_statement
-                (list
-                  (command
-                    (command_name
-                      (arithmetic_expansion
-                        (binary_expression
-                          (variable_name)
-                          (number)))))
-                  (command
-                    (command_name
-                      (word))
-                    (string)))
-                (file_redirect
-                  (number)))
-              (command
-                (command_name
-                  (word))
-                (number)))
-            (binary_expression
-              (postfix_expression
-                (word))
-              (number)))))
       (binary_expression
         (word)
         (word))
@@ -892,24 +892,11 @@ fi
   (if_statement
     (test_command
       (binary_expression
+        (binary_expression (string (simple_expansion (variable_name))) (raw_string))
         (binary_expression
-          (binary_expression
-            (string
-              (simple_expansion
-                (variable_name)))
-            (raw_string))
           (command_substitution
-            (command
-              (command_name
-                (word))
-              (string
-                (simple_expansion
-                  (variable_name))))))
-        (command_substitution
-          (command
-            (command_name
-              (word))
-            (raw_string)))))
+            (command (command_name (word)) (string (simple_expansion (variable_name)))))
+          (command_substitution (command (command_name (word)) (raw_string))))))
     (command (command_name (word)) (number)))
   (test_command
     (binary_expression
@@ -927,43 +914,34 @@ fi
               (command_substitution (command (command_name (word))))
               (string_content)))
           (command (command_name (word)))))))
+  (test_command (binary_expression (expansion (variable_name)) (extglob_pattern)))
   (test_command
     (binary_expression
-      (expansion
-        (variable_name))
-      (extglob_pattern)))
-  (test_command
-    (binary_expression
-      (binary_expression
-        (binary_expression
-          (string (expansion (variable_name)))
-          (extglob_pattern))
-        (word))
-      (number)))
+      (binary_expression (string (expansion (variable_name))) (extglob_pattern))
+      (binary_expression (word) (number))))
   (test_command
     (binary_expression
       (command_substitution
         (redirected_statement
           (command
             (variable_assignment (variable_name) (word))
-            (command_name
-              (command_substitution (command (command_name (word)))))
+            (command_name (command_substitution (command (command_name (word)))))
             (expansion (variable_name))
             (word))
           (file_redirect (file_descriptor) (word))))
       (extglob_pattern)))
   (test_command
-    (unary_expression
-      (test_operator)
-      (binary_expression
+    (binary_expression
+      (unary_expression
+        (test_operator)
         (string
           (expansion (variable_name))
           (string_content)
           (expansion (variable_name))
-          (string_content))
-        (unary_expression
-          (test_operator)
-          (string (expansion (variable_name)) (string_content))))))
+          (string_content)))
+      (unary_expression
+        (test_operator)
+        (string (expansion (variable_name)) (string_content)))))
   (test_command
     (binary_expression
       (expansion (variable_name))
@@ -1080,10 +1058,10 @@ Test commands with regexes
   (test_command (binary_expression (string (string_content)) (regex)))
   (test_command (binary_expression (simple_expansion (variable_name)) (regex)))
   (test_command
-    (unary_expression
-      (binary_expression
-        (string (expansion (subscript (variable_name) (word))))
-        (string (simple_expansion (variable_name))))))
+    (binary_expression
+      (unary_expression
+        (string (expansion (subscript (variable_name) (word)))))
+      (string (simple_expansion (variable_name)))))
   (negated_command (test_command (binary_expression (string (simple_expansion (variable_name))) (regex))))
   (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
   (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
@@ -1096,19 +1074,17 @@ Test commands with regexes
   (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
   (test_command (binary_expression (string (simple_expansion (variable_name))) (regex)))
   (test_command
-    (unary_expression
-      (test_operator)
+    (binary_expression
+      (unary_expression (test_operator) (expansion (variable_name)))
       (binary_expression
-        (binary_expression
-          (expansion (variable_name))
-          (command_substitution
-            (command
-              (command_name (word))
-              (word)
-              (word)
-              (word)
-              (number)
-              (string (expansion (variable_name))))))
+        (command_substitution
+          (command
+            (command_name (word))
+            (word)
+            (word)
+            (word)
+            (number)
+            (string (expansion (variable_name)))))
         (extglob_pattern)
         (string (string_content))
         (extglob_pattern))))
