@@ -161,11 +161,16 @@ module.exports = grammar({
     redirected_statement: $ => prec.dynamic(-1, prec(-1, choice(
       seq(
         field('body', $._statement),
-        field('redirect', repeat1(choice(
-          $.file_redirect,
-          $.heredoc_redirect,
-          $.herestring_redirect,
-        ))),
+        field('redirect', choice(
+          repeat1(choice(
+            $.file_redirect,
+            $.heredoc_redirect,
+          )),
+        )),
+      ),
+      seq(
+        field('body', choice($.if_statement, $.while_statement)),
+        $.herestring_redirect,
       ),
       field('redirect', repeat1($.file_redirect)),
       $.herestring_redirect,
@@ -422,18 +427,19 @@ module.exports = grammar({
     command: $ => prec.left(seq(
       repeat(choice(
         $.variable_assignment,
-        field('redirect', $.file_redirect),
+        field('redirect', choice($.file_redirect, $.herestring_redirect)),
       )),
       field('name', $.command_name),
       choice(
-        repeat(field('argument', choice(
-          $._literal,
-          alias($._bare_dollar, '$'),
-          seq(
+        repeat(choice(
+          field('argument', $._literal),
+          field('argument', alias($._bare_dollar, '$')),
+          field('argument', seq(
             choice('=~', '=='),
             choice($._literal, $.regex),
-          ),
-        ))),
+          )),
+          field('redirect', $.herestring_redirect),
+        )),
         $.subshell,
       ),
     )),
@@ -534,7 +540,7 @@ module.exports = grammar({
     herestring_redirect: $ => prec.left(seq(
       field('descriptor', optional($.file_descriptor)),
       '<<<',
-      repeat1($._literal),
+      $._literal,
     )),
 
     // Expressions

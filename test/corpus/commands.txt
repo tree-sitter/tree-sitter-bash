@@ -534,15 +534,24 @@ $(tc-getCC) -Werror -Wl,-l:libobjc.so.${ver} -x objective-c \
 
 <<<string cmd arg
 
+cmd arg <<<string
+
+cmd <<<string arg
+
+<<<string
+
 ---
 
 (program
-  (redirected_statement (command (command_name (word))) (herestring_redirect (word)))
+  (command (command_name (word)) (herestring_redirect (word)))
   (redirected_statement
     (while_statement
       (command (command_name (word)) (word) (number) (word))
-      (do_group (command (command_name (word)) (simple_expansion (variable_name)))))
-    (herestring_redirect (file_descriptor) (string (simple_expansion (variable_name)))))
+      (do_group
+        (command (command_name (word)) (simple_expansion (variable_name)))))
+    (herestring_redirect
+      (file_descriptor)
+      (string (simple_expansion (variable_name)))))
   (redirected_statement
     (command
       (command_name (command_substitution (command (command_name (word)))))
@@ -550,10 +559,15 @@ $(tc-getCC) -Werror -Wl,-l:libobjc.so.${ver} -x objective-c \
       (concatenation (word) (expansion (variable_name)))
       (word)
       (word)
+      (word)
+      (herestring_redirect (ansi_c_string))
+      (word)
       (word))
-    (herestring_redirect (ansi_c_string) (word) (word))
     (file_redirect (file_descriptor) (word)))
-    (redirected_statement (herestring_redirect (word) (word) (word))))
+  (command (herestring_redirect (word)) (command_name (word)) (word))
+  (command (command_name (word)) (word) (herestring_redirect (word)))
+  (command (command_name (word)) (herestring_redirect (word)) (word))
+  (redirected_statement (herestring_redirect (word))))
 
 ==========================================
 Subscripts
