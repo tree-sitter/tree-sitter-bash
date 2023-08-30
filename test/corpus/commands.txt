@@ -35,7 +35,7 @@ Quoted command names
 
 (program
   (command
-    (command_name (string (simple_expansion (variable_name)) (simple_expansion (variable_name))))
+    (command_name (string (simple_expansion (variable_name)) (string_content) (simple_expansion (variable_name))))
     (word)))
 
 ===============================
@@ -64,7 +64,7 @@ VAR1=a VAR2="ok" git diff --word-diff=color
     (command_name (word)))
   (command
     (variable_assignment (variable_name) (word))
-    (variable_assignment (variable_name) (string))
+    (variable_assignment (variable_name) (string (string_content)))
     (command_name (word))
     (word)
     (word)))
@@ -96,6 +96,11 @@ if [ ]; then
 	>aa >bb
 fi
 
+exec {VIRTWL[0]} {VIRTWL[1]} <&- >&-
+exec {VIRTWL[0]}<&- {VIRTWL[1]}>&-
+
+grep 2>/dev/null -q "^/usr/bin/scponly$" /etc/shells
+
 ---
 
 (program
@@ -109,7 +114,7 @@ fi
     (file_redirect (file_descriptor) (number))
     (command_name (word)))
   (redirected_statement
-    (command (command_name (word)) (string))
+    (command (command_name (word)) (string (string_content)))
     (file_redirect (number)))
   (list
     (test_command
@@ -122,7 +127,24 @@ fi
     (test_command)
     (redirected_statement
       (file_redirect (word))
-      (file_redirect (word)))))
+      (file_redirect (word))))
+      (redirected_statement
+    (command
+      (command_name (word))
+      (concatenation (word) (word) (word) (number) (word) (word))
+      (concatenation (word) (word) (word) (number) (word) (word)))
+    (file_redirect)
+    (file_redirect))
+  (redirected_statement
+    (command
+      (command_name (word))
+      (concatenation (word) (word) (word) (number) (word) (word)))
+    (file_redirect
+      (concatenation (word) (word) (word) (number) (word) (word)))
+    (file_redirect))
+  (redirected_statement
+    (command (command_name (word)))
+    (file_redirect (file_descriptor) (word) (word) (string (string_content)) (word))))
 
 ===============================
 File redirects (noclobber override)
@@ -153,24 +175,33 @@ bash -c <<JS
 echo hi
 JS
 
+newins <<-EOF - org.freedesktop.Notifications.service
+	[D-BUS Service]
+	Name=org.freedesktop.Notifications
+	Exec=/usr/libexec/notification-daemon
+EOF
+
 ---
 
 (program
   (redirected_statement
-    (command
-      (command_name
-        (word)))
+    (command (command_name (word)))
     (heredoc_redirect
       (heredoc_start)
       (heredoc_body)
       (heredoc_end)))
   (redirected_statement
-    (command
-      (command_name
-        (word))
-      (word))
+    (command (command_name (word)) (word))
     (heredoc_redirect
       (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (word)
+      (word)
       (heredoc_body)
       (heredoc_end))))
 
@@ -196,8 +227,10 @@ exit
       (heredoc_body
         (simple_expansion
           (variable_name))
+        (heredoc_content)
         (expansion
-          (variable_name)))
+          (variable_name))
+        (heredoc_content))
       (heredoc_end)))
   (command
     (command_name
@@ -228,8 +261,10 @@ wc -l $tmpfile
       (heredoc_body
         (simple_expansion
           (variable_name))
+        (heredoc_content)
         (expansion
-          (variable_name)))
+          (variable_name))
+        (heredoc_content))
       (heredoc_end)))
   (command
     (command_name
@@ -349,7 +384,10 @@ usage() {
     (compound_statement
       (redirected_statement
         (command (command_name (word)))
-        (heredoc_redirect (heredoc_start) (heredoc_body (expansion (special_variable_name) (regex))) (heredoc_end))))))
+        (heredoc_redirect
+          (heredoc_start)
+          (heredoc_body (expansion (special_variable_name) (regex)) (heredoc_content))
+          (heredoc_end))))))
 
 ==========================================
 Heredocs with empty bodies
@@ -444,6 +482,44 @@ Hello.
   (redirected_statement (command (command_name (word))) (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
 
 ==========================================
+Heredocs with a rhs statement
+==========================================
+
+cat <<-_EOF_ || die "cat EOF failed"
+	#!/bin/sh
+	echo hello
+_EOF_
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (command (command_name (word)) (string (string_content)))
+      (heredoc_body)
+      (heredoc_end))))
+
+==========================================
+Heredocs with a $ that is not an expansion
+==========================================
+
+cat <<EOF
+# check out this regex '^EOF$'
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+==========================================
 Herestrings
 ==========================================
 
@@ -453,15 +529,45 @@ while read -u 3 entry; do
   echo $entry
 done 3<<<"$ENTRIES"
 
+$(tc-getCC) -Werror -Wl,-l:libobjc.so.${ver} -x objective-c \
+		- <<<$'int main() {}' -o /dev/null 2> /dev/null;
+
+<<<string cmd arg
+
+cmd arg <<<string
+
+cmd <<<string arg
+
+<<<string
+
 ---
 
 (program
-  (redirected_statement (command (command_name (word))) (herestring_redirect (word)))
+  (command (command_name (word)) (herestring_redirect (word)))
   (redirected_statement
     (while_statement
       (command (command_name (word)) (word) (number) (word))
-      (do_group (command (command_name (word)) (simple_expansion (variable_name)))))
-    (herestring_redirect (file_descriptor) (string (simple_expansion (variable_name))))))
+      (do_group
+        (command (command_name (word)) (simple_expansion (variable_name)))))
+    (herestring_redirect
+      (file_descriptor)
+      (string (simple_expansion (variable_name)))))
+  (redirected_statement
+    (command
+      (command_name (command_substitution (command (command_name (word)))))
+      (word)
+      (concatenation (word) (expansion (variable_name)))
+      (word)
+      (word)
+      (word)
+      (herestring_redirect (ansi_c_string))
+      (word)
+      (word))
+    (file_redirect (file_descriptor) (word)))
+  (command (herestring_redirect (word)) (command_name (word)) (word))
+  (command (command_name (word)) (word) (herestring_redirect (word)))
+  (command (command_name (word)) (herestring_redirect (word)) (word))
+  (redirected_statement (herestring_redirect (word))))
 
 ==========================================
 Subscripts
@@ -510,14 +616,19 @@ Bare $
 ==========================================
 
 echo $
+echo "${module}"$
+echo $$
 
 ---
 
 (program
+  (command (command_name (word)))
   (command
-    (command_name
-      (word))))
-
+    (command_name (word))
+    (concatenation (string (expansion (variable_name)))))
+  (command
+    (command_name (word))
+    (simple_expansion (special_variable_name))))
 
 ==========================================
 Arithmetic with command substitution

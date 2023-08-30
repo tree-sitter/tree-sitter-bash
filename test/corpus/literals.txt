@@ -1,4 +1,3 @@
-================================================================================
 Literal words
 ================================================================================
 
@@ -108,6 +107,7 @@ echo ${abc:
 echo ${abc,?}
 echo ${abc^^b}
 echo ${abc@U}
+echo ${abc:- -quiet}
 
 --------------------------------------------------------------------------------
 
@@ -123,7 +123,8 @@ echo ${abc@U}
   (command (command_name (word)) (expansion (variable_name)))
   (command (command_name (word)) (expansion (variable_name) (regex)))
   (command (command_name (word)) (expansion (variable_name) (regex)))
-  (command (command_name (word)) (expansion (variable_name))))
+  (command (command_name (word)) (expansion (variable_name)))
+  (command (command_name (word)) (expansion (variable_name) (word))))
 
 ================================================================================
 Variable expansions with operators
@@ -268,6 +269,8 @@ ${var%%Pattern}
 ${var:pos}
 ${var:pos:len}
 ${MATRIX:$(($RANDOM%${#MATRIX})):1}
+${PKG_CONFIG_LIBDIR:-${ESYSROOT}/usr/$(get_libdir)/pkgconfig}
+${ver_str::${#ver_str}-${#not_match}}
 
 --------------------------------------------------------------------------------
 
@@ -343,7 +346,24 @@ ${MATRIX:$(($RANDOM%${#MATRIX})):1}
               (variable_name))
             (expansion
               (variable_name))))
-        (number)))))
+        (number))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (concatenation
+          (expansion (variable_name))
+          (word)
+          (command_substitution
+            (command (command_name (word))))
+          (word)))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (binary_expression
+          (expansion (variable_name))
+          (expansion (variable_name)))))))
 
 ================================================================================
 Variable expansions in strings
@@ -351,6 +371,7 @@ Variable expansions in strings
 
 A="${A:-$B/c}"
 A="${b=$c/$d}"
+MY_PV="${PV/_pre/$'\x7e'pre}"
 
 --------------------------------------------------------------------------------
 
@@ -374,7 +395,14 @@ A="${b=$c/$d}"
             (variable_name))
           (word)
           (simple_expansion
-            (variable_name)))))))
+            (variable_name))))))
+  (variable_assignment
+    (variable_name)
+    (string
+      (expansion
+        (variable_name)
+        (regex)
+        (concatenation (ansi_c_string) (word))))))
 
 ================================================================================
 Variable expansions with regexes
@@ -384,6 +412,13 @@ A=${B//:;;/$'\n'}
 
 # escaped space
 C=${D/;\ *;|}
+MOFILES=${LINGUAS// /.po }.po
+MY_P="${PN/aspell/aspell"${ASPELL_VERSION}"}"
+pyc=${pyc//*\/}
+${pv/\.}
+${new_test_cp//"${old_ver_cp}"/}
+${tests_to_run//"${classes}"\/}
+${allarchives// /\\|}
 
 --------------------------------------------------------------------------------
 
@@ -397,9 +432,32 @@ C=${D/;\ *;|}
   (comment)
   (variable_assignment
     (variable_name)
-    (expansion
-      (variable_name)
-      (regex))))
+    (expansion (variable_name) (regex)))
+  (variable_assignment
+    (variable_name)
+    (concatenation
+      (expansion (variable_name) (regex) (word))
+      (word)))
+  (variable_assignment
+    (variable_name)
+    (string
+      (expansion
+        (variable_name)
+        (regex)
+        (concatenation
+          (word)
+          (string (expansion (variable_name)))))))
+  (variable_assignment
+    (variable_name)
+    (expansion (variable_name) (regex)))
+  (command (command_name (expansion (variable_name) (regex))))
+  (command
+    (command_name
+      (expansion (variable_name) (string (expansion (variable_name))))))
+  (command
+    (command_name
+      (expansion (variable_name) (string (expansion (variable_name))) (regex))))
+  (command (command_name (expansion (variable_name) (regex) (word)))))
 
 ================================================================================
 Other variable expansion operators
@@ -446,6 +504,12 @@ ${matrix:$(($random%${#matrix})):1}
 
 "${_component_to_single:${len}:2}"
 
+"${PN::-1}"
+
+${trarr:$(ver_cut 2):1}
+
+${comp[@]:start:end*2-start}
+
 --------------------------------------------------------------------------------
 
 (program
@@ -461,7 +525,17 @@ ${matrix:$(($random%${#matrix})):1}
         (arithmetic_expansion
           (binary_expression (simple_expansion (variable_name)) (expansion (variable_name))))
         (number))))
-  (command (command_name (string (expansion (variable_name) (expansion (variable_name)) (number))))))
+  (command (command_name (string (expansion (variable_name) (expansion (variable_name)) (number)))))
+  (command (command_name (string (expansion (variable_name) (number)))))
+  (command
+    (command_name
+      (expansion (variable_name) (command_substitution (command (command_name (word)) (number))) (number))))
+  (command
+    (command_name
+      (expansion
+        (subscript (variable_name) (word))
+        (variable_name)
+        (binary_expression (binary_expression (variable_name) (number)) (variable_name))))))
 
 ================================================================================
 Variable Expansions with operators
@@ -491,6 +565,8 @@ ${!# }
 ${!##}
 ${!## }
 ${!##/}
+# here be dragons
+echo "${kw}? ( ${cond:+${cond}? (} ${baseuri}-${ver}-${kw}.${suff} ${cond:+) })"
 
 --------------------------------------------------------------------------------
 
@@ -499,7 +575,25 @@ ${!##/}
   (command (command_name (expansion)))
   (command (command_name (expansion)))
   (command (command_name (expansion)))
-  (command (command_name (expansion (special_variable_name) (regex)))))
+  (command (command_name (expansion (special_variable_name) (regex))))
+  (comment)
+  (command
+    (command_name (word))
+    (string
+      (expansion (variable_name))
+      (string_content)
+      (expansion
+        (variable_name)
+        (concatenation (expansion (variable_name)) (word)))
+      (expansion (variable_name))
+      (string_content)
+      (expansion (variable_name))
+      (string_content)
+      (expansion (variable_name))
+      (string_content)
+      (expansion (variable_name))
+      (expansion (variable_name) (word))
+      (string_content))))
 
 ================================================================================
 Variable Expansions: Weird Cases
@@ -515,6 +609,11 @@ ${to_enables[0]##*/}
 exec "${0#-}" --rcfile "${BASH_IT_BASHRC:-${HOME?}/.bashrc}"
 recho "TDEFAULTS = ${selvecs:+-DSELECT_VECS=\"$selvecs\"}"
 local msg="${2:-command '$1' does not exist}"
+${cdir:+#}
+${dict_langs:+;}
+${UTIL_LINUX_LIBC[@]/%/? ( sys-apps/util-linux )}
+${id}${2+ ${2}}
+${BRANDING_GCC_PKGVERSION/(/(Gentoo ${PVR}${extvers}, } # look at that parenthesis!
 
 --------------------------------------------------------------------------------
 
@@ -534,11 +633,25 @@ local msg="${2:-command '$1' does not exist}"
   (command
     (command_name (word))
     (string
-      (expansion (variable_name) (concatenation (variable_name) (word) (simple_expansion (variable_name)) (word)))))
+      (string_content)
+      (expansion (variable_name) (concatenation (word) (simple_expansion (variable_name)) (word)))))
   (declaration_command
     (variable_assignment
       (variable_name)
-      (string (expansion (variable_name) (concatenation (word) (raw_string) (word) (word) (word)))))))
+      (string (expansion (variable_name) (concatenation (word) (raw_string) (word))))))
+  (command (command_name (expansion (variable_name) (word))))
+  (command (command_name (expansion (variable_name) (word))))
+  (command (command_name (expansion (subscript (variable_name) (word)) (word))))
+  (command
+    (command_name
+      (concatenation (expansion (variable_name)) (expansion (variable_name) (expansion (variable_name))))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (regex)
+        (concatenation (word) (expansion (variable_name)) (expansion (variable_name)) (word)))))
+  (comment))
 
 ================================================================================
 Variable Expansions: Regex
@@ -548,6 +661,10 @@ A=${B//:;;/$'\n'}
 C="${D/#* -E /}"
 BASH_IT_GIT_URL="${BASH_IT_GIT_URL/git@/https://}"
 10#${command_start##*.}
+echo ${LIB_DEPEND//\[static-libs(+)]}
+${ALL_LLVM_TARGETS[@]/%/(-)?}
+filterdiff -p1 ${paths[@]/#/-i }
+${cflags//-O? /$(get-flag O) }
 
 --------------------------------------------------------------------------------
 
@@ -555,7 +672,13 @@ BASH_IT_GIT_URL="${BASH_IT_GIT_URL/git@/https://}"
   (variable_assignment (variable_name) (expansion (variable_name) (regex) (ansi_c_string)))
   (variable_assignment (variable_name) (string (expansion (variable_name) (regex))))
   (variable_assignment (variable_name) (string (expansion (variable_name) (regex) (word))))
-  (command (command_name (number (expansion (variable_name) (regex))))))
+  (command (command_name (number (expansion (variable_name) (regex)))))
+  (command (command_name (word)) (expansion (variable_name) (regex)))
+  (command (command_name (expansion (subscript (variable_name) (word)) (word))))
+  (command (command_name (word)) (word) (expansion (subscript (variable_name) (word)) (word)))
+  (command
+    (command_name
+      (expansion (variable_name) (regex) (command_substitution (command (command_name (word)) (word))) (word)))))
 
 ================================================================================
 Words ending with '$'
@@ -728,15 +851,18 @@ echo "a ${b} c" "d $e"
   (command
     (command_name
       (word))
-    (string)
-    (string))
+    (string (string_content))
+    (string (string_content)))
   (command
     (command_name
       (word))
     (string
+      (string_content)
       (expansion
-        (variable_name)))
+        (variable_name))
+      (string_content))
     (string
+      (string_content)
       (simple_expansion
         (variable_name)))))
 
@@ -778,7 +904,7 @@ echo "\"The great escape\`\${var}"
   (command
     (command_name
       (word))
-    (string)))
+    (string (string_content))))
 
 ================================================================================
 Strings containing special characters
@@ -794,15 +920,15 @@ echo "s$"
   (command
     (command_name
       (word))
-    (string))
+    (string (string_content) (string_content)))
   (command
     (command_name
       (word))
-    (string))
+    (string (string_content)))
   (command
     (command_name
       (word))
-    (string)))
+    (string (string_content))))
 
 ================================================================================
 Strings with ANSI-C quoting
@@ -869,7 +995,7 @@ printf "  %-9s" "${seq0:-(default)}"
     (variable_name)
     (array
       (word)
-      (string)
+      (string (string_content))
       (command_substitution
         (command
           (command_name
@@ -877,7 +1003,7 @@ printf "  %-9s" "${seq0:-(default)}"
   (command
     (command_name
       (word))
-    (string)
+    (string (string_content))
     (string
       (expansion
         (variable_name)
@@ -899,8 +1025,10 @@ echo -ne "\033k$1\033\\" > /dev/stderr
         (word))
       (word)
       (string
+        (string_content)
         (simple_expansion
-          (variable_name))))
+          (variable_name))
+        (string_content)))
     (file_redirect
       (word))))
 
@@ -987,8 +1115,10 @@ echo "'$var'" # -> '#not-comment'
     (command_name
       (word))
     (string
+      (string_content)
       (simple_expansion
-        (variable_name))))
+        (variable_name))
+      (string_content)))
   (comment))
 
 ================================================================================
@@ -1040,23 +1170,21 @@ echo $((bar=1))
 echo $((-1, 1))
 echo $((! -a || ~ +b || ++c || --d))
 echo $((foo-- || bar++))
+(("${MULTIBUILD_VARIANTS}" > 1))
+$(("$(stat --printf '%05a' "${save_file}")" & 07177))
+soft_errors_count=$[soft_errors_count + 1]
 
 --------------------------------------------------------------------------------
 
 (program
   (command
-    (command_name
-      (word))
+    (command_name (word))
     (arithmetic_expansion
       (binary_expression
+        (binary_expression (number) (number))
         (binary_expression
-          (binary_expression
-            (binary_expression
-              (number)
-              (number))
-            (number))
-          (number))
-        (number))))
+          (binary_expression (number) (number))
+          (number)))))
   (variable_assignment
     (variable_name)
     (arithmetic_expansion
@@ -1065,16 +1193,12 @@ echo $((foo-- || bar++))
           (binary_expression
             (binary_expression
               (binary_expression
-                (binary_expression
-                  (binary_expression
-                    (number)
-                    (number))
-                  (number))
-                (number))
+                (number)
+                (binary_expression (number) (number)))
               (number))
             (number))
           (number))
-        (number))))
+        (binary_expression (number) (number)))))
   (command
     (command_name
       (arithmetic_expansion
@@ -1083,56 +1207,67 @@ echo $((foo-- || bar++))
             (binary_expression
               (expansion
                 (variable_name)
-                (expansion
-                  (variable_name)))
+                (expansion (variable_name)))
               (number)))
           (number)))))
   (command
     (command_name
       (arithmetic_expansion
-        (binary_expression
-          (variable_name)
-          (number)))))
+        (binary_expression (variable_name) (number)))))
   (command
-    (command_name
-      (word))
+    (command_name (word))
     (arithmetic_expansion
-      (binary_expression
-        (variable_name)
-        (number))))
+      (binary_expression (variable_name) (number))))
   (command
-    (command_name
-      (word))
-    (arithmetic_expansion
-      (unary_expression
-        (number))
-      (number)))
+    (command_name (word))
+    (arithmetic_expansion (unary_expression (number)) (number)))
   (command
-    (command_name
-      (word))
+    (command_name (word))
     (arithmetic_expansion
       (binary_expression
         (binary_expression
           (binary_expression
-            (unary_expression
-              (unary_expression
-                (variable_name)))
-            (unary_expression
-              (unary_expression
-                (variable_name))))
-          (unary_expression
-            (variable_name)))
-        (unary_expression
+            (unary_expression (unary_expression (variable_name)))
+            (unary_expression (unary_expression (variable_name))))
+          (unary_expression (variable_name)))
+        (unary_expression (variable_name)))))
+  (command
+    (command_name (word))
+    (arithmetic_expansion
+      (binary_expression
+        (postfix_expression
+          (variable_name))
+        (postfix_expression
           (variable_name)))))
   (command
     (command_name
-      (word))
-    (arithmetic_expansion
-      (postfix_expression
+      (arithmetic_expansion
         (binary_expression
-          (postfix_expression
-            (variable_name))
-          (variable_name))))))
+          (string
+            (expansion
+              (variable_name)))
+          (number)))))
+  (command
+    (command_name
+      (arithmetic_expansion
+        (binary_expression
+          (string
+            (command_substitution
+              (command
+                (command_name
+                  (word))
+                (word)
+                (raw_string)
+                (string
+                  (expansion
+                    (variable_name))))))
+          (number)))))
+  (variable_assignment
+    (variable_name)
+    (arithmetic_expansion
+      (binary_expression
+        (variable_name)
+        (number)))))
 
 ================================================================================
 Concatenation with double backticks
@@ -1153,8 +1288,8 @@ main() {
         (variable_assignment
           (variable_name)
           (concatenation
-            (string)
-            (string)))))))
+            (string (string_content))
+            (string (string_content))))))))
 
 ================================================================================
 Brace expressions and lookalikes
