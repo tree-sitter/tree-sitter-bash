@@ -35,7 +35,7 @@ Quoted command names
 
 (program
   (command
-    (command_name (string (simple_expansion (variable_name)) (simple_expansion (variable_name))))
+    (command_name (string (simple_expansion (variable_name)) (string_content) (simple_expansion (variable_name))))
     (word)))
 
 ===============================
@@ -64,7 +64,7 @@ VAR1=a VAR2="ok" git diff --word-diff=color
     (command_name (word)))
   (command
     (variable_assignment (variable_name) (word))
-    (variable_assignment (variable_name) (string))
+    (variable_assignment (variable_name) (string (string_content)))
     (command_name (word))
     (word)
     (word)))
@@ -114,7 +114,7 @@ grep 2>/dev/null -q "^/usr/bin/scponly$" /etc/shells
     (file_redirect (file_descriptor) (number))
     (command_name (word)))
   (redirected_statement
-    (command (command_name (word)) (string))
+    (command (command_name (word)) (string (string_content)))
     (file_redirect (number)))
   (list
     (test_command
@@ -144,7 +144,7 @@ grep 2>/dev/null -q "^/usr/bin/scponly$" /etc/shells
     (file_redirect))
   (redirected_statement
     (command (command_name (word)))
-    (file_redirect (file_descriptor) (word) (word) (string) (word))))
+    (file_redirect (file_descriptor) (word) (word) (string (string_content)) (word))))
 
 ===============================
 File redirects (noclobber override)
@@ -490,7 +490,7 @@ _EOF_
     (command (command_name (word)))
     (heredoc_redirect
       (heredoc_start)
-      (command (command_name (word)) (string))
+      (command (command_name (word)) (string (string_content)))
       (heredoc_body)
       (heredoc_end))))
 

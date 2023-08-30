@@ -704,7 +704,7 @@ module.exports = grammar({
       '"',
       repeat(seq(
         choice(
-          seq(optional('$'), $._string_content),
+          seq(optional('$'), $.string_content),
           $.expansion,
           $.simple_expansion,
           $.command_substitution,
@@ -716,7 +716,7 @@ module.exports = grammar({
       '"',
     ),
 
-    _string_content: _ => token(prec(-1, /([^"`$\\]|\\(.|\r?\n))+/)),
+    string_content: _ => token(prec(-1, /([^"`$\\]|\\(.|\r?\n))+/)),
 
     translated_string: $ => seq('$', $.string),
 

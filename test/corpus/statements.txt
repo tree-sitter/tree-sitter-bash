@@ -123,7 +123,7 @@ done
       (command
         name: (command_name
           (word))
-        argument: (string)
+        argument: (string (string_content))
         argument: (string
           (simple_expansion
             (variable_name)))
@@ -824,12 +824,12 @@ esac
 
 (program
   (case_statement
-    (string)
+    (string (string_content))
     (case_item (word) (command (command_name (word)) (word)))
     (case_item (word) (command (command_name (word)) (word)))
     (case_item (word) (command (command_name (word)) (word))))
   (case_statement
-    (string)
+    (string (string_content))
     (case_item (word) (command (command_name (word)) (word)))
     (case_item (word) (command (command_name (word)) (word)))
     (case_item (word) (command (command_name (word)) (word))))
@@ -923,7 +923,9 @@ fi
             (raw_string)
             (string
               (expansion (variable_name))
-              (command_substitution (command (command_name (word))))))
+              (string_content)
+              (command_substitution (command (command_name (word))))
+              (string_content)))
           (command (command_name (word)))))))
   (test_command
     (binary_expression
@@ -956,10 +958,12 @@ fi
       (binary_expression
         (string
           (expansion (variable_name))
-          (expansion (variable_name)))
+          (string_content)
+          (expansion (variable_name))
+          (string_content))
         (unary_expression
           (test_operator)
-          (string (expansion (variable_name)))))))
+          (string (expansion (variable_name)) (string_content))))))
   (test_command
     (binary_expression
       (expansion (variable_name))
@@ -1073,7 +1077,7 @@ Test commands with regexes
 --------------------------------------------------------------------------------
 
 (program
-  (test_command (binary_expression (string) (regex)))
+  (test_command (binary_expression (string (string_content)) (regex)))
   (test_command (binary_expression (simple_expansion (variable_name)) (regex)))
   (test_command
     (unary_expression
@@ -1106,7 +1110,7 @@ Test commands with regexes
               (number)
               (string (expansion (variable_name))))))
         (extglob_pattern)
-        (string)
+        (string (string_content))
         (extglob_pattern))))
   (test_command (binary_expression (expansion (variable_name)) (regex)))
   (test_command (binary_expression (simple_expansion (variable_name)) (extglob_pattern)))
@@ -1175,9 +1179,9 @@ esac
     (expansion (variable_name))
     (case_item
       (extglob_pattern)
-      (string)
+      (string (string_content))
       (extglob_pattern)
-      (concatenation (word) (string) (word))))
+      (concatenation (word) (string (string_content)) (word))))
   (case_statement
     (simple_expansion (variable_name))
     (case_item
@@ -1374,7 +1378,8 @@ export FOOBAR PATH="$PATH:/usr/foobar/bin"
       (variable_name)
       (string
         (simple_expansion
-          (variable_name))))))
+          (variable_name))
+          (string_content)))))
 
 ================================================================================
 Variable declaration: command substitution with semi-colon
@@ -1401,7 +1406,7 @@ _path=$(
           (command
             (command_name
               (word))
-            (string))))
+            (string (string_content)))))
       (command
         (command_name
           (word))
@@ -1460,6 +1465,7 @@ export "$(echo ${key} | tr [:lower:] [:upper:])=${p_key#*=}"
               (word)
               (word)
               (word)))))
+      (string_content)
       (expansion
         (variable_name)
         (regex)))))
@@ -1513,7 +1519,7 @@ a () {
           (command
             (command_name
               (word))
-            (string))
+            (string (string_content)))
           (command
             (command_name
               (word))
@@ -1527,11 +1533,11 @@ a () {
       (command
         (command_name
           (word))
-        (string))
+        (string (string_content)))
       (command
         (command_name
           (word))
-        (string)))
+        (string (string_content))))
     (file_redirect
       (number))))
 
