@@ -178,6 +178,7 @@ static inline bool scan_bare_dollar(TSLexer *lexer) {
         lexer->result_symbol = BARE_DOLLAR;
         lexer->mark_end(lexer);
         return iswspace(lexer->lookahead) || lexer->eof(lexer);
+               lexer->lookahead == '\"';
     }
 
     return false;
@@ -291,7 +292,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                     // an alternative is to check the starting column of the
                     // heredoc body and track that statefully
                     while (iswspace(lexer->lookahead)) {
-                        skip(lexer);
+                        did_advance ? advance(lexer) : skip(lexer);
                     }
                     if (end_type != SIMPLE_HEREDOC_BODY) {
                         lexer->result_symbol = middle_type;
@@ -316,8 +317,6 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
 }
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
-    /* printf("scan! lookahead: %c, valid_symbols[EXPANSION_WORD]: %d\n", */
-    /*        lexer->lookahead, valid_symbols[EXPANSION_WORD]); */
     if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) ||
               lexer->lookahead == '>' || lexer->lookahead == '<' ||
