@@ -520,6 +520,48 @@ EOF
       (heredoc_end))))
 
 ==========================================
+Nested Heredocs
+==========================================
+
+cat <<OUTER
+Outer Heredoc Start
+$(cat <<INNER
+Inner Heredoc Content
+$(cat <<INNERMOST
+Innermost Heredoc Content
+INNERMOST
+)
+INNER)
+Outer Heredoc End
+OUTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution
+          (redirected_statement
+            (command (command_name (word)))
+            (heredoc_redirect
+              (heredoc_start)
+              (heredoc_body
+                (command_substitution
+                  (redirected_statement
+                    (command (command_name (word)))
+                    (heredoc_redirect
+                      (heredoc_start)
+                      (heredoc_body)
+                      (heredoc_end))))
+                (heredoc_content))
+              (heredoc_end))))
+        (heredoc_content))
+      (heredoc_end))))
+
+==========================================
 Herestrings
 ==========================================
 

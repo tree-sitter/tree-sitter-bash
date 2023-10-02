@@ -1,13 +1,46 @@
+#include "tree_sitter/parser.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
 #include <wctype.h>
 
-#include "tree_sitter/parser.h"
-
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+#define VEC_RESIZE(vec, _cap)                                                  \
+    void *tmp = realloc((vec).data, (_cap) * sizeof((vec).data[0]));           \
+    assert(tmp != NULL);                                                       \
+    (vec).data = tmp;                                                          \
+    assert((vec).data != NULL);                                                \
+    (vec).cap = (_cap);
+
+#define VEC_PUSH(vec, el)                                                      \
+    if ((vec).cap == (vec).len) {                                              \
+        VEC_RESIZE((vec), MAX(16, (vec).len * 2));                             \
+    }                                                                          \
+    (vec).data[(vec).len++] = (el);
+
+#define VEC_POP(vec)                                                           \
+    { (vec).len--; }
+
+#define VEC_BACK(vec) ((vec).data[(vec).len - 1])
+
+#define VEC_FREE(vec)                                                          \
+    {                                                                          \
+        if ((vec).data != NULL)                                                \
+            free((vec).data);                                                  \
+        (vec).data = NULL;                                                     \
+    }
+
+#define VEC_CLEAR(vec)                                                         \
+    {                                                                          \
+        for (uint32_t i = 0; i < (vec).len; i++) {                             \
+            STRING_FREE((vec).data[i].word);                                   \
+        }                                                                      \
+        (vec).len = 0;                                                         \
+    }
 
 #define STRING_RESIZE(vec, _cap)                                               \
     void *tmp = realloc((vec).data, ((_cap) + 1) * sizeof((vec).data[0]));     \
@@ -30,7 +63,8 @@
 
 #define STRING_FREE(vec)                                                       \
     if ((vec).data != NULL)                                                    \
-        free((vec).data);
+        free((vec).data);                                                      \
+    (vec).data = NULL;
 
 #define STRING_CLEAR(vec)                                                      \
     {                                                                          \
@@ -79,12 +113,40 @@ static String string_new() {
 }
 
 typedef struct {
-    bool heredoc_is_raw;
-    bool started_heredoc;
-    bool heredoc_allows_indent;
-    uint8_t last_glob_paren_depth;
-    String heredoc_delimiter;
+    bool is_raw;
+    bool started;
+    bool allows_indent;
+    String delimiter;
     String current_leading_word;
+} Heredoc;
+
+static Heredoc heredoc_new() {
+    Heredoc heredoc = {
+        .is_raw = false,
+        .started = false,
+        .allows_indent = false,
+        .delimiter = string_new(),
+        .current_leading_word = string_new(),
+    };
+    return heredoc;
+}
+
+typedef struct {
+    uint32_t len;
+    uint32_t cap;
+    Heredoc *data;
+} heredoc_vec;
+
+static heredoc_vec vec_new() {
+    heredoc_vec vec = {0, 0, NULL};
+    vec.data = calloc(1, sizeof(Heredoc));
+    vec.cap = 1;
+    return vec;
+}
+
+typedef struct {
+    uint8_t last_glob_paren_depth;
+    heredoc_vec heredocs;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
@@ -95,39 +157,71 @@ static inline bool in_error_recovery(const bool *valid_symbols) {
     return valid_symbols[ERROR_RECOVERY];
 }
 
+static inline void reset_heredoc(Heredoc *heredoc) {
+    heredoc->is_raw = false;
+    heredoc->started = false;
+    heredoc->allows_indent = false;
+    STRING_CLEAR(heredoc->delimiter);
+}
+
 static inline void reset(Scanner *scanner) {
-    scanner->heredoc_is_raw = false;
-    scanner->started_heredoc = false;
-    scanner->heredoc_allows_indent = false;
-    STRING_CLEAR(scanner->heredoc_delimiter);
+    for (uint32_t i = 0; i < scanner->heredocs.len; i++) {
+        reset_heredoc(&scanner->heredocs.data[i]);
+    }
 }
 
 static unsigned serialize(Scanner *scanner, char *buffer) {
-    if (scanner->heredoc_delimiter.len + 4 >=
-        TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
-        return 0;
+    uint32_t size = 0;
+
+    buffer[size++] = (char)scanner->last_glob_paren_depth;
+    buffer[size++] = (char)scanner->heredocs.len;
+
+    for (uint32_t i = 0; i < scanner->heredocs.len; i++) {
+        Heredoc heredoc = scanner->heredocs.data[i];
+        if (heredoc.delimiter.len + 3 + size >=
+            TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
+            return 0;
+        }
+
+        buffer[size++] = (char)heredoc.is_raw;
+        buffer[size++] = (char)heredoc.started;
+        buffer[size++] = (char)heredoc.allows_indent;
+
+        buffer[size++] = (char)heredoc.delimiter.len;
+        memcpy(&buffer[size], heredoc.delimiter.data, heredoc.delimiter.len);
+        size += heredoc.delimiter.len;
     }
-    buffer[0] = (char)scanner->heredoc_is_raw;
-    buffer[1] = (char)scanner->started_heredoc;
-    buffer[2] = (char)scanner->heredoc_allows_indent;
-    buffer[3] = (char)scanner->last_glob_paren_depth;
-    memcpy(&buffer[4], scanner->heredoc_delimiter.data,
-           scanner->heredoc_delimiter.len);
-    return scanner->heredoc_delimiter.len + 4;
+    return size;
 }
 
 static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
     if (length == 0) {
         reset(scanner);
     } else {
-        scanner->heredoc_is_raw = buffer[0];
-        scanner->started_heredoc = buffer[1];
-        scanner->heredoc_allows_indent = buffer[2];
-        scanner->last_glob_paren_depth = buffer[3];
-        scanner->heredoc_delimiter.len = length - 4;
-        STRING_GROW(scanner->heredoc_delimiter, scanner->heredoc_delimiter.len);
-        memcpy(scanner->heredoc_delimiter.data, &buffer[4],
-               scanner->heredoc_delimiter.len);
+        uint32_t size = 0;
+        scanner->last_glob_paren_depth = buffer[size++];
+        uint32_t heredoc_count = (unsigned char)buffer[size++];
+        for (uint32_t i = 0; i < heredoc_count; i++) {
+            Heredoc *heredoc = NULL;
+            if (i < scanner->heredocs.len) {
+                heredoc = &scanner->heredocs.data[i];
+            } else {
+                Heredoc new_heredoc = heredoc_new();
+                VEC_PUSH(scanner->heredocs, new_heredoc);
+                heredoc = &VEC_BACK(scanner->heredocs);
+            }
+
+            heredoc->is_raw = buffer[size++];
+            heredoc->started = buffer[size++];
+            heredoc->allows_indent = buffer[size++];
+
+            uint32_t delimiter_len = (unsigned char)buffer[size++];
+            STRING_GROW(heredoc->delimiter, delimiter_len);
+            memcpy(heredoc->delimiter.data, &buffer[size], delimiter_len);
+            heredoc->delimiter.len = delimiter_len;
+            size += delimiter_len;
+        }
+        assert(size == length);
     }
 }
 
@@ -177,57 +271,54 @@ static inline bool scan_bare_dollar(TSLexer *lexer) {
         advance(lexer);
         lexer->result_symbol = BARE_DOLLAR;
         lexer->mark_end(lexer);
-        return iswspace(lexer->lookahead) || lexer->eof(lexer);
+        return iswspace(lexer->lookahead) || lexer->eof(lexer) ||
                lexer->lookahead == '\"';
     }
 
     return false;
 }
 
-static bool scan_heredoc_start(Scanner *scanner, TSLexer *lexer) {
+static bool scan_heredoc_start(Heredoc *heredoc, TSLexer *lexer) {
     while (iswspace(lexer->lookahead)) {
         skip(lexer);
     }
 
     lexer->result_symbol = HEREDOC_START;
-    scanner->heredoc_is_raw = lexer->lookahead == '\'' ||
-                              lexer->lookahead == '"' ||
-                              lexer->lookahead == '\\';
-    scanner->started_heredoc = false;
-    STRING_CLEAR(scanner->heredoc_delimiter);
+    heredoc->is_raw = lexer->lookahead == '\'' || lexer->lookahead == '"' ||
+                      lexer->lookahead == '\\';
 
-    bool found_delimiter = advance_word(lexer, &scanner->heredoc_delimiter);
+    bool found_delimiter = advance_word(lexer, &heredoc->delimiter);
     if (!found_delimiter)
-        STRING_CLEAR(scanner->heredoc_delimiter);
+        STRING_CLEAR(heredoc->delimiter);
     return found_delimiter;
 }
 
-static bool scan_heredoc_end_identifier(Scanner *scanner, TSLexer *lexer) {
-    STRING_CLEAR(scanner->current_leading_word);
+static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer) {
+    STRING_CLEAR(heredoc->current_leading_word);
     // Scan the first 'n' characters on this line, to see if they match the
     // heredoc delimiter
     int32_t size = 0;
     while (lexer->lookahead != '\0' && lexer->lookahead != '\n' &&
-           ((int32_t)scanner->heredoc_delimiter.data[size++]) ==
-               lexer->lookahead &&
-           scanner->current_leading_word.len < scanner->heredoc_delimiter.len) {
-        STRING_PUSH(scanner->current_leading_word, lexer->lookahead);
+           ((int32_t)heredoc->delimiter.data[size++]) == lexer->lookahead &&
+           heredoc->current_leading_word.len < heredoc->delimiter.len) {
+        STRING_PUSH(heredoc->current_leading_word, lexer->lookahead);
         advance(lexer);
     }
-    return strcmp(scanner->current_leading_word.data,
-                  scanner->heredoc_delimiter.data) == 0;
+    return strcmp(heredoc->current_leading_word.data,
+                  heredoc->delimiter.data) == 0;
 }
 
 static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                                  enum TokenType middle_type,
                                  enum TokenType end_type) {
     bool did_advance = false;
+    Heredoc *heredoc = &VEC_BACK(scanner->heredocs);
 
     for (;;) {
         switch (lexer->lookahead) {
             case '\0': {
                 if (lexer->eof(lexer) && did_advance) {
-                    reset(scanner);
+                    reset_heredoc(heredoc);
                     lexer->result_symbol = end_type;
                     return true;
                 }
@@ -242,7 +333,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
             }
 
             case '$': {
-                if (scanner->heredoc_is_raw) {
+                if (heredoc->is_raw) {
                     did_advance = true;
                     advance(lexer);
                     break;
@@ -250,9 +341,10 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                 if (did_advance) {
                     lexer->mark_end(lexer);
                     lexer->result_symbol = middle_type;
-                    scanner->started_heredoc = true;
+                    heredoc->started = true;
                     advance(lexer);
-                    if (isalpha(lexer->lookahead) || lexer->lookahead == '{') {
+                    if (isalpha(lexer->lookahead) || lexer->lookahead == '{' ||
+                        lexer->lookahead == '(') {
                         return true;
                     }
                     break;
@@ -260,7 +352,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                 if (middle_type == HEREDOC_BODY_BEGINNING &&
                     lexer->get_column(lexer) == 0) {
                     lexer->result_symbol = middle_type;
-                    scanner->started_heredoc = true;
+                    heredoc->started = true;
                     return true;
                 }
                 return false;
@@ -273,15 +365,18 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                     advance(lexer);
                 }
                 did_advance = true;
-                if (scanner->heredoc_allows_indent) {
+                if (heredoc->allows_indent) {
                     while (iswspace(lexer->lookahead)) {
                         advance(lexer);
                     }
                 }
                 lexer->result_symbol =
-                    scanner->started_heredoc ? middle_type : end_type;
+                    heredoc->started ? middle_type : end_type;
                 lexer->mark_end(lexer);
-                if (scan_heredoc_end_identifier(scanner, lexer)) {
+                if (scan_heredoc_end_identifier(heredoc, lexer)) {
+                    if (lexer->result_symbol == HEREDOC_END) {
+                        VEC_POP(scanner->heredocs);
+                    }
                     return true;
                 }
                 break;
@@ -292,18 +387,23 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                     // an alternative is to check the starting column of the
                     // heredoc body and track that statefully
                     while (iswspace(lexer->lookahead)) {
-                        did_advance ? advance(lexer) : skip(lexer);
+                        /* did_advance ? advance(lexer) : skip(lexer); */
+                        if (did_advance) {
+                            advance(lexer);
+                        } else {
+                            skip(lexer);
+                        }
                     }
                     if (end_type != SIMPLE_HEREDOC_BODY) {
                         lexer->result_symbol = middle_type;
-                        if (scan_heredoc_end_identifier(scanner, lexer)) {
+                        if (scan_heredoc_end_identifier(heredoc, lexer)) {
                             return true;
                         }
                     }
                     if (end_type == SIMPLE_HEREDOC_BODY) {
                         lexer->result_symbol = end_type;
                         lexer->mark_end(lexer);
-                        if (scan_heredoc_end_identifier(scanner, lexer)) {
+                        if (scan_heredoc_end_identifier(heredoc, lexer)) {
                             return true;
                         }
                     }
@@ -417,28 +517,33 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
     if ((valid_symbols[HEREDOC_BODY_BEGINNING] ||
          valid_symbols[SIMPLE_HEREDOC_BODY]) &&
-        scanner->heredoc_delimiter.len > 0 && !scanner->started_heredoc &&
+        scanner->heredocs.len > 0 && !VEC_BACK(scanner->heredocs).started &&
         !in_error_recovery(valid_symbols)) {
         return scan_heredoc_content(scanner, lexer, HEREDOC_BODY_BEGINNING,
                                     SIMPLE_HEREDOC_BODY);
     }
 
-    if (valid_symbols[HEREDOC_END]) {
-        if (scan_heredoc_end_identifier(scanner, lexer)) {
-            reset(scanner);
+    if (valid_symbols[HEREDOC_END] && scanner->heredocs.len > 0) {
+        Heredoc *heredoc = &VEC_BACK(scanner->heredocs);
+        if (scan_heredoc_end_identifier(heredoc, lexer)) {
+            STRING_FREE(heredoc->current_leading_word);
+            STRING_FREE(heredoc->delimiter);
+            VEC_POP(scanner->heredocs);
             lexer->result_symbol = HEREDOC_END;
             return true;
         }
     }
 
-    if (valid_symbols[HEREDOC_CONTENT] && scanner->heredoc_delimiter.len > 0 &&
-        scanner->started_heredoc && !in_error_recovery(valid_symbols)) {
+    if (valid_symbols[HEREDOC_CONTENT] && scanner->heredocs.len > 0 &&
+        VEC_BACK(scanner->heredocs).started &&
+        !in_error_recovery(valid_symbols)) {
         return scan_heredoc_content(scanner, lexer, HEREDOC_CONTENT,
                                     HEREDOC_END);
     }
 
-    if (valid_symbols[HEREDOC_START] && !in_error_recovery(valid_symbols)) {
-        return scan_heredoc_start(scanner, lexer);
+    if (valid_symbols[HEREDOC_START] && !in_error_recovery(valid_symbols) &&
+        scanner->heredocs.len > 0) {
+        return scan_heredoc_start(&VEC_BACK(scanner->heredocs), lexer);
     }
 
     if (valid_symbols[TEST_OPERATOR] && !valid_symbols[EXPANSION_WORD]) {
@@ -579,12 +684,15 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 advance(lexer);
                 if (lexer->lookahead == '-') {
                     advance(lexer);
-                    scanner->heredoc_allows_indent = true;
+                    Heredoc heredoc = heredoc_new();
+                    heredoc.allows_indent = true;
+                    VEC_PUSH(scanner->heredocs, heredoc);
                     lexer->result_symbol = HEREDOC_ARROW_DASH;
                 } else if (lexer->lookahead == '<' || lexer->lookahead == '=') {
                     return false;
                 } else {
-                    scanner->heredoc_allows_indent = false;
+                    Heredoc heredoc = heredoc_new();
+                    VEC_PUSH(scanner->heredocs, heredoc);
                     lexer->result_symbol = HEREDOC_ARROW;
                 }
                 return true;
@@ -1122,8 +1230,7 @@ brace_start:
 
 void *tree_sitter_bash_external_scanner_create() {
     Scanner *scanner = calloc(1, sizeof(Scanner));
-    scanner->heredoc_delimiter = string_new();
-    scanner->current_leading_word = string_new();
+    scanner->heredocs = vec_new();
     return scanner;
 }
 
@@ -1148,7 +1255,11 @@ void tree_sitter_bash_external_scanner_deserialize(void *payload,
 
 void tree_sitter_bash_external_scanner_destroy(void *payload) {
     Scanner *scanner = (Scanner *)payload;
-    STRING_FREE(scanner->heredoc_delimiter);
-    STRING_FREE(scanner->current_leading_word);
+    for (size_t i = 0; i < scanner->heredocs.len; i++) {
+        Heredoc *heredoc = &scanner->heredocs.data[i];
+        STRING_FREE(heredoc->current_leading_word);
+        STRING_FREE(heredoc->delimiter);
+    }
+    VEC_FREE(scanner->heredocs);
     free(scanner);
 }
