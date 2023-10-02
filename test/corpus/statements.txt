@@ -1108,9 +1108,8 @@ Test commands with regexes
       (extglob_pattern)
       (command_substitution
         (pipeline
-          (pipeline
-            (command (command_name (word)) (word) (word))
-            (command (command_name (word)) (raw_string)))
+          (command (command_name (word)) (word) (word))
+          (command (command_name (word)) (raw_string))
           (command (command_name (word)) (word) (raw_string))))
       (extglob_pattern)))
   (test_command

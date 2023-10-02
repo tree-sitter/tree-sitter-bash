@@ -157,6 +157,83 @@
         }
       ]
     },
+    "_statement_not_pipeline": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "redirected_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "variable_assignment"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "variable_assignments"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "command"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "declaration_command"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "unset_command"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "test_command"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "negated_command"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "for_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "c_style_for_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "while_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "if_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "case_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "list"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "compound_statement"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "function_definition"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "subshell"
+          }
+        ]
+      }
+    },
     "redirected_statement": {
       "type": "PREC_DYNAMIC",
       "value": -1,
@@ -1856,31 +1933,39 @@
       ]
     },
     "pipeline": {
-      "type": "PREC_LEFT",
-      "value": 1,
+      "type": "PREC_RIGHT",
+      "value": 0,
       "content": {
         "type": "SEQ",
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_statement"
+            "name": "_statement_not_pipeline"
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "|"
-              },
-              {
-                "type": "STRING",
-                "value": "|&"
-              }
-            ]
-          },
-          {
-            "type": "SYMBOL",
-            "name": "_statement"
+            "type": "REPEAT1",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "|"
+                    },
+                    {
+                      "type": "STRING",
+                      "value": "|&"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_statement_not_pipeline"
+                }
+              ]
+            }
           }
         ]
       }
@@ -6817,6 +6902,9 @@
     [
       "function_definition",
       "command_name"
+    ],
+    [
+      "pipeline"
     ]
   ],
   "precedences": [],

@@ -54,6 +54,7 @@ module.exports = grammar({
     [$.redirected_statement, $.command],
     [$.redirected_statement, $.command_substitution],
     [$.function_definition, $.command_name],
+    [$.pipeline],
   ],
 
   inline: $ => [
@@ -157,6 +158,26 @@ module.exports = grammar({
       $.compound_statement,
       $.function_definition,
     ),
+
+    _statement_not_pipeline: $ => prec(1, choice(
+      $.redirected_statement,
+      $.variable_assignment,
+      $.variable_assignments,
+      $.command,
+      $.declaration_command,
+      $.unset_command,
+      $.test_command,
+      $.negated_command,
+      $.for_statement,
+      $.c_style_for_statement,
+      $.while_statement,
+      $.if_statement,
+      $.case_statement,
+      $.list,
+      $.compound_statement,
+      $.function_definition,
+      $.subshell,
+    )),
 
     redirected_statement: $ => prec.dynamic(-1, prec(-1, choice(
       seq(
@@ -375,10 +396,12 @@ module.exports = grammar({
       ')',
     ),
 
-    pipeline: $ => prec.left(1, seq(
-      $._statement,
-      choice('|', '|&'),
-      $._statement,
+    pipeline: $ => prec.right(seq(
+      $._statement_not_pipeline,
+      repeat1(seq(
+        choice('|', '|&'),
+        $._statement_not_pipeline,
+      )),
     )),
 
     list: $ => prec.left(-1, seq(
