@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-bash",
-  "version": "0.20.3",
+  "version": "0.20.4",
   "description": "Bash grammar for tree-sitter",
   "main": "bindings/node",
   "keywords": [
@@ -11,15 +11,15 @@
   "author": "Max Brunsfeld",
   "license": "MIT",
   "dependencies": {
-    "nan": "^2.17.0",
+    "nan": "^2.18.0",
     "prebuild-install": "^7.1.1",
     "web-tree-sitter": "^0.20.8"
   },
   "devDependencies": {
-    "eslint": "^8.47.0",
+    "eslint": "^8.50.0",
     "eslint-config-google": "^0.14.0",
     "node-gyp": "^9.4.0",
-    "prebuild": "^11.0.4",
+    "prebuild": "^12.1.0",
     "tree-sitter-cli": "^0.20.8"
   },
   "overrides": {
