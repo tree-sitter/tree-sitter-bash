@@ -5205,6 +5205,10 @@
               "name": "_special_variable_name"
             },
             {
+              "type": "SYMBOL",
+              "name": "variable_name"
+            },
+            {
               "type": "ALIAS",
               "content": {
                 "type": "STRING",

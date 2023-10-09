@@ -426,9 +426,9 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
               (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) ||
               (lexer->lookahead == ']' && valid_symbols[CLOSING_BRACKET]))) {
             lexer->result_symbol = CONCAT;
-            // So for a`b`, we want to return a concat. We check if the 2nd
-            // backtick has whitespace after it, and if it does we return
-            // concat.
+            // So for a`b`, we want to return a concat. We check if the
+            // 2nd backtick has whitespace after it, and if it does we
+            // return concat.
             if (lexer->lookahead == '`') {
                 lexer->mark_end(lexer);
                 advance(lexer);
@@ -443,8 +443,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 }
                 return iswspace(lexer->lookahead) || lexer->eof(lexer);
             }
-            // strings w/ expansions that contains escaped quotes or backslashes
-            // need this to return a concat
+            // strings w/ expansions that contains escaped quotes or
+            // backslashes need this to return a concat
             if (lexer->lookahead == '\\') {
                 lexer->mark_end(lexer);
                 advance(lexer);
@@ -925,7 +925,7 @@ regex:
     }
 
 extglob_pattern:
-    if (valid_symbols[EXTGLOB_PATTERN]) {
+    if (valid_symbols[EXTGLOB_PATTERN] && !in_error_recovery(valid_symbols)) {
         // first skip ws, then check for ? * + @ !
         while (iswspace(lexer->lookahead)) {
             skip(lexer);
@@ -1137,8 +1137,9 @@ expansion_word:
                 lexer->mark_end(lexer);
                 advance(lexer);
                 while (lexer->lookahead != ')' && !lexer->eof(lexer)) {
-                    // if we find a $( or ${ assume this is valid and is a
-                    // garbage concatenation of some weird word + an expansion
+                    // if we find a $( or ${ assume this is valid and is
+                    // a garbage concatenation of some weird word + an
+                    // expansion
                     // I wonder where this can fail
                     if (lexer->lookahead == '$') {
                         lexer->mark_end(lexer);

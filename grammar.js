@@ -838,6 +838,7 @@ module.exports = grammar({
         $._simple_variable_name,
         $._multiline_variable_name,
         $._special_variable_name,
+        $.variable_name,
         alias('!', $.special_variable_name),
         alias('#', $.special_variable_name),
       ),
