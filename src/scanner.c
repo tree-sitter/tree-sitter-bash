@@ -187,7 +187,8 @@ static unsigned serialize(Scanner *scanner, char *buffer) {
         buffer[size++] = (char)heredoc.started;
         buffer[size++] = (char)heredoc.allows_indent;
 
-        buffer[size++] = (char)heredoc.delimiter.len;
+        memcpy(&buffer[size], &heredoc.delimiter.len, sizeof(uint32_t));
+        size += sizeof(uint32_t);
         memcpy(&buffer[size], heredoc.delimiter.data, heredoc.delimiter.len);
         size += heredoc.delimiter.len;
     }
@@ -215,11 +216,13 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
             heredoc->started = buffer[size++];
             heredoc->allows_indent = buffer[size++];
 
-            uint32_t delimiter_len = (unsigned char)buffer[size++];
-            STRING_GROW(heredoc->delimiter, delimiter_len);
-            memcpy(heredoc->delimiter.data, &buffer[size], delimiter_len);
-            heredoc->delimiter.len = delimiter_len;
-            size += delimiter_len;
+            memcpy(&heredoc->delimiter.len, &buffer[size], sizeof(uint32_t));
+            size += sizeof(uint32_t);
+            STRING_GROW(heredoc->delimiter, heredoc->delimiter.len);
+
+            memcpy(heredoc->delimiter.data, &buffer[size],
+                   heredoc->delimiter.len);
+            size += heredoc->delimiter.len;
         }
         assert(size == length);
     }
