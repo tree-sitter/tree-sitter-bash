@@ -242,7 +242,9 @@ static bool advance_word(TSLexer *lexer, String *unquoted_word) {
     }
 
     while (lexer->lookahead &&
-           !(quote ? lexer->lookahead == quote : iswspace(lexer->lookahead))) {
+           !(quote ? lexer->lookahead == quote || lexer->lookahead == '\r' ||
+                         lexer->lookahead == '\n'
+                   : iswspace(lexer->lookahead))) {
         if (lexer->lookahead == '\\') {
             advance(lexer);
             if (!lexer->lookahead) {
