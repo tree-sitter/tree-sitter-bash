@@ -42,9 +42,16 @@
   "tree-sitter": [
     {
       "scope": "source.bash",
+      "injection-regex": "(shell|bash|zsh|sh)",
+      "first-line-regex": "^#!.*\\b(sh|bash|dash|zsh)\\b.*$",
       "file-types": [
         "sh",
-        "bash"
+        "bash",
+        "zsh",
+        ".bashrc",
+        ".bash_profile",
+        ".zshrc",
+        "zshrc"
       ]
     }
   ]
