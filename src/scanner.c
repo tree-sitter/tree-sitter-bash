@@ -348,7 +348,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                     lexer->result_symbol = middle_type;
                     heredoc->started = true;
                     advance(lexer);
-                    if (isalpha(lexer->lookahead) || lexer->lookahead == '{' ||
+                    if (iswalpha(lexer->lookahead) || lexer->lookahead == '{' ||
                         lexer->lookahead == '(') {
                         return true;
                     }
@@ -597,7 +597,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             advance(lexer);
 
             bool advanced_once = false;
-            while (isalpha(lexer->lookahead)) {
+            while (iswalpha(lexer->lookahead)) {
                 advanced_once = true;
                 advance(lexer);
             }
@@ -770,7 +770,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 lexer->result_symbol = VARIABLE_NAME;
-                return isalpha(lexer->lookahead);
+                return iswalpha(lexer->lookahead);
             }
         }
 
@@ -968,7 +968,7 @@ extglob_pattern:
             if (lexer->lookahead == '-') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                while (isalnum(lexer->lookahead)) {
+                while (iswalnum(lexer->lookahead)) {
                     advance(lexer);
                 }
 
@@ -1016,7 +1016,7 @@ extglob_pattern:
                 }
             }
 
-            if (!isalnum(lexer->lookahead) && lexer->lookahead != '(' &&
+            if (!iswalnum(lexer->lookahead) && lexer->lookahead != '(' &&
                 lexer->lookahead != '"' && lexer->lookahead != '[' &&
                 lexer->lookahead != '?' && lexer->lookahead != '/' &&
                 lexer->lookahead != '\\' && lexer->lookahead != '_') {
