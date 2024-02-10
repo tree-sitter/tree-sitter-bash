@@ -1292,6 +1292,10 @@
             "named": true
           },
           {
+            "type": "if_statement",
+            "named": true
+          },
+          {
             "type": "subshell",
             "named": true
           },
@@ -1317,6 +1321,10 @@
         "types": [
           {
             "type": "file_redirect",
+            "named": true
+          },
+          {
+            "type": "herestring_redirect",
             "named": true
           }
         ]
@@ -1398,6 +1406,10 @@
         "types": [
           {
             "type": "file_redirect",
+            "named": true
+          },
+          {
+            "type": "herestring_redirect",
             "named": true
           }
         ]
@@ -1562,6 +1574,10 @@
       "multiple": false,
       "required": false,
       "types": [
+        {
+          "type": "command_substitution",
+          "named": true
+        },
         {
           "type": "expansion",
           "named": true
@@ -1743,6 +1759,10 @@
           },
           {
             "type": "heredoc_redirect",
+            "named": true
+          },
+          {
+            "type": "herestring_redirect",
             "named": true
           }
         ]
