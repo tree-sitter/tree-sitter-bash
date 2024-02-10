@@ -1219,6 +1219,11 @@ foo::baz() {
   echo how
 }
 
+assert()
+  if ! $1; then
+    return 1
+  fi
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1292,7 +1297,19 @@ foo::baz() {
       (command
         (command_name
           (word))
-        (word)))))
+        (word))))
+  (function_definition
+    (word)
+    (if_statement
+      (negated_command
+        (command
+          (command_name
+            (simple_expansion
+              (variable_name)))))
+      (command
+        (command_name
+          (word))
+        (number)))))
 
 ================================================================================
 Variable declaration: declare & typeset

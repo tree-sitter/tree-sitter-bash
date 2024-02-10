@@ -380,7 +380,9 @@ module.exports = grammar({
         choice(
           $.compound_statement,
           $.subshell,
-          $.test_command),
+          $.test_command,
+          $.if_statement,
+        ),
       ),
       field('redirect', optional($.file_redirect)),
     )),
