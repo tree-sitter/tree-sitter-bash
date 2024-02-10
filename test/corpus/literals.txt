@@ -279,6 +279,7 @@ ${var:pos:len}
 ${MATRIX:$(($RANDOM%${#MATRIX})):1}
 ${PKG_CONFIG_LIBDIR:-${ESYSROOT}/usr/$(get_libdir)/pkgconfig}
 ${ver_str::${#ver_str}-${#not_match}}
+${value#\{sd.cicd.}
 
 --------------------------------------------------------------------------------
 
@@ -371,7 +372,12 @@ ${ver_str::${#ver_str}-${#not_match}}
         (variable_name)
         (binary_expression
           (expansion (variable_name))
-          (expansion (variable_name)))))))
+          (expansion (variable_name))))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (regex)))))
 
 ================================================================================
 Variable expansions in strings

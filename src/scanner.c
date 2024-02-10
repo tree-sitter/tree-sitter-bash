@@ -756,6 +756,7 @@ regex:
                 bool done;
                 bool advanced_once;
                 bool found_non_alnumdollarunderdash;
+                bool last_was_escape;
                 uint32_t paren_depth;
                 uint32_t bracket_depth;
                 uint32_t brace_depth;
@@ -771,37 +772,51 @@ regex:
 
             lexer->mark_end(lexer);
 
-            State state = {false, false, false, 0, 0, 0};
+            State state = {false, false, false, false, 0, 0, 0};
             while (!state.done) {
                 switch (lexer->lookahead) {
+                    case '\\':
+                        state.last_was_escape = true;
+                        break;
                     case '\0':
                         return false;
                     case '(':
                         state.paren_depth++;
+                        state.last_was_escape = false;
                         break;
                     case '[':
                         state.bracket_depth++;
+                        state.last_was_escape = false;
                         break;
                     case '{':
-                        state.brace_depth++;
+                        if (!state.last_was_escape) {
+                            state.brace_depth++;
+                        }
+                        state.last_was_escape = false;
                         break;
                     case ')':
                         if (state.paren_depth == 0) {
                             state.done = true;
                         }
                         state.paren_depth--;
+                        state.last_was_escape = false;
                         break;
                     case ']':
                         if (state.bracket_depth == 0) {
                             state.done = true;
                         }
                         state.bracket_depth--;
+                        state.last_was_escape = false;
                         break;
                     case '}':
                         if (state.brace_depth == 0) {
                             state.done = true;
                         }
                         state.brace_depth--;
+                        state.last_was_escape = false;
+                        break;
+                    default:
+                        state.last_was_escape = false;
                         break;
                 }
 
