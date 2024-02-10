@@ -751,7 +751,7 @@ regex:
         }
 
         if ((lexer->lookahead != '"' && lexer->lookahead != '\'') ||
-            (lexer->lookahead == '$' && valid_symbols[REGEX_NO_SLASH])) {
+            ((lexer->lookahead == '$' || lexer->lookahead == '\'') && valid_symbols[REGEX_NO_SLASH])) {
             typedef struct {
                 bool done;
                 bool advanced_once;
