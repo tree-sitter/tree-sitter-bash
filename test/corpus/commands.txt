@@ -101,6 +101,8 @@ exec {VIRTWL[0]}<&- {VIRTWL[1]}>&-
 
 grep 2>/dev/null -q "^/usr/bin/scponly$" /etc/shells
 
+x <x a b c
+
 ---
 
 (program
@@ -136,15 +138,25 @@ grep 2>/dev/null -q "^/usr/bin/scponly$" /etc/shells
     (file_redirect)
     (file_redirect))
   (redirected_statement
-    (command
-      (command_name (word))
-      (concatenation (word) (word) (word) (number) (word) (word)))
-    (file_redirect
+    (redirected_statement
+      (command (command_name (word))
+        (concatenation (word) (word) (word) (number) (word) (word)))
+      (file_redirect)
       (concatenation (word) (word) (word) (number) (word) (word)))
     (file_redirect))
   (redirected_statement
     (command (command_name (word)))
-    (file_redirect (file_descriptor) (word) (word) (string (string_content)) (word))))
+    (file_redirect (file_descriptor) (word))
+        (word)
+        (string
+          (string_content))
+    (word))
+  (redirected_statement
+    (command (command_name (word)))
+    (file_redirect (word))
+    (word)
+    (word)
+    (word)))
 
 ===============================
 File redirects (noclobber override)
