@@ -191,7 +191,6 @@ module.exports = grammar({
             $.heredoc_redirect,
           )),
         )),
-        repeat(field('argument', $._literal)),
       ),
       seq(
         field('body', choice($.if_statement, $.while_statement)),
@@ -446,7 +445,7 @@ module.exports = grammar({
     _test_command_binary_expression: $ => prec(PREC.ASSIGN,
       seq(
         field('left', $._expression),
-        field('operator', choice('=')),
+        field('operator', '='),
         field('right', alias($._regex_no_space, $.regex)),
       ),
     ),
@@ -523,7 +522,7 @@ module.exports = grammar({
       choice(
         seq(
           choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-          field('destination', $._literal),
+          field('destination', repeat1($._literal)),
         ),
         seq(
           choice('<&-', '>&-'), // close file descriptor
@@ -851,8 +850,8 @@ module.exports = grammar({
 
     number: $ => choice(
       /-?(0x)?[0-9]+(#[0-9A-Za-z@_]+)?/,
-      // the base can be an expansion
-      seq(/-?(0x)?[0-9]+#/, $.expansion),
+      // the base can be an expansion or command substitution
+      seq(/-?(0x)?[0-9]+#/, choice($.expansion, $.command_substitution)),
     ),
 
     simple_expansion: $ => seq(
@@ -996,6 +995,7 @@ module.exports = grammar({
       )),
       optional(seq(
         field('operator', ':'),
+        optional($.simple_expansion),
         optional(choice(
           $._simple_variable_name,
           $.number,
