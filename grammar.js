@@ -68,6 +68,7 @@ module.exports = grammar({
     $._special_variable_name,
     $._c_word,
     $._statement_not_subshell,
+    $._redirect,
   ],
 
   externals: $ => [
@@ -180,7 +181,7 @@ module.exports = grammar({
       $.subshell,
     )),
 
-    redirected_statement: $ => prec.dynamic(-1, prec(-1, choice(
+    redirected_statement: $ => prec.dynamic(-1, prec.right(-1, choice(
       seq(
         field('body', $._statement),
         field('redirect', choice(
@@ -189,12 +190,13 @@ module.exports = grammar({
             $.heredoc_redirect,
           )),
         )),
+        repeat(field('argument', $._literal)),
       ),
       seq(
         field('body', choice($.if_statement, $.while_statement)),
         $.herestring_redirect,
       ),
-      field('redirect', repeat1($.file_redirect)),
+      field('redirect', repeat1($._redirect)),
       $.herestring_redirect,
     ))),
 
@@ -384,7 +386,7 @@ module.exports = grammar({
           $.if_statement,
         ),
       ),
-      field('redirect', optional($.file_redirect)),
+      field('redirect', optional($._redirect)),
     )),
 
     compound_statement: $ => seq(
@@ -453,7 +455,7 @@ module.exports = grammar({
     command: $ => prec.left(seq(
       repeat(choice(
         $.variable_assignment,
-        field('redirect', choice($.file_redirect, $.herestring_redirect)),
+        field('redirect', $._redirect),
       )),
       field('name', $.command_name),
       choice(
@@ -505,7 +507,7 @@ module.exports = grammar({
       choice(
         seq(
           choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-          field('destination', repeat1($._literal)),
+          field('destination', $._literal),
         ),
         seq(
           choice('<&-', '>&-'), // close file descriptor
@@ -521,7 +523,7 @@ module.exports = grammar({
       optional(choice(
         alias($._heredoc_pipeline, $.pipeline),
         seq(
-          field('redirect', repeat1($.file_redirect)),
+          field('redirect', repeat1($._redirect)),
           optional($._heredoc_expression),
         ),
         $._heredoc_expression,
@@ -568,6 +570,8 @@ module.exports = grammar({
       '<<<',
       $._literal,
     )),
+
+    _redirect: $ => choice($.file_redirect, $.herestring_redirect),
 
     // Expressions
 
