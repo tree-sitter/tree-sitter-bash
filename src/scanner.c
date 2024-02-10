@@ -751,12 +751,14 @@ regex:
         }
 
         if ((lexer->lookahead != '"' && lexer->lookahead != '\'') ||
-            ((lexer->lookahead == '$' || lexer->lookahead == '\'') && valid_symbols[REGEX_NO_SLASH])) {
+            ((lexer->lookahead == '$' || lexer->lookahead == '\'') && valid_symbols[REGEX_NO_SLASH]) ||
+            (lexer->lookahead == '\'' && valid_symbols[REGEX_NO_SPACE])) {
             typedef struct {
                 bool done;
                 bool advanced_once;
                 bool found_non_alnumdollarunderdash;
                 bool last_was_escape;
+                bool in_single_quote;
                 uint32_t paren_depth;
                 uint32_t bracket_depth;
                 uint32_t brace_depth;
@@ -772,8 +774,14 @@ regex:
 
             lexer->mark_end(lexer);
 
-            State state = {false, false, false, false, 0, 0, 0};
+            State state = {false, false, false, false, false, 0, 0, 0};
             while (!state.done) {
+                if (state.in_single_quote) {
+                    if (lexer->lookahead == '\'') {
+                        state.in_single_quote = false;
+                        advance(lexer);
+                    }
+                }
                 switch (lexer->lookahead) {
                     case '\\':
                         state.last_was_escape = true;
@@ -815,6 +823,13 @@ regex:
                         state.brace_depth--;
                         state.last_was_escape = false;
                         break;
+                    case '\'':
+                        // Enter or exit a single-quoted string.
+                        state.in_single_quote = !state.in_single_quote;
+                        advance(lexer);
+                        state.advanced_once = true;
+                        state.last_was_escape = false;
+                        continue;
                     default:
                         state.last_was_escape = false;
                         break;
@@ -822,7 +837,7 @@ regex:
 
                 if (!state.done) {
                     if (valid_symbols[REGEX]) {
-                        bool was_space = iswspace(lexer->lookahead);
+                        bool was_space = !state.in_single_quote && iswspace(lexer->lookahead);
                         advance(lexer);
                         state.advanced_once = true;
                         if (!was_space || state.paren_depth > 0) {
@@ -842,7 +857,7 @@ regex:
                                 lexer->mark_end(lexer);
                             }
                         } else {
-                            bool was_space = iswspace(lexer->lookahead);
+                            bool was_space = !state.in_single_quote && iswspace(lexer->lookahead);
                             advance(lexer);
                             state.advanced_once = true;
                             if (!was_space) {
@@ -872,7 +887,8 @@ regex:
                                 return true;
                             }
                         } else {
-                            if (iswspace(lexer->lookahead) && state.paren_depth == 0) {
+                            bool was_space = !state.in_single_quote && iswspace(lexer->lookahead);
+                            if (was_space && state.paren_depth == 0) {
                                 lexer->mark_end(lexer);
                                 lexer->result_symbol = REGEX_NO_SPACE;
                                 return state.found_non_alnumdollarunderdash;

@@ -1051,6 +1051,7 @@ Test commands with regexes
 [[ ${file} == @(*${GENTOO_PATCH_NAME}.tar.xz|*.asc|*.sig) ]]
 [[ $RUBY_TARGETS != *$( eselect ruby show | awk 'NR==2' | tr  -d ' '  )* ]]
 [[ " ${m[0]##*/}" =~ ^(\ ${skip_files[*]/%/.*|\\} ) ]]
+[[ ' boop xyz' =~ ' boop '(.*)$ ]]
 
 --------------------------------------------------------------------------------
 
@@ -1113,7 +1114,8 @@ Test commands with regexes
           (command (command_name (word)) (word) (raw_string))))
       (extglob_pattern)))
   (test_command
-    (binary_expression (string (expansion (subscript (variable_name) (number)) (regex))) (regex))))
+    (binary_expression (string (expansion (subscript (variable_name) (number)) (regex))) (regex)))
+  (test_command (binary_expression (raw_string) (regex))))
 
 ================================================================================
 Test command paren statefulness with a case glob
