@@ -835,7 +835,7 @@ esac
     (case_item (word) (command (command_name (word)) (word))))
   (case_statement
     (string (simple_expansion (variable_name)))
-    (case_item (word) (word) (command (command_name (word)))))
+    (case_item (extglob_pattern) (command (command_name (word)))))
   (case_statement
     (simple_expansion (variable_name))
     (case_item
@@ -1052,6 +1052,7 @@ Test commands with regexes
 [[ $RUBY_TARGETS != *$( eselect ruby show | awk 'NR==2' | tr  -d ' '  )* ]]
 [[ " ${m[0]##*/}" =~ ^(\ ${skip_files[*]/%/.*|\\} ) ]]
 [[ ' boop xyz' =~ ' boop '(.*)$ ]]
+[[ $b = foo* ]]
 
 --------------------------------------------------------------------------------
 
@@ -1115,7 +1116,8 @@ Test commands with regexes
       (extglob_pattern)))
   (test_command
     (binary_expression (string (expansion (subscript (variable_name) (number)) (regex))) (regex)))
-  (test_command (binary_expression (raw_string) (regex))))
+  (test_command (binary_expression (raw_string) (regex)))
+  (test_command (binary_expression (simple_expansion (variable_name)) (regex))))
 
 ================================================================================
 Test command paren statefulness with a case glob
