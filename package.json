@@ -16,10 +16,10 @@
     "web-tree-sitter": "^0.20.8"
   },
   "devDependencies": {
-    "eslint": "^8.50.0",
+    "eslint": "^8.56.0",
     "eslint-config-google": "^0.14.0",
-    "node-gyp": "^9.4.0",
-    "prebuild": "^12.1.0",
+    "node-gyp": "^10.0.1",
+    "prebuild": "^13.0.0",
     "tree-sitter-cli": "^0.20.8"
   },
   "overrides": {

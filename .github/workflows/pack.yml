@@ -1,6 +1,7 @@
 name: Pack
 
 on:
+  workflow_dispatch:
   release:
     types:
       - released
