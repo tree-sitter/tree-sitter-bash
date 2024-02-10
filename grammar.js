@@ -923,7 +923,13 @@ module.exports = grammar({
 
     _expansion_regex: $ => seq(
       field('operator', choice('#', alias($._immediate_double_hash, '##'), '%', '%%')),
-      optional(choice($.regex, alias(')', $.regex), $.string, $.raw_string, alias(/\s+/, $.regex))),
+      repeat(choice(
+        $.regex,
+        alias(')', $.regex),
+        $.string,
+        $.raw_string,
+        alias(/\s+/, $.regex),
+      )),
     ),
 
     _expansion_regex_replacement: $ => seq(
