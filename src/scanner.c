@@ -781,6 +781,7 @@ regex:
                     if (lexer->lookahead == '\'') {
                         state.in_single_quote = false;
                         advance(lexer);
+                        lexer->mark_end(lexer);
                     }
                 }
                 switch (lexer->lookahead) {
