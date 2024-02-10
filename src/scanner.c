@@ -150,6 +150,7 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
+
 static inline bool in_error_recovery(const bool *valid_symbols) { return valid_symbols[ERROR_RECOVERY]; }
 
 static inline void reset_heredoc(Heredoc *heredoc) {
@@ -1011,15 +1012,13 @@ extglob_pattern:
             if (lexer->lookahead == '|') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                if (lexer->lookahead == '\\' || lexer->lookahead == '\r' || lexer->lookahead == '\n') {
-                    lexer->result_symbol = EXTGLOB_PATTERN;
-                    return true;
-                }
+                lexer->result_symbol = EXTGLOB_PATTERN;
+                return true;
             }
 
             if (!iswalnum(lexer->lookahead) && lexer->lookahead != '(' && lexer->lookahead != '"' &&
                 lexer->lookahead != '[' && lexer->lookahead != '?' && lexer->lookahead != '/' &&
-                lexer->lookahead != '\\' && lexer->lookahead != '_') {
+                lexer->lookahead != '\\' && lexer->lookahead != '_' && lexer->lookahead != '*') {
                 return false;
             }
 
@@ -1063,6 +1062,15 @@ extglob_pattern:
                         }
                         state.brace_depth--;
                         break;
+                }
+
+                if (lexer->lookahead == '|') {
+                    lexer->mark_end(lexer);
+                    advance(lexer);
+                    if (state.paren_depth == 0 && state.bracket_depth == 0 && state.brace_depth == 0) {
+                        lexer->result_symbol = EXTGLOB_PATTERN;
+                        return true;
+                    }
                 }
 
                 if (!state.done) {
