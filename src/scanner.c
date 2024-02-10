@@ -97,6 +97,7 @@ enum TokenType {
     HEREDOC_ARROW_DASH,
     NEWLINE,
     OPENING_PAREN,
+    ESAC,
     ERROR_RECOVERY,
 };
 
@@ -922,7 +923,7 @@ extglob_pattern:
 
         if (lexer->lookahead == '?' || lexer->lookahead == '*' || lexer->lookahead == '+' || lexer->lookahead == '@' ||
             lexer->lookahead == '!' || lexer->lookahead == '-' || lexer->lookahead == ')' || lexer->lookahead == '\\' ||
-            lexer->lookahead == '.') {
+            lexer->lookahead == '.' || lexer->lookahead == '[' || (isalpha(lexer->lookahead))) {
             if (lexer->lookahead == '\\') {
                 advance(lexer);
                 if ((iswspace(lexer->lookahead) || lexer->lookahead == '"') && lexer->lookahead != '\r' &&
@@ -943,7 +944,28 @@ extglob_pattern:
             }
 
             lexer->mark_end(lexer);
-            advance(lexer);
+            bool was_non_alpha = !iswalpha(lexer->lookahead);
+            if (lexer->lookahead != '[') {
+                // no esac
+                if (lexer->lookahead == 'e') {
+                    lexer->mark_end(lexer);
+                    advance(lexer);
+                    if (lexer->lookahead == 's') {
+                        advance(lexer);
+                        if (lexer->lookahead == 'a') {
+                            advance(lexer);
+                            if (lexer->lookahead == 'c') {
+                                advance(lexer);
+                                if (iswspace(lexer->lookahead)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    advance(lexer);
+                }
+            }
 
             // -\w is just a word, find something else special
             if (lexer->lookahead == '-') {
@@ -965,7 +987,7 @@ extglob_pattern:
                 advance(lexer);
                 if (iswspace(lexer->lookahead)) {
                     lexer->result_symbol = EXTGLOB_PATTERN;
-                    return true;
+                    return was_non_alpha;
                 }
             }
 
@@ -1002,12 +1024,13 @@ extglob_pattern:
 
             typedef struct {
                 bool done;
+                bool saw_non_alphadot;
                 uint32_t paren_depth;
                 uint32_t bracket_depth;
                 uint32_t brace_depth;
             } State;
 
-            State state = {false, scanner->last_glob_paren_depth, 0, 0};
+            State state = {false, was_non_alpha, scanner->last_glob_paren_depth, 0, 0};
             while (!state.done) {
                 switch (lexer->lookahead) {
                     case '\0':
@@ -1045,31 +1068,40 @@ extglob_pattern:
                     bool was_space = iswspace(lexer->lookahead);
                     if (lexer->lookahead == '$') {
                         lexer->mark_end(lexer);
+                        if (!iswalpha(lexer->lookahead) && lexer->lookahead != '.' && lexer->lookahead != '\\') {
+                            state.saw_non_alphadot = true;
+                        }
                         advance(lexer);
                         if (lexer->lookahead == '(' || lexer->lookahead == '{') {
                             lexer->result_symbol = EXTGLOB_PATTERN;
                             scanner->last_glob_paren_depth = state.paren_depth;
-                            return true;
+                            return state.saw_non_alphadot;
                         }
                     }
                     if (was_space) {
                         lexer->mark_end(lexer);
                         lexer->result_symbol = EXTGLOB_PATTERN;
                         scanner->last_glob_paren_depth = 0;
-                        return true;
+                        return state.saw_non_alphadot;
                     }
                     if (lexer->lookahead == '"') {
                         lexer->mark_end(lexer);
                         lexer->result_symbol = EXTGLOB_PATTERN;
                         scanner->last_glob_paren_depth = 0;
-                        return true;
+                        return state.saw_non_alphadot;
                     }
                     if (lexer->lookahead == '\\') {
+                        if (!iswalpha(lexer->lookahead) && lexer->lookahead != '.' && lexer->lookahead != '\\') {
+                            state.saw_non_alphadot = true;
+                        }
                         advance(lexer);
                         if (iswspace(lexer->lookahead) || lexer->lookahead == '"') {
                             advance(lexer);
                         }
                     } else {
+                        if (!iswalpha(lexer->lookahead) && lexer->lookahead != '.' && lexer->lookahead != '\\') {
+                            state.saw_non_alphadot = true;
+                        }
                         advance(lexer);
                     }
                     if (!was_space) {
@@ -1080,7 +1112,7 @@ extglob_pattern:
 
             lexer->result_symbol = EXTGLOB_PATTERN;
             scanner->last_glob_paren_depth = 0;
-            return true;
+            return state.saw_non_alphadot;
         }
         scanner->last_glob_paren_depth = 0;
 
