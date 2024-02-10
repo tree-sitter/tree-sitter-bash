@@ -147,6 +147,7 @@ C="${D%</E>*}"
 F="${#!}"
 G=${H,,[I]}
 J=${K^^[L]}
+L="${M/'N'*/O}"
 
 --------------------------------------------------------------------------------
 
@@ -250,7 +251,14 @@ J=${K^^[L]}
     (variable_name)
     (expansion
       (variable_name)
-      (regex))))
+      (regex)))
+  (variable_assignment
+    (variable_name)
+    (string
+      (expansion
+        (variable_name)
+        (regex)
+        (word)))))
 
 ================================================================================
 More Variable expansions with operators
