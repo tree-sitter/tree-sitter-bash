@@ -13,23 +13,32 @@ function clone_repo() {
 	path=examples/$name
 	if [ ! -d "$path" ]; then
 		echo "Cloning $owner/$name"
-		git clone "$url" "$path"
+		if [ "$name" = "gentoo" ]; then
+			git clone --depth=1 "$url" "$path"
+			# fetch commits slowly, 20k at a time or until we can checkout the sha
+			cd "$path"
+			while ! git checkout "$sha"; do
+				git fetch --depth=20000
+			done
+			cd -
+		else
+			git clone --filter=tree:0 "$url" "$path"
+			pushd "$path" >/dev/null
+			actual_sha=$(git rev-parse HEAD)
+			if [ "$actual_sha" != "$sha" ]; then
+				echo "Updating $owner/$name to $sha"
+				git fetch origin "$sha"
+			fi
+			popd >/dev/null
+		fi
 	fi
 
-	pushd "$path" >/dev/null
-	actual_sha=$(git rev-parse HEAD)
-	if [ "$actual_sha" != "$sha" ]; then
-		echo "Updating $owner/$name to $sha"
-		git fetch
-		git reset --hard "$sha"
-	fi
-	popd >/dev/null
 }
 
-clone_repo Bash-it bash-it https://github.com/Bash-it/bash-it e38696a0acfdb6e4fbeb6963801c417d6ca7e9a7
-clone_repo bash bash https://git.savannah.gnu.org/git/bash.git ec8113b9861375e4e17b3307372569d429dec814
+clone_repo Bash-it bash-it https://github.com/Bash-it/bash-it d985e4c96b1eb4e7374b3ab53eea3513fc9f50ce
+clone_repo bash bash https://git.savannah.gnu.org/git/bash.git f3b6bd19457e260b65d11f2712ec3da56cef463f
 clone_repo oilshell wild-corpus https://github.com/oilshell/wild-corpus a6fe3886095ae03afd528aefe296a169738984bc
-clone_repo gentoo gentoo https://anongit.gentoo.org/git/repo/gentoo.git 683eaf8be0351ac263c0b73c9806062647feafe4
+clone_repo gentoo gentoo https://anongit.gentoo.org/git/repo/gentoo.git 5d1f99c854c92dbb61677b776f691eb4c9841267
 
 known_failures="$(cat script/known-failures.txt)"
 
