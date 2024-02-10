@@ -7,69 +7,66 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
-#define VEC_RESIZE(vec, _cap)                                                  \
-    void *tmp = realloc((vec).data, (_cap) * sizeof((vec).data[0]));           \
-    assert(tmp != NULL);                                                       \
-    (vec).data = tmp;                                                          \
-    assert((vec).data != NULL);                                                \
+#define VEC_RESIZE(vec, _cap)                                                                                          \
+    void *tmp = realloc((vec).data, (_cap) * sizeof((vec).data[0]));                                                   \
+    assert(tmp != NULL);                                                                                               \
+    (vec).data = tmp;                                                                                                  \
+    assert((vec).data != NULL);                                                                                        \
     (vec).cap = (_cap);
 
-#define VEC_PUSH(vec, el)                                                      \
-    if ((vec).cap == (vec).len) {                                              \
-        VEC_RESIZE((vec), MAX(16, (vec).len * 2));                             \
-    }                                                                          \
+#define VEC_PUSH(vec, el)                                                                                              \
+    if ((vec).cap == (vec).len) {                                                                                      \
+        VEC_RESIZE((vec), MAX(16, (vec).len * 2));                                                                     \
+    }                                                                                                                  \
     (vec).data[(vec).len++] = (el);
 
-#define VEC_POP(vec)                                                           \
+#define VEC_POP(vec)                                                                                                   \
     { (vec).len--; }
 
 #define VEC_BACK(vec) ((vec).data[(vec).len - 1])
 
-#define VEC_FREE(vec)                                                          \
-    {                                                                          \
-        if ((vec).data != NULL)                                                \
-            free((vec).data);                                                  \
-        (vec).data = NULL;                                                     \
+#define VEC_FREE(vec)                                                                                                  \
+    {                                                                                                                  \
+        if ((vec).data != NULL)                                                                                        \
+            free((vec).data);                                                                                          \
+        (vec).data = NULL;                                                                                             \
     }
 
-#define VEC_CLEAR(vec)                                                         \
-    {                                                                          \
-        for (uint32_t i = 0; i < (vec).len; i++) {                             \
-            STRING_FREE((vec).data[i].word);                                   \
-        }                                                                      \
-        (vec).len = 0;                                                         \
+#define VEC_CLEAR(vec)                                                                                                 \
+    {                                                                                                                  \
+        for (uint32_t i = 0; i < (vec).len; i++) {                                                                     \
+            STRING_FREE((vec).data[i].word);                                                                           \
+        }                                                                                                              \
+        (vec).len = 0;                                                                                                 \
     }
 
-#define STRING_RESIZE(vec, _cap)                                               \
-    void *tmp = realloc((vec).data, ((_cap) + 1) * sizeof((vec).data[0]));     \
-    assert(tmp != NULL);                                                       \
-    (vec).data = tmp;                                                          \
-    memset((vec).data + (vec).len, 0,                                          \
-           (((_cap) + 1) - (vec).len) * sizeof((vec).data[0]));                \
+#define STRING_RESIZE(vec, _cap)                                                                                       \
+    void *tmp = realloc((vec).data, ((_cap) + 1) * sizeof((vec).data[0]));                                             \
+    assert(tmp != NULL);                                                                                               \
+    (vec).data = tmp;                                                                                                  \
+    memset((vec).data + (vec).len, 0, (((_cap) + 1) - (vec).len) * sizeof((vec).data[0]));                             \
     (vec).cap = (_cap);
 
-#define STRING_GROW(vec, _cap)                                                 \
-    if ((vec).cap < (_cap)) {                                                  \
-        STRING_RESIZE((vec), (_cap));                                          \
+#define STRING_GROW(vec, _cap)                                                                                         \
+    if ((vec).cap < (_cap)) {                                                                                          \
+        STRING_RESIZE((vec), (_cap));                                                                                  \
     }
 
-#define STRING_PUSH(vec, el)                                                   \
-    if ((vec).cap == (vec).len) {                                              \
-        STRING_RESIZE((vec), MAX(16, (vec).len * 2));                          \
-    }                                                                          \
+#define STRING_PUSH(vec, el)                                                                                           \
+    if ((vec).cap == (vec).len) {                                                                                      \
+        STRING_RESIZE((vec), MAX(16, (vec).len * 2));                                                                  \
+    }                                                                                                                  \
     (vec).data[(vec).len++] = (el);
 
-#define STRING_FREE(vec)                                                       \
-    if ((vec).data != NULL)                                                    \
-        free((vec).data);                                                      \
+#define STRING_FREE(vec)                                                                                               \
+    if ((vec).data != NULL)                                                                                            \
+        free((vec).data);                                                                                              \
     (vec).data = NULL;
 
-#define STRING_CLEAR(vec)                                                      \
-    {                                                                          \
-        (vec).len = 0;                                                         \
-        memset((vec).data, 0, (vec).cap * sizeof(char));                       \
+#define STRING_CLEAR(vec)                                                                                              \
+    {                                                                                                                  \
+        (vec).len = 0;                                                                                                 \
+        memset((vec).data, 0, (vec).cap * sizeof(char));                                                               \
     }
 
 enum TokenType {
@@ -108,9 +105,7 @@ typedef struct {
     char *data;
 } String;
 
-static String string_new() {
-    return (String){.cap = 16, .len = 0, .data = calloc(1, sizeof(char) * 17)};
-}
+static String string_new() { return (String){.cap = 16, .len = 0, .data = calloc(1, sizeof(char) * 17)}; }
 
 typedef struct {
     bool is_raw;
@@ -153,9 +148,7 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
-static inline bool in_error_recovery(const bool *valid_symbols) {
-    return valid_symbols[ERROR_RECOVERY];
-}
+static inline bool in_error_recovery(const bool *valid_symbols) { return valid_symbols[ERROR_RECOVERY]; }
 
 static inline void reset_heredoc(Heredoc *heredoc) {
     heredoc->is_raw = false;
@@ -178,8 +171,7 @@ static unsigned serialize(Scanner *scanner, char *buffer) {
 
     for (uint32_t i = 0; i < scanner->heredocs.len; i++) {
         Heredoc heredoc = scanner->heredocs.data[i];
-        if (heredoc.delimiter.len + 3 + size >=
-            TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
+        if (heredoc.delimiter.len + 3 + size >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
             return 0;
         }
 
@@ -220,8 +212,7 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
             size += sizeof(uint32_t);
             STRING_GROW(heredoc->delimiter, heredoc->delimiter.len);
 
-            memcpy(heredoc->delimiter.data, &buffer[size],
-                   heredoc->delimiter.len);
+            memcpy(heredoc->delimiter.data, &buffer[size], heredoc->delimiter.len);
             size += heredoc->delimiter.len;
         }
         assert(size == length);
@@ -245,8 +236,7 @@ static bool advance_word(TSLexer *lexer, String *unquoted_word) {
     }
 
     while (lexer->lookahead &&
-           !(quote ? lexer->lookahead == quote || lexer->lookahead == '\r' ||
-                         lexer->lookahead == '\n'
+           !(quote ? lexer->lookahead == quote || lexer->lookahead == '\r' || lexer->lookahead == '\n'
                    : iswspace(lexer->lookahead))) {
         if (lexer->lookahead == '\\') {
             advance(lexer);
@@ -267,8 +257,7 @@ static bool advance_word(TSLexer *lexer, String *unquoted_word) {
 }
 
 static inline bool scan_bare_dollar(TSLexer *lexer) {
-    while (iswspace(lexer->lookahead) && lexer->lookahead != '\n' &&
-           !lexer->eof(lexer)) {
+    while (iswspace(lexer->lookahead) && lexer->lookahead != '\n' && !lexer->eof(lexer)) {
         skip(lexer);
     }
 
@@ -276,8 +265,7 @@ static inline bool scan_bare_dollar(TSLexer *lexer) {
         advance(lexer);
         lexer->result_symbol = BARE_DOLLAR;
         lexer->mark_end(lexer);
-        return iswspace(lexer->lookahead) || lexer->eof(lexer) ||
-               lexer->lookahead == '\"';
+        return iswspace(lexer->lookahead) || lexer->eof(lexer) || lexer->lookahead == '\"';
     }
 
     return false;
@@ -289,8 +277,7 @@ static bool scan_heredoc_start(Heredoc *heredoc, TSLexer *lexer) {
     }
 
     lexer->result_symbol = HEREDOC_START;
-    heredoc->is_raw = lexer->lookahead == '\'' || lexer->lookahead == '"' ||
-                      lexer->lookahead == '\\';
+    heredoc->is_raw = lexer->lookahead == '\'' || lexer->lookahead == '"' || lexer->lookahead == '\\';
 
     bool found_delimiter = advance_word(lexer, &heredoc->delimiter);
     if (!found_delimiter)
@@ -309,12 +296,10 @@ static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer) {
         STRING_PUSH(heredoc->current_leading_word, lexer->lookahead);
         advance(lexer);
     }
-    return strcmp(heredoc->current_leading_word.data,
-                  heredoc->delimiter.data) == 0;
+    return strcmp(heredoc->current_leading_word.data, heredoc->delimiter.data) == 0;
 }
 
-static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
-                                 enum TokenType middle_type,
+static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenType middle_type,
                                  enum TokenType end_type) {
     bool did_advance = false;
     Heredoc *heredoc = &VEC_BACK(scanner->heredocs);
@@ -348,14 +333,12 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                     lexer->result_symbol = middle_type;
                     heredoc->started = true;
                     advance(lexer);
-                    if (iswalpha(lexer->lookahead) || lexer->lookahead == '{' ||
-                        lexer->lookahead == '(') {
+                    if (iswalpha(lexer->lookahead) || lexer->lookahead == '{' || lexer->lookahead == '(') {
                         return true;
                     }
                     break;
                 }
-                if (middle_type == HEREDOC_BODY_BEGINNING &&
-                    lexer->get_column(lexer) == 0) {
+                if (middle_type == HEREDOC_BODY_BEGINNING && lexer->get_column(lexer) == 0) {
                     lexer->result_symbol = middle_type;
                     heredoc->started = true;
                     return true;
@@ -375,8 +358,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
                         advance(lexer);
                     }
                 }
-                lexer->result_symbol =
-                    heredoc->started ? middle_type : end_type;
+                lexer->result_symbol = heredoc->started ? middle_type : end_type;
                 lexer->mark_end(lexer);
                 if (scan_heredoc_end_identifier(heredoc, lexer)) {
                     if (lexer->result_symbol == HEREDOC_END) {
@@ -423,11 +405,9 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer,
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
-        if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) ||
-              lexer->lookahead == '>' || lexer->lookahead == '<' ||
-              lexer->lookahead == ')' || lexer->lookahead == '(' ||
-              lexer->lookahead == ';' || lexer->lookahead == '&' ||
-              lexer->lookahead == '|' ||
+        if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) || lexer->lookahead == '>' ||
+              lexer->lookahead == '<' || lexer->lookahead == ')' || lexer->lookahead == '(' ||
+              lexer->lookahead == ';' || lexer->lookahead == '&' || lexer->lookahead == '|' ||
               (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) ||
               (lexer->lookahead == ']' && valid_symbols[CLOSING_BRACKET]))) {
             lexer->result_symbol = CONCAT;
@@ -453,8 +433,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (lexer->lookahead == '\\') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                if (lexer->lookahead == '"' || lexer->lookahead == '\'' ||
-                    lexer->lookahead == '\\') {
+                if (lexer->lookahead == '"' || lexer->lookahead == '\'' || lexer->lookahead == '\\') {
                     return true;
                 }
                 if (lexer->eof(lexer)) {
@@ -464,15 +443,13 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return true;
             }
         }
-        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] &&
-            !valid_symbols[EXPANSION_WORD]) {
+        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] && !valid_symbols[EXPANSION_WORD]) {
             lexer->result_symbol = CONCAT;
             return true;
         }
     }
 
-    if (valid_symbols[IMMEDIATE_DOUBLE_HASH] &&
-        !in_error_recovery(valid_symbols)) {
+    if (valid_symbols[IMMEDIATE_DOUBLE_HASH] && !in_error_recovery(valid_symbols)) {
         // advance two # and ensure not } after
         if (lexer->lookahead == '#') {
             lexer->mark_end(lexer);
@@ -488,18 +465,14 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
     }
 
-    if (valid_symbols[EXTERNAL_EXPANSION_SYM_HASH] &&
-        !in_error_recovery(valid_symbols)) {
-        if (lexer->lookahead == '#' || lexer->lookahead == '=' ||
-            lexer->lookahead == '!') {
-            lexer->result_symbol =
-                lexer->lookahead == '#'   ? EXTERNAL_EXPANSION_SYM_HASH
-                : lexer->lookahead == '!' ? EXTERNAL_EXPANSION_SYM_BANG
-                                          : EXTERNAL_EXPANSION_SYM_EQUAL;
+    if (valid_symbols[EXTERNAL_EXPANSION_SYM_HASH] && !in_error_recovery(valid_symbols)) {
+        if (lexer->lookahead == '#' || lexer->lookahead == '=' || lexer->lookahead == '!') {
+            lexer->result_symbol = lexer->lookahead == '#'   ? EXTERNAL_EXPANSION_SYM_HASH
+                                   : lexer->lookahead == '!' ? EXTERNAL_EXPANSION_SYM_BANG
+                                                             : EXTERNAL_EXPANSION_SYM_EQUAL;
             advance(lexer);
             lexer->mark_end(lexer);
-            while (lexer->lookahead == '#' || lexer->lookahead == '=' ||
-                   lexer->lookahead == '!') {
+            while (lexer->lookahead == '#' || lexer->lookahead == '=' || lexer->lookahead == '!') {
                 advance(lexer);
             }
             while (iswspace(lexer->lookahead)) {
@@ -513,19 +486,15 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     }
 
     if (valid_symbols[EMPTY_VALUE]) {
-        if (iswspace(lexer->lookahead) || lexer->eof(lexer) ||
-            lexer->lookahead == ';' || lexer->lookahead == '&') {
+        if (iswspace(lexer->lookahead) || lexer->eof(lexer) || lexer->lookahead == ';' || lexer->lookahead == '&') {
             lexer->result_symbol = EMPTY_VALUE;
             return true;
         }
     }
 
-    if ((valid_symbols[HEREDOC_BODY_BEGINNING] ||
-         valid_symbols[SIMPLE_HEREDOC_BODY]) &&
-        scanner->heredocs.len > 0 && !VEC_BACK(scanner->heredocs).started &&
-        !in_error_recovery(valid_symbols)) {
-        return scan_heredoc_content(scanner, lexer, HEREDOC_BODY_BEGINNING,
-                                    SIMPLE_HEREDOC_BODY);
+    if ((valid_symbols[HEREDOC_BODY_BEGINNING] || valid_symbols[SIMPLE_HEREDOC_BODY]) && scanner->heredocs.len > 0 &&
+        !VEC_BACK(scanner->heredocs).started && !in_error_recovery(valid_symbols)) {
+        return scan_heredoc_content(scanner, lexer, HEREDOC_BODY_BEGINNING, SIMPLE_HEREDOC_BODY);
     }
 
     if (valid_symbols[HEREDOC_END] && scanner->heredocs.len > 0) {
@@ -539,15 +508,12 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
     }
 
-    if (valid_symbols[HEREDOC_CONTENT] && scanner->heredocs.len > 0 &&
-        VEC_BACK(scanner->heredocs).started &&
+    if (valid_symbols[HEREDOC_CONTENT] && scanner->heredocs.len > 0 && VEC_BACK(scanner->heredocs).started &&
         !in_error_recovery(valid_symbols)) {
-        return scan_heredoc_content(scanner, lexer, HEREDOC_CONTENT,
-                                    HEREDOC_END);
+        return scan_heredoc_content(scanner, lexer, HEREDOC_CONTENT, HEREDOC_END);
     }
 
-    if (valid_symbols[HEREDOC_START] && !in_error_recovery(valid_symbols) &&
-        scanner->heredocs.len > 0) {
+    if (valid_symbols[HEREDOC_START] && !in_error_recovery(valid_symbols) && scanner->heredocs.len > 0) {
         return scan_heredoc_start(&VEC_BACK(scanner->heredocs), lexer);
     }
 
@@ -622,18 +588,15 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             }
         }
 
-        if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols) &&
-            scan_bare_dollar(lexer)) {
+        if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols) && scan_bare_dollar(lexer)) {
             return true;
         }
     }
 
-    if ((valid_symbols[VARIABLE_NAME] || valid_symbols[FILE_DESCRIPTOR] ||
-         valid_symbols[HEREDOC_ARROW]) &&
+    if ((valid_symbols[VARIABLE_NAME] || valid_symbols[FILE_DESCRIPTOR] || valid_symbols[HEREDOC_ARROW]) &&
         !valid_symbols[REGEX_NO_SLASH] && !in_error_recovery(valid_symbols)) {
         for (;;) {
-            if ((lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
-                 lexer->lookahead == '\r' ||
+            if ((lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\r' ||
                  (lexer->lookahead == '\n' && !valid_symbols[NEWLINE])) &&
                 !valid_symbols[EXPANSION_WORD]) {
                 skip(lexer);
@@ -652,8 +615,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 if (lexer->lookahead == '\n') {
                     skip(lexer);
                 } else {
-                    if (lexer->lookahead == '\\' &&
-                        valid_symbols[EXPANSION_WORD]) {
+                    if (lexer->lookahead == '\\' && valid_symbols[EXPANSION_WORD]) {
                         goto expansion_word;
                     }
                     return false;
@@ -665,14 +627,12 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
         // no '*', '@', '?', '-', '$', '0', '_'
         if (!valid_symbols[EXPANSION_WORD] &&
-            (lexer->lookahead == '*' || lexer->lookahead == '@' ||
-             lexer->lookahead == '?' || lexer->lookahead == '-' ||
+            (lexer->lookahead == '*' || lexer->lookahead == '@' || lexer->lookahead == '?' || lexer->lookahead == '-' ||
              lexer->lookahead == '0' || lexer->lookahead == '_')) {
             lexer->mark_end(lexer);
             advance(lexer);
-            if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
-                lexer->lookahead == ':' || lexer->lookahead == '-' ||
-                lexer->lookahead == '%' || lexer->lookahead == '#' ||
+            if (lexer->lookahead == '=' || lexer->lookahead == '[' || lexer->lookahead == ':' ||
+                lexer->lookahead == '-' || lexer->lookahead == '%' || lexer->lookahead == '#' ||
                 lexer->lookahead == '/') {
                 return false;
             }
@@ -735,8 +695,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             }
         }
 
-        if (is_number && valid_symbols[FILE_DESCRIPTOR] &&
-            (lexer->lookahead == '>' || lexer->lookahead == '<')) {
+        if (is_number && valid_symbols[FILE_DESCRIPTOR] && (lexer->lookahead == '>' || lexer->lookahead == '<')) {
             lexer->result_symbol = FILE_DESCRIPTOR;
             return true;
         }
@@ -745,8 +704,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (lexer->lookahead == '+') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                if (lexer->lookahead == '=' || lexer->lookahead == ':' ||
-                    valid_symbols[CLOSING_BRACE]) {
+                if (lexer->lookahead == '=' || lexer->lookahead == ':' || valid_symbols[CLOSING_BRACE]) {
                     lexer->result_symbol = VARIABLE_NAME;
                     return true;
                 }
@@ -756,10 +714,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return false;
             }
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
-                (lexer->lookahead == ':' && !valid_symbols[CLOSING_BRACE]) ||
-                lexer->lookahead == '%' ||
-                (lexer->lookahead == '#' && !is_number) ||
-                lexer->lookahead == '@' ||
+                (lexer->lookahead == ':' && !valid_symbols[CLOSING_BRACE]) || lexer->lookahead == '%' ||
+                (lexer->lookahead == '#' && !is_number) || lexer->lookahead == '@' ||
                 (lexer->lookahead == '-' && valid_symbols[CLOSING_BRACE])) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = VARIABLE_NAME;
@@ -777,14 +733,12 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return false;
     }
 
-    if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols) &&
-        scan_bare_dollar(lexer)) {
+    if (valid_symbols[BARE_DOLLAR] && !in_error_recovery(valid_symbols) && scan_bare_dollar(lexer)) {
         return true;
     }
 
 regex:
-    if ((valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] ||
-         valid_symbols[REGEX_NO_SPACE]) &&
+    if ((valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] || valid_symbols[REGEX_NO_SPACE]) &&
         !in_error_recovery(valid_symbols)) {
         if (valid_symbols[REGEX] || valid_symbols[REGEX_NO_SPACE]) {
             while (iswspace(lexer->lookahead)) {
@@ -864,8 +818,7 @@ regex:
                         if (lexer->lookahead == '\\') {
                             advance(lexer);
                             state.advanced_once = true;
-                            if (!lexer->eof(lexer) && lexer->lookahead != '[' &&
-                                lexer->lookahead != '/') {
+                            if (!lexer->eof(lexer) && lexer->lookahead != '[' && lexer->lookahead != '/') {
                                 advance(lexer);
                                 lexer->mark_end(lexer);
                             }
@@ -900,15 +853,12 @@ regex:
                                 return true;
                             }
                         } else {
-                            if (iswspace(lexer->lookahead) &&
-                                state.paren_depth == 0) {
+                            if (iswspace(lexer->lookahead) && state.paren_depth == 0) {
                                 lexer->mark_end(lexer);
                                 lexer->result_symbol = REGEX_NO_SPACE;
                                 return state.found_non_alnumdollarunderdash;
                             }
-                            if (!iswalnum(lexer->lookahead) &&
-                                lexer->lookahead != '$' &&
-                                lexer->lookahead != '-' &&
+                            if (!iswalnum(lexer->lookahead) && lexer->lookahead != '$' && lexer->lookahead != '-' &&
                                 lexer->lookahead != '_') {
                                 state.found_non_alnumdollarunderdash = true;
                             }
@@ -918,10 +868,9 @@ regex:
                 }
             }
 
-            lexer->result_symbol =
-                valid_symbols[REGEX_NO_SLASH]   ? REGEX_NO_SLASH
-                : valid_symbols[REGEX_NO_SPACE] ? REGEX_NO_SPACE
-                                                : REGEX;
+            lexer->result_symbol = valid_symbols[REGEX_NO_SLASH]   ? REGEX_NO_SLASH
+                                   : valid_symbols[REGEX_NO_SPACE] ? REGEX_NO_SPACE
+                                                                   : REGEX;
             if (valid_symbols[REGEX] && !state.advanced_once) {
                 return false;
             }
@@ -936,23 +885,20 @@ extglob_pattern:
             skip(lexer);
         }
 
-        if (lexer->lookahead == '?' || lexer->lookahead == '*' ||
-            lexer->lookahead == '+' || lexer->lookahead == '@' ||
-            lexer->lookahead == '!' || lexer->lookahead == '-' ||
-            lexer->lookahead == ')' || lexer->lookahead == '\\' ||
+        if (lexer->lookahead == '?' || lexer->lookahead == '*' || lexer->lookahead == '+' || lexer->lookahead == '@' ||
+            lexer->lookahead == '!' || lexer->lookahead == '-' || lexer->lookahead == ')' || lexer->lookahead == '\\' ||
             lexer->lookahead == '.') {
             if (lexer->lookahead == '\\') {
                 advance(lexer);
-                if ((iswspace(lexer->lookahead) || lexer->lookahead == '"') &&
-                    lexer->lookahead != '\r' && lexer->lookahead != '\n') {
+                if ((iswspace(lexer->lookahead) || lexer->lookahead == '"') && lexer->lookahead != '\r' &&
+                    lexer->lookahead != '\n') {
                     advance(lexer);
                 } else {
                     return false;
                 }
             }
 
-            if (lexer->lookahead == ')' &&
-                scanner->last_glob_paren_depth == 0) {
+            if (lexer->lookahead == ')' && scanner->last_glob_paren_depth == 0) {
                 lexer->mark_end(lexer);
                 advance(lexer);
 
@@ -972,16 +918,14 @@ extglob_pattern:
                     advance(lexer);
                 }
 
-                if (lexer->lookahead == ')' || lexer->lookahead == '\\' ||
-                    lexer->lookahead == '.') {
+                if (lexer->lookahead == ')' || lexer->lookahead == '\\' || lexer->lookahead == '.') {
                     return false;
                 }
                 lexer->mark_end(lexer);
             }
 
             // case item -) or *)
-            if (lexer->lookahead == ')' &&
-                scanner->last_glob_paren_depth == 0) {
+            if (lexer->lookahead == ')' && scanner->last_glob_paren_depth == 0) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 if (iswspace(lexer->lookahead)) {
@@ -1009,16 +953,14 @@ extglob_pattern:
             if (lexer->lookahead == '|') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                if (lexer->lookahead == '\\' || lexer->lookahead == '\r' ||
-                    lexer->lookahead == '\n') {
+                if (lexer->lookahead == '\\' || lexer->lookahead == '\r' || lexer->lookahead == '\n') {
                     lexer->result_symbol = EXTGLOB_PATTERN;
                     return true;
                 }
             }
 
-            if (!iswalnum(lexer->lookahead) && lexer->lookahead != '(' &&
-                lexer->lookahead != '"' && lexer->lookahead != '[' &&
-                lexer->lookahead != '?' && lexer->lookahead != '/' &&
+            if (!iswalnum(lexer->lookahead) && lexer->lookahead != '(' && lexer->lookahead != '"' &&
+                lexer->lookahead != '[' && lexer->lookahead != '?' && lexer->lookahead != '/' &&
                 lexer->lookahead != '\\' && lexer->lookahead != '_') {
                 return false;
             }
@@ -1069,8 +1011,7 @@ extglob_pattern:
                     if (lexer->lookahead == '$') {
                         lexer->mark_end(lexer);
                         advance(lexer);
-                        if (lexer->lookahead == '(' ||
-                            lexer->lookahead == '{') {
+                        if (lexer->lookahead == '(' || lexer->lookahead == '{') {
                             lexer->result_symbol = EXTGLOB_PATTERN;
                             scanner->last_glob_paren_depth = state.paren_depth;
                             return true;
@@ -1090,8 +1031,7 @@ extglob_pattern:
                     }
                     if (lexer->lookahead == '\\') {
                         advance(lexer);
-                        if (iswspace(lexer->lookahead) ||
-                            lexer->lookahead == '"') {
+                        if (iswspace(lexer->lookahead) || lexer->lookahead == '"') {
                             advance(lexer);
                         }
                     } else {
@@ -1123,8 +1063,8 @@ expansion_word:
             if (lexer->lookahead == '$') {
                 lexer->mark_end(lexer);
                 advance(lexer);
-                if (lexer->lookahead == '{' || lexer->lookahead == '(' ||
-                    lexer->lookahead == '\'' || iswalnum(lexer->lookahead)) {
+                if (lexer->lookahead == '{' || lexer->lookahead == '(' || lexer->lookahead == '\'' ||
+                    iswalnum(lexer->lookahead)) {
                     lexer->result_symbol = EXPANSION_WORD;
                     return advanced_once;
                 }
@@ -1137,8 +1077,7 @@ expansion_word:
                 return advanced_once || advance_once_space;
             }
 
-            if (lexer->lookahead == '(' &&
-                !(advanced_once || advance_once_space)) {
+            if (lexer->lookahead == '(' && !(advanced_once || advance_once_space)) {
                 lexer->mark_end(lexer);
                 advance(lexer);
                 while (lexer->lookahead != ')' && !lexer->eof(lexer)) {
@@ -1149,19 +1088,15 @@ expansion_word:
                     if (lexer->lookahead == '$') {
                         lexer->mark_end(lexer);
                         advance(lexer);
-                        if (lexer->lookahead == '{' ||
-                            lexer->lookahead == '(' ||
-                            lexer->lookahead == '\'' ||
+                        if (lexer->lookahead == '{' || lexer->lookahead == '(' || lexer->lookahead == '\'' ||
                             iswalnum(lexer->lookahead)) {
                             lexer->result_symbol = EXPANSION_WORD;
                             return advanced_once;
                         }
                         advanced_once = true;
                     } else {
-                        advanced_once =
-                            advanced_once || !iswspace(lexer->lookahead);
-                        advance_once_space =
-                            advance_once_space || iswspace(lexer->lookahead);
+                        advanced_once = advanced_once || !iswspace(lexer->lookahead);
+                        advance_once_space = advance_once_space || iswspace(lexer->lookahead);
                         advance(lexer);
                     }
                 }
@@ -1186,8 +1121,7 @@ expansion_word:
                 return false;
             }
             advanced_once = advanced_once || !iswspace(lexer->lookahead);
-            advance_once_space =
-                advance_once_space || iswspace(lexer->lookahead);
+            advance_once_space = advance_once_space || iswspace(lexer->lookahead);
             advance(lexer);
         }
     }
@@ -1240,21 +1174,17 @@ void *tree_sitter_bash_external_scanner_create() {
     return scanner;
 }
 
-bool tree_sitter_bash_external_scanner_scan(void *payload, TSLexer *lexer,
-                                            const bool *valid_symbols) {
+bool tree_sitter_bash_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
     Scanner *scanner = (Scanner *)payload;
     return scan(scanner, lexer, valid_symbols);
 }
 
-unsigned tree_sitter_bash_external_scanner_serialize(void *payload,
-                                                     char *state) {
+unsigned tree_sitter_bash_external_scanner_serialize(void *payload, char *state) {
     Scanner *scanner = (Scanner *)payload;
     return serialize(scanner, state);
 }
 
-void tree_sitter_bash_external_scanner_deserialize(void *payload,
-                                                   const char *state,
-                                                   unsigned length) {
+void tree_sitter_bash_external_scanner_deserialize(void *payload, const char *state, unsigned length) {
     Scanner *scanner = (Scanner *)payload;
     deserialize(scanner, state, length);
 }
