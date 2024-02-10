@@ -150,7 +150,6 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
-
 static inline bool in_error_recovery(const bool *valid_symbols) { return valid_symbols[ERROR_RECOVERY]; }
 
 static inline void reset_heredoc(Heredoc *heredoc) {
@@ -925,7 +924,7 @@ extglob_pattern:
 
         if (lexer->lookahead == '?' || lexer->lookahead == '*' || lexer->lookahead == '+' || lexer->lookahead == '@' ||
             lexer->lookahead == '!' || lexer->lookahead == '-' || lexer->lookahead == ')' || lexer->lookahead == '\\' ||
-            lexer->lookahead == '.' || lexer->lookahead == '[' || (isalpha(lexer->lookahead))) {
+            lexer->lookahead == '.' || lexer->lookahead == '[' || (iswalpha(lexer->lookahead))) {
             if (lexer->lookahead == '\\') {
                 advance(lexer);
                 if ((iswspace(lexer->lookahead) || lexer->lookahead == '"') && lexer->lookahead != '\r' &&
