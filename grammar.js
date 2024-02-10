@@ -1021,6 +1021,7 @@ module.exports = grammar({
         $.command_substitution,
         alias($._expansion_word, $.word),
         $.array,
+        $.process_substitution,
       ),
       repeat1(seq(
         choice($._concat, alias(/`\s*`/, '``')),
@@ -1035,6 +1036,7 @@ module.exports = grammar({
           $.command_substitution,
           alias($._expansion_word, $.word),
           $.array,
+          $.process_substitution,
         ),
       )),
     )),
