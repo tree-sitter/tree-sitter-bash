@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-bash",
-  "version": "0.20.4",
+  "version": "0.20.5",
   "description": "Bash grammar for tree-sitter",
   "main": "bindings/node",
   "keywords": [
@@ -8,7 +8,10 @@
     "lexer",
     "bash"
   ],
-  "author": "Max Brunsfeld",
+  "author": "Max Brunsfeld <maxbrunsfeld@gmail.com>",
+  "contributors": [
+    "Amaan Qureshi <amaanq12@gmail.com>"
+  ],
   "license": "MIT",
   "dependencies": {
     "nan": "^2.18.0",
@@ -42,9 +45,15 @@
   "tree-sitter": [
     {
       "scope": "source.bash",
+      "injection-regex": "(shell|bash|sh)",
+      "first-line-regex": "^#!.*\\b(sh|bash|dash)\\b.*$",
       "file-types": [
         "sh",
-        "bash"
+        "bash",
+        ".bashrc",
+        ".bash_profile",
+        "ebuild",
+        "eclass"
       ]
     }
   ]

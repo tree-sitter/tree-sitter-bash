@@ -1,8 +1,11 @@
 [package]
 name = "tree-sitter-bash"
 description = "Bash grammar for tree-sitter"
-version = "0.20.4"
-authors = ["Max Brunsfeld <maxbrunsfeld@gmail.com"]
+version = "0.20.5"
+authors = [
+	"Max Brunsfeld <maxbrunsfeld@gmail.com>",
+	"Amaan Qureshi <amaanq12@gmail.com>",
+]
 license = "MIT"
 readme = "bindings/rust/README.md"
 keywords = ["incremental", "parsing", "bash"]
