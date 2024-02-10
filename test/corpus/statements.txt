@@ -1211,6 +1211,14 @@ function do_yet_another_thing {
 
 do_nothing() { return 0; }
 
+foo::bar() {
+  echo what
+}
+
+foo::baz() {
+  echo how
+}
+
 --------------------------------------------------------------------------------
 
 (program
@@ -1270,7 +1278,21 @@ do_nothing() { return 0; }
       (command
         (command_name
           (word))
-        (number)))))
+        (number))))
+  (function_definition
+    (word)
+    (compound_statement
+      (command
+        (command_name
+          (word))
+        (word))))
+  (function_definition
+    (word)
+    (compound_statement
+      (command
+        (command_name
+          (word))
+        (word)))))
 
 ================================================================================
 Variable declaration: declare & typeset
