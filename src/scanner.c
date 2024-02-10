@@ -96,6 +96,7 @@ enum TokenType {
     HEREDOC_ARROW,
     HEREDOC_ARROW_DASH,
     NEWLINE,
+    OPENING_PAREN,
     ERROR_RECOVERY,
 };
 
@@ -714,7 +715,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return false;
             }
             if (lexer->lookahead == '=' || lexer->lookahead == '[' ||
-                (lexer->lookahead == ':' && !valid_symbols[CLOSING_BRACE]) || lexer->lookahead == '%' ||
+                (lexer->lookahead == ':' && !valid_symbols[CLOSING_BRACE] &&
+                 !valid_symbols[OPENING_PAREN]) || // TODO(amaanq): more cases for regular word chars but not variable
+                                                   // names for function words, only handling : for now? #235
+                lexer->lookahead == '%' ||
                 (lexer->lookahead == '#' && !is_number) || lexer->lookahead == '@' ||
                 (lexer->lookahead == '-' && valid_symbols[CLOSING_BRACE])) {
                 lexer->mark_end(lexer);

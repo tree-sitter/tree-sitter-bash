@@ -97,6 +97,7 @@ module.exports = grammar({
     '<<',
     '<<-',
     /\n/,
+    '(',
     $.__error_recovery,
   ],
 
