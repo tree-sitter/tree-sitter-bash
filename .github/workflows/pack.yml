@@ -28,7 +28,7 @@ jobs:
     name: Testing Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -55,7 +55,7 @@ jobs:
     name: Testing Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -78,7 +78,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [test, test-windows]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
