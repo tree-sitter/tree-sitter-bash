@@ -9,20 +9,20 @@ Bash grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter).
 Install the dependencies:
 
 ```sh
-    npm install
+npm install
 ```
 
 Build and run the tests:
 
 ```sh
-    npm run build
-    npm run test
+npm run build
+npm run test
 ```
 
 Run the build and tests in watch mode:
 
 ```sh
-    npm run test:watch
+npm run test:watch
 ```
 
 ### References
