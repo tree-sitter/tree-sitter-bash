@@ -2,6 +2,8 @@
 
 test/corpus/crlf.txt eol=crlf
 
+script/known-failures.txt -diff
+
 examples/* linguist-vendored
 
 src/*.json linguist-generated

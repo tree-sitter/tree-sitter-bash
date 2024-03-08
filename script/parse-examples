@@ -1,62 +1,36 @@
 #!/usr/bin/env bash
 
-set -eu
+set -euo pipefail
 
-cd "$(dirname "$0")/.."
+files=(
+  examples/*.sh
+  examples/bash-it/**/*.sh
+  examples/bash-it/**/*.bash
+  examples/bash/**/*.sh
+  examples/bash/**/*.tests
+  examples/gentoo/**/*.sh
+  examples/gentoo/**/*.eclass
+  examples/gentoo/**/*.ebuild
+  examples/wild-corpus/**/*.sh
+)
 
-function clone_repo() {
-	owner=$1
-	name=$2
-	url=$3
-	sha=$4
-
-	path=examples/$name
-	if [ ! -d "$path" ]; then
-		echo "Cloning $owner/$name"
-		if [ "$name" = "gentoo" ]; then
-			git clone --depth=1 "$url" "$path"
-			# fetch commits slowly, 20k at a time or until we can checkout the sha
-			cd "$path"
-			while ! git checkout "$sha"; do
-				git fetch --depth=20000
-			done
-			cd -
-		else
-			git clone --filter=tree:0 "$url" "$path"
-			pushd "$path" >/dev/null
-			actual_sha=$(git rev-parse HEAD)
-			if [ "$actual_sha" != "$sha" ]; then
-				echo "Updating $owner/$name to $sha"
-				git fetch origin "$sha"
-			fi
-			popd >/dev/null
-		fi
-	fi
-
+clone() {
+  if [[ -d examples/$1 ]]; then
+    git -C "examples/$1" fetch origin "$3:$3" -f -u --depth=1
+  else
+    git clone "$2" "examples/$1" -b "$3" --single-branch --depth=1
+  fi
 }
 
-clone_repo Bash-it bash-it https://github.com/Bash-it/bash-it d985e4c96b1eb4e7374b3ab53eea3513fc9f50ce
-clone_repo bash bash https://git.savannah.gnu.org/git/bash.git f3b6bd19457e260b65d11f2712ec3da56cef463f
-clone_repo oilshell wild-corpus https://github.com/oilshell/wild-corpus a6fe3886095ae03afd528aefe296a169738984bc
-clone_repo gentoo gentoo https://anongit.gentoo.org/git/repo/gentoo.git 5d1f99c854c92dbb61677b776f691eb4c9841267
+cd "${0%/script/parse-examples}"
 
-known_failures="$(cat script/known-failures.txt)"
+clone bash-it https://github.com/Bash-it/bash-it master
+clone bash https://git.savannah.gnu.org/git/bash.git master
+clone gentoo https://anongit.gentoo.org/git/repo/gentoo.git master
+clone wild-corpus https://github.com/oilshell/wild-corpus main
 
-# shellcheck disable=2046
-tree-sitter parse -q \
-	examples/bash-it/**/*.bash \
-	examples/bash-it/**/*.sh \
-	examples/bash/tests/*.tests \
-	examples/gentoo/**/*.ebuild \
-	examples/gentoo/**/*.eclass \
-	examples/*.sh \
-	$(for failure in $known_failures; do echo "!${failure}"; done)
+find examples \( -name '*.sh' -or -name '*.bash' -or -name '*.tests' -or \
+  -name '*.eclass' -or -name '*.ebuild' \) -and -type f -print > script/example-files.txt
 
-example_count=$(find examples -name '*.bash' -o -name '*.sh' -o -name '*.tests' -o -name '*.ebuild' -o -name '*.eclass' | wc -l)
-failure_count=$(wc -w <<<"$known_failures")
-success_count=$((example_count - failure_count))
-success_percent=$(bc -l <<<"100*${success_count}/${example_count}")
-
-printf \
-	"Successfully parsed %d of %d example files (%.1f%%)\n" \
-	"$success_count" "$example_count" "$success_percent"
+tree-sitter parse --scope source.bash -q -s --paths scripts/example-files |& \
+  tee >(awk '/ERROR|MISSING/{print "!"$1|"sort"}' > script/known-failures.txt)
