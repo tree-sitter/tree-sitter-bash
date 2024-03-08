@@ -23,8 +23,9 @@ dist/
 *.dll
 *.pc
 
-# Example dirs
+# Examples
 /examples/*/
+script/example-files.txt
 
 # Grammar volatiles
 *.wasm
