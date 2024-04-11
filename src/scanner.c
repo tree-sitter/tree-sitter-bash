@@ -145,8 +145,10 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
             size += sizeof(uint32_t);
             array_reserve(&heredoc->delimiter, heredoc->delimiter.size);
 
-            memcpy(heredoc->delimiter.contents, &buffer[size], heredoc->delimiter.size);
-            size += heredoc->delimiter.size;
+            if (heredoc->delimiter.size > 0) {
+                memcpy(heredoc->delimiter.contents, &buffer[size], heredoc->delimiter.size);
+                size += heredoc->delimiter.size;
+            }
         }
         assert(size == length);
     }
