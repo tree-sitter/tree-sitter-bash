@@ -110,8 +110,10 @@ static unsigned serialize(Scanner *scanner, char *buffer) {
 
         memcpy(&buffer[size], &heredoc->delimiter.size, sizeof(uint32_t));
         size += sizeof(uint32_t);
-        memcpy(&buffer[size], heredoc->delimiter.contents, heredoc->delimiter.size);
-        size += heredoc->delimiter.size;
+        if (heredoc->delimiter.size > 0) {
+            memcpy(&buffer[size], heredoc->delimiter.contents, heredoc->delimiter.size);
+            size += heredoc->delimiter.size;
+        }
     }
     return size;
 }
