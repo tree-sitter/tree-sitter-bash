@@ -32,5 +32,5 @@ clone wild-corpus https://github.com/oilshell/wild-corpus main
 find examples \( -name '*.sh' -or -name '*.bash' -or -name '*.tests' -or \
   -name '*.eclass' -or -name '*.ebuild' \) -and -type f -print > script/example-files.txt
 
-tree-sitter parse --scope source.bash -q -s --paths scripts/example-files |& \
-  tee >(awk '/ERROR|MISSING/{print "!"$1|"sort"}' > script/known-failures.txt)
+tree-sitter parse --scope source.bash -q -s --paths script/example-files.txt |& \
+  tee >(awk '/ERROR|MISSING/{print $1}' | sort > script/known-failures.txt)

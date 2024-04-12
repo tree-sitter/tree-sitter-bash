@@ -30,31 +30,27 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-14]
     steps:
-      - name: Set up the repo
-        uses: tree-sitter/parser-setup-action@v1.2
-        with:
-          node-version: ${{vars.NODE_VERSION}}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v1
       - name: Set up examples
-        shell: sh
+        shell: bash
         run: |-
           git clone https://github.com/Bash-it/bash-it examples/bash-it -q --single-branch --depth=1
           git clone https://git.savannah.gnu.org/git/bash.git examples/bash -q --single-branch --depth=1
           git clone https://anongit.gentoo.org/git/repo/gentoo.git examples/gentoo -q --single-branch --depth=1
-          if [[ '${{runner.os}}' != Windows ]]; then
+          if [[ $RUNNER_OS != Windows ]]; then
             git clone https://github.com/oilshell/wild-corpus examples/wild-corpus -q --single-branch --depth=1
           fi
-      - name: Read known failures
-        uses: actions/github-script@v7
-        id: known-failures
-        with:
-          result-encoding: string
-          script: "return require('fs').readFileSync('script/known-failures.txt', 'utf8')"
       - name: Run tests
-        uses: tree-sitter/parser-test-action@v1.2
+        uses: tree-sitter/parser-test-action@v2
         with:
-          lint: ${{runner.os == 'Linux'}}
-          test-library: ${{runner.os == 'Linux'}}
-          corpus-files: |
+          test-rust: ${{runner.os == 'Linux'}}
+      - name: Parse examples
+        uses: tree-sitter/parse-action@v4
+        with:
+          files: |-
             examples/*.sh
             examples/bash-it/**/*.sh
             examples/bash-it/**/*.bash
@@ -64,5 +60,6 @@ jobs:
             examples/gentoo/**/*.eclass
             examples/wild-corpus/**/*.sh
             # examples/gentoo/**/*.ebuild
+            !examples/gentoo/app-antivirus/fangfrisch/files/fangfrisch-has-news.sh
             !examples/gentoo/eclass/ruby-fakegem.eclass
-            ${{steps.known-failures.outputs.result}}
+          invalid-files-list: script/known-failures.txt
