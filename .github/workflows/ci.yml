@@ -50,7 +50,7 @@ jobs:
           result-encoding: string
           script: "return require('fs').readFileSync('script/known-failures.txt', 'utf8')"
       - name: Run tests
-        uses: tree-sitter/parser-test-action@v1.2
+        uses: tree-sitter/parser-test-action@v2
         with:
           lint: ${{runner.os == 'Linux'}}
           test-library: ${{runner.os == 'Linux'}}
