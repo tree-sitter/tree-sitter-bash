@@ -25,8 +25,8 @@
     "bash"
   ],
   "dependencies": {
-    "node-addon-api": "^8.0.0",
-    "node-gyp-build": "^4.8.0"
+    "node-addon-api": "^8.1.0",
+    "node-gyp-build": "^4.8.2"
   },
   "peerDependencies": {
     "tree-sitter": "^0.21.1"
@@ -39,17 +39,14 @@
   "devDependencies": {
     "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
-    "tree-sitter-cli": "^0.22.2",
-    "prebuildify": "^6.0.0"
+    "tree-sitter-cli": "^0.23.0",
+    "prebuildify": "^6.0.1"
   },
   "scripts": {
-    "build": "tree-sitter generate --no-bindings",
-    "build-wasm": "tree-sitter build --wasm -o tree-sitter-bash.wasm",
     "install": "node-gyp-build",
-    "lint": "eslint grammar.js",
-    "parse": "tree-sitter parse",
-    "prebuildify": "prebuildify --napi --strip",
-    "test": "tree-sitter test"
+    "prestart": "tree-sitter build --wasm",
+    "start": "tree-sitter playground",
+    "test": "node --test bindings/node/*_test.js"
   },
   "tree-sitter": [
     {
