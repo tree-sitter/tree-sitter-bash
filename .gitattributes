@@ -1,10 +1,4 @@
-* text eol=lf
-
-test/corpus/crlf.txt eol=crlf
-
-script/known-failures.txt -diff
-
-examples/* linguist-vendored
+* text=auto eol=lf
 
 src/*.json linguist-generated
 src/parser.c linguist-generated
