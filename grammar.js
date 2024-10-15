@@ -617,7 +617,7 @@ module.exports = grammar({
 
       return choice(
         choice(...table.map(([operator, precedence]) => {
-        // @ts-ignore
+          // @ts-ignore
           return prec[operator === '**' ? 'right' : 'left'](precedence, seq(
             field('left', $._expression),
             // @ts-ignore
@@ -1133,8 +1133,7 @@ module.exports = grammar({
  *
  * @param  {...string} characters
  *
- * @return {RegExp}
- *
+ * @returns {RegExp}
  */
 function noneOf(...characters) {
   const negatedString = characters.map(c => c == '\\' ? '\\\\' : c).join('');
@@ -1146,8 +1145,7 @@ function noneOf(...characters) {
  *
  * @param {RuleOrLiteral} rule
  *
- * @return {ChoiceRule}
- *
+ * @returns {ChoiceRule}
  */
 function commaSep(rule) {
   return optional(commaSep1(rule));
@@ -1158,8 +1156,7 @@ function commaSep(rule) {
  *
  * @param {RuleOrLiteral} rule
  *
- * @return {SeqRule}
- *
+ * @returns {SeqRule}
  */
 function commaSep1(rule) {
   return seq(rule, repeat(seq(',', rule)));
@@ -1169,9 +1166,9 @@ function commaSep1(rule) {
  *
  * Turns a list of rules into a choice of immediate rule
  *
- * @param {(RegExp|String)[]} literals
+ * @param {(RegExp | string)[]} literals
  *
- * @return {ChoiceRule}
+ * @returns {ChoiceRule}
  */
 function immediateLiterals(...literals) {
   return choice(...literals.map(l => token.immediate(l)));
@@ -1183,9 +1180,9 @@ function immediateLiterals(...literals) {
  *
  * @param {number} precedence
  *
- * @param {(RegExp|String)[]} literals
+ * @param {(RegExp | string)[]} literals
  *
- * @return {ChoiceRule}
+ * @returns {ChoiceRule}
  */
 function tokenLiterals(precedence, ...literals) {
   return choice(...literals.map(l => token(prec(precedence, l))));
