@@ -7,10 +7,10 @@ typedef struct TSLanguage TSLanguage;
 extern "C" {
 #endif
 
-extern TSLanguage *tree_sitter_bash();
+const TSLanguage *tree_sitter_bash(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // TREE_SITTER_BASH_H_ 
+#endif // TREE_SITTER_BASH_H_
