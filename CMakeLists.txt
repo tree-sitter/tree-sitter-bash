@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-bash
-        VERSION "0.23.1"
+        VERSION "0.23.2"
         DESCRIPTION "Bash grammar for tree-sitter"
         HOMEPAGE_URL "https://github.com/tree-sitter/tree-sitter-bash"
         LANGUAGES C)
