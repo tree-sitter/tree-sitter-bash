@@ -5213,9 +5213,33 @@
         }
       ]
     },
+    "raw_string_content": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": -1,
+        "content": {
+          "type": "PATTERN",
+          "value": "([^']|\\\\')*"
+        }
+      }
+    },
     "raw_string": {
-      "type": "PATTERN",
-      "value": "'[^']*'"
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "'"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "raw_string_content"
+        },
+        {
+          "type": "STRING",
+          "value": "'"
+        }
+      ]
     },
     "ansi_c_string": {
       "type": "PATTERN",

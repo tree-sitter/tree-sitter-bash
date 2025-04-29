@@ -841,7 +841,12 @@ module.exports = grammar({
       ')',
     ),
 
-    raw_string: _ => /'[^']*'/,
+    raw_string_content: _ => token(prec(-1, /([^']|\\')*/)),
+    raw_string: $ => seq(
+      '\'',
+      $.raw_string_content,
+      '\'',
+    ),
 
     ansi_c_string: _ => /\$'([^']|\\')*'/,
 
