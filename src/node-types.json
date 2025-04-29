@@ -1737,6 +1737,21 @@
     }
   },
   {
+    "type": "raw_string",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "raw_string_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "redirected_statement",
     "named": true,
     "fields": {
@@ -2335,6 +2350,10 @@
     "named": false
   },
   {
+    "type": "'",
+    "named": false
+  },
+  {
     "type": "(",
     "named": false
   },
@@ -2711,7 +2730,7 @@
     "named": false
   },
   {
-    "type": "raw_string",
+    "type": "raw_string_content",
     "named": true
   },
   {
