@@ -46,6 +46,7 @@ jobs:
       - name: Run tests
         uses: tree-sitter/parser-test-action@v2
         with:
+          generate: false
           test-rust: true
           test-node: true
           test-python: true
