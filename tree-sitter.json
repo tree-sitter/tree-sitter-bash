@@ -18,7 +18,7 @@
     }
   ],
   "metadata": {
-    "version": "0.23.3",
+    "version": "0.25.0",
     "license": "MIT",
     "description": "Bash grammar for tree-sitter",
     "authors": [
