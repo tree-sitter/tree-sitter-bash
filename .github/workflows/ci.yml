@@ -44,7 +44,7 @@ jobs:
             git clone https://github.com/oilshell/wild-corpus examples/wild-corpus -q --single-branch --depth=1
           fi
       - name: Run tests
-        uses: tree-sitter/parser-test-action@v2
+        uses: tree-sitter/parser-test-action@v3
         with:
           generate: false
           test-rust: true
