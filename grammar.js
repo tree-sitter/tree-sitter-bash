@@ -359,7 +359,10 @@ module.exports = grammar({
       repeat(seq('|', field('value', choice($._literal, $._extglob_blob)))),
       ')',
       optional($._statements),
-      optional(prec(1, ';;')),
+      optional(prec(1, choice(
+        field('termination', ';;'),
+        field('fallthrough', choice(';&', ';;&')),
+      ))),
     ),
 
     function_definition: $ => prec.right(seq(
