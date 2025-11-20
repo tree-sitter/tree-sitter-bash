@@ -405,13 +405,11 @@ done )
         (simple_expansion
           (variable_name)))
       (if_statement
-        (command
-          (command_name
-            (arithmetic_expansion
-              (binary_expression
-                (simple_expansion
-                  (variable_name))
-                (number)))))
+        (test_command
+          (binary_expression
+            (simple_expansion
+              (variable_name))
+            (number)))
         (command
           (command_name
             (word))))))
@@ -435,12 +433,10 @@ done )
         (command_substitution
           (redirected_statement
             (list
-              (command
-                (command_name
-                  (arithmetic_expansion
-                    (binary_expression
-                      (variable_name)
-                      (number)))))
+              (test_command
+                (binary_expression
+                  (variable_name)
+                  (number)))
               (command
                 (command_name
                   (word))
@@ -488,12 +484,10 @@ done )
           (command_substitution
             (redirected_statement
               (list
-                (command
-                  (command_name
-                    (arithmetic_expansion
-                      (binary_expression
-                        (variable_name)
-                        (number)))))
+                (test_command
+                  (binary_expression
+                    (variable_name)
+                    (number)))
                 (command
                   (command_name
                     (word))
@@ -1124,15 +1118,13 @@ fi
 
 (program
   (if_statement
-    (command
-      (command_name
-        (arithmetic_expansion
-          (ternary_expression
-            (binary_expression
-              (number)
-              (number))
-            (number)
-            (number)))))
+    (test_command
+      (ternary_expression
+        (binary_expression
+          (number)
+          (number))
+        (number)
+        (number)))
     (command
       (command_name
         (word))

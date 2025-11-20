@@ -551,7 +551,7 @@ usage() {
           (heredoc_start)
           (heredoc_body
             (expansion
-              (special_variable_name)
+              (variable_name)
               (regex))
             (heredoc_content))
           (heredoc_end))))))
@@ -910,26 +910,28 @@ ${array[((number+1))]}
         (subscript
           (variable_name)
           (unary_expression
-            (word))))))
+            (variable_name))))))
   (command
     (command_name
       (expansion
         (subscript
           (variable_name)
-          (arithmetic_expansion
-            (binary_expression
-              (simple_expansion
-                (variable_name))
-              (number)))))))
+          (parenthesized_expression
+            (parenthesized_expression
+              (binary_expression
+                (simple_expansion
+                  (variable_name))
+                (number))))))))
   (command
     (command_name
       (expansion
         (subscript
           (variable_name)
-          (arithmetic_expansion
-            (binary_expression
-              (variable_name)
-              (number))))))))
+          (parenthesized_expression
+            (parenthesized_expression
+              (binary_expression
+                (variable_name)
+                (number)))))))))
 
 ==========================================
 Bare $
