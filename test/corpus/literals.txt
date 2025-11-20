@@ -1193,6 +1193,7 @@ Double quoted strings
 
 echo "a" "b"
 echo "a ${b} c" "d $e"
+echo "(())"
 
 --------------------------------------------------------------------------------
 
@@ -1215,7 +1216,12 @@ echo "a ${b} c" "d $e"
     (string
       (string_content)
       (simple_expansion
-        (variable_name)))))
+        (variable_name))))
+  (command
+    (command_name
+      (word))
+    (string
+      (string_content))))
 
 ================================================================================
 Strings containing command substitutions
