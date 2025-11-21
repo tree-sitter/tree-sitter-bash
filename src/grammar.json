@@ -2532,7 +2532,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "parenthesized_expression"
+                "name": "compound_statement"
               }
             ]
           }

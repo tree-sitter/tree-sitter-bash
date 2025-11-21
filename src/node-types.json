@@ -1919,11 +1919,11 @@
             "named": true
           },
           {
-            "type": "concatenation",
+            "type": "compound_statement",
             "named": true
           },
           {
-            "type": "parenthesized_expression",
+            "type": "concatenation",
             "named": true
           },
           {

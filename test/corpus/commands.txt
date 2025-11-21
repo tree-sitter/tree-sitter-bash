@@ -910,28 +910,26 @@ ${array[((number+1))]}
         (subscript
           (variable_name)
           (unary_expression
-            (variable_name))))))
+            (word))))))
   (command
     (command_name
       (expansion
         (subscript
           (variable_name)
-          (parenthesized_expression
-            (parenthesized_expression
-              (binary_expression
-                (simple_expansion
-                  (variable_name))
-                (number))))))))
+          (compound_statement
+            (binary_expression
+              (simple_expansion
+                (variable_name))
+              (number)))))))
   (command
     (command_name
       (expansion
         (subscript
           (variable_name)
-          (parenthesized_expression
-            (parenthesized_expression
-              (binary_expression
-                (variable_name)
-                (number)))))))))
+          (compound_statement
+            (binary_expression
+              (variable_name)
+              (number))))))))
 
 ==========================================
 Bare $

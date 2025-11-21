@@ -1,4 +1,3 @@
-examples/bash-it/completion/available/aliases.completion.bash
 examples/bash-it/completion/available/bundler.completion.bash
 examples/bash-it/completion/available/sqlmap.completion.bash
 examples/bash-it/plugins/available/colors.plugin.bash
@@ -83,6 +82,7 @@ examples/wild-corpus/cloud/sandstorm/install.sh
 examples/wild-corpus/cloud/sandstorm/make-bundle.sh
 examples/wild-corpus/cloud/sandstorm/shell/run-dev.sh
 examples/wild-corpus/distro/DietPi/PREP_SYSTEM_FOR_DIETPI.sh
+examples/wild-corpus/distro/crankshaft/crankshaft/scripts/read-only-fs.sh
 examples/wild-corpus/distro/portage/bin/misc-functions.sh
 examples/wild-corpus/distro/portage/bin/phase-helpers.sh
 examples/wild-corpus/distro/woof-CE/initrd-progs/build.sh
@@ -91,8 +91,6 @@ examples/wild-corpus/distro/woof-CE/woof-code/rootfs-skeleton/usr/local/petget/i
 examples/wild-corpus/distro/woof-CE/woof-code/rootfs-skeleton/usr/local/petget/pkg_chooser.sh
 examples/wild-corpus/esoteric/CmdlineGL/share/examples/FlightSim.sh
 examples/wild-corpus/esoteric/CmdlineGL/share/examples/Robot.sh
-examples/wild-corpus/esoteric/lishp/callable.lambda.sh
-examples/wild-corpus/esoteric/lishp/parser.sh
 examples/wild-corpus/esoteric/make-a-lisp-bash/core.sh
 examples/wild-corpus/esoteric/shasm/shasm.sh
 examples/wild-corpus/exp/shootout/timing.sh
@@ -109,8 +107,6 @@ examples/wild-corpus/freebsd-11.1/crypto/openssl/util/bat.sh
 examples/wild-corpus/freebsd-11.1/gnu/usr.bin/binutils/ld/genscripts.sh
 examples/wild-corpus/freebsd-11.1/share/examples/drivers/make_device_driver.sh
 examples/wild-corpus/freebsd-11.1/share/examples/drivers/make_pseudo_driver.sh
-examples/wild-corpus/freebsd-11.1/sys/dev/bhnd/tools/bus_macro.sh
-examples/wild-corpus/freebsd-11.1/sys/tools/bus_macro.sh
 examples/wild-corpus/freebsd-11.1/tools/tools/mctest/mctest_run.sh
 examples/wild-corpus/freebsd-11.1/tools/tools/nanobsd/fill_pkg.sh
 examples/wild-corpus/freebsd-11.1/tools/tools/shlib-compat/test/regress.sh
@@ -365,5 +361,4 @@ examples/wild-corpus/shell/mksh/Build.sh
 examples/wild-corpus/shell/mksh/test.sh
 examples/wild-corpus/shell/modernish/install.sh
 examples/wild-corpus/shell/mwc-sh/shql.sh
-examples/wild-corpus/shell/posixcube/posixcube.sh
 examples/wild-corpus/shell/posixcube/test.sh
