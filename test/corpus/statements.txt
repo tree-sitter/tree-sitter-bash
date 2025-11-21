@@ -405,7 +405,7 @@ done )
         (simple_expansion
           (variable_name)))
       (if_statement
-        (test_command
+        (compound_statement
           (binary_expression
             (simple_expansion
               (variable_name))
@@ -433,7 +433,7 @@ done )
         (command_substitution
           (redirected_statement
             (list
-              (test_command
+              (compound_statement
                 (binary_expression
                   (variable_name)
                   (number)))
@@ -484,7 +484,7 @@ done )
           (command_substitution
             (redirected_statement
               (list
-                (test_command
+                (compound_statement
                   (binary_expression
                     (variable_name)
                     (number)))
@@ -1118,7 +1118,7 @@ fi
 
 (program
   (if_statement
-    (test_command
+    (compound_statement
       (ternary_expression
         (binary_expression
           (number)

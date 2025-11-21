@@ -1584,7 +1584,7 @@ soft_errors_count=$[soft_errors_count + 1]
                   (variable_name)))
               (number)))
           (number)))))
-  (test_command
+  (compound_statement
     (binary_expression
       (variable_name)
       (number)))
@@ -1628,7 +1628,7 @@ soft_errors_count=$[soft_errors_count + 1]
           (variable_name))
         (postfix_expression
           (variable_name)))))
-  (test_command
+  (compound_statement
     (binary_expression
       (string
         (expansion
