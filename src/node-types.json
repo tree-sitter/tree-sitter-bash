@@ -1927,23 +1927,7 @@
             "named": true
           },
           {
-            "type": "postfix_expression",
-            "named": true
-          },
-          {
-            "type": "subscript",
-            "named": true
-          },
-          {
-            "type": "ternary_expression",
-            "named": true
-          },
-          {
             "type": "unary_expression",
-            "named": true
-          },
-          {
-            "type": "variable_name",
             "named": true
           }
         ]

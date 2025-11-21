@@ -518,17 +518,14 @@ module.exports = grammar({
 
     variable_assignments: $ => seq($.variable_assignment, repeat1($.variable_assignment)),
 
-    subscript: $ => prec.left(seq(
+    subscript: $ => seq(
       field('name', $.variable_name),
       '[',
-      field('index', choice(
-        $._literal,
-        $._arithmetic_expression,
-      )),
+      field('index', choice($._literal, $.binary_expression, $.unary_expression, $.parenthesized_expression)),
       optional($._concat),
       ']',
       optional($._concat),
-    )),
+    ),
 
     file_redirect: $ => prec.left(seq(
       field('descriptor', optional($.file_descriptor)),
