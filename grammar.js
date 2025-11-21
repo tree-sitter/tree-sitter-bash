@@ -386,10 +386,24 @@ module.exports = grammar({
       field('redirect', optional($._redirect)),
     )),
 
-    compound_statement: $ => seq(
-      '{',
-      optional($._terminated_statement),
-      token(prec(-1, '}')),
+    compound_statement: $ => choice(
+      seq(
+        '{',
+        optional($._terminated_statement),
+        token(prec(-1, '}')),
+      ),
+      seq(
+        '((',
+        optional(
+          repeat(
+            seq(
+              $._arithmetic_expression,
+              ',',
+            ),
+          ),
+        ),
+        $._arithmetic_expression,
+        '))'),
     ),
 
     subshell: $ => seq(
@@ -435,7 +449,6 @@ module.exports = grammar({
           ),
           ']]',
         ),
-        seq('((', optional($._arithmetic_expression), '))'),
       ),
     ),
 
