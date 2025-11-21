@@ -2533,6 +2533,10 @@
               {
                 "type": "SYMBOL",
                 "name": "compound_statement"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "subshell"
               }
             ]
           }

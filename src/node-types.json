@@ -1927,6 +1927,10 @@
             "named": true
           },
           {
+            "type": "subshell",
+            "named": true
+          },
+          {
             "type": "unary_expression",
             "named": true
           }

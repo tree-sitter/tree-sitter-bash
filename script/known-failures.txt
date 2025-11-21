@@ -82,7 +82,6 @@ examples/wild-corpus/cloud/sandstorm/install.sh
 examples/wild-corpus/cloud/sandstorm/make-bundle.sh
 examples/wild-corpus/cloud/sandstorm/shell/run-dev.sh
 examples/wild-corpus/distro/DietPi/PREP_SYSTEM_FOR_DIETPI.sh
-examples/wild-corpus/distro/crankshaft/crankshaft/scripts/read-only-fs.sh
 examples/wild-corpus/distro/portage/bin/misc-functions.sh
 examples/wild-corpus/distro/portage/bin/phase-helpers.sh
 examples/wild-corpus/distro/woof-CE/initrd-progs/build.sh
