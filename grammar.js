@@ -1088,7 +1088,7 @@ module.exports = grammar({
       ),
     ),
 
-    comment: _ => token(prec(-10, /#.*/)),
+    comment: _ => token(prec(-10, /#[^\r\n]*/)),
 
     _comment_word: _ => token(prec(-8, seq(
       choice(
