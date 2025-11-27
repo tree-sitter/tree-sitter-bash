@@ -6717,7 +6717,7 @@
         "value": -10,
         "content": {
           "type": "PATTERN",
-          "value": "#.*"
+          "value": "#[^\\r\\n]*"
         }
       }
     },
