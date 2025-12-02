@@ -1889,34 +1889,72 @@
       }
     },
     "compound_statement": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
-          "type": "STRING",
-          "value": "{"
-        },
-        {
-          "type": "CHOICE",
+          "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "_terminated_statement"
+              "type": "STRING",
+              "value": "{"
             },
             {
-              "type": "BLANK"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_terminated_statement"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "TOKEN",
+              "content": {
+                "type": "PREC",
+                "value": -1,
+                "content": {
+                  "type": "STRING",
+                  "value": "}"
+                }
+              }
             }
           ]
         },
         {
-          "type": "TOKEN",
-          "content": {
-            "type": "PREC",
-            "value": -1,
-            "content": {
+          "type": "SEQ",
+          "members": [
+            {
               "type": "STRING",
-              "value": "}"
+              "value": "(("
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_arithmetic_expression"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  }
+                ]
+              }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_arithmetic_expression"
+            },
+            {
+              "type": "STRING",
+              "value": "))"
             }
-          }
+          ]
         }
       ]
     },
@@ -2111,31 +2149,6 @@
                 {
                   "type": "STRING",
                   "value": "]]"
-                }
-              ]
-            },
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "(("
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "_expression"
-                    },
-                    {
-                      "type": "BLANK"
-                    }
-                  ]
-                },
-                {
-                  "type": "STRING",
-                  "value": "))"
                 }
               ]
             }
@@ -2511,7 +2524,11 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "parenthesized_expression"
+                "name": "compound_statement"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "subshell"
               }
             ]
           }
@@ -3973,17 +3990,8 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "$(("
-                },
-                {
-                  "type": "STRING",
-                  "value": "(("
-                }
-              ]
+              "type": "STRING",
+              "value": "$(("
             },
             {
               "type": "SEQ",
@@ -4182,6 +4190,10 @@
           {
             "type": "SYMBOL",
             "name": "string"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "raw_string"
           }
         ]
       }
@@ -6841,10 +6853,6 @@
           {
             "type": "STRING",
             "value": "$"
-          },
-          {
-            "type": "STRING",
-            "value": "0"
           },
           {
             "type": "STRING",

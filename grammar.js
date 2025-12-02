@@ -386,10 +386,22 @@ module.exports = grammar({
       field('redirect', optional($._redirect)),
     )),
 
-    compound_statement: $ => seq(
-      '{',
-      optional($._terminated_statement),
-      token(prec(-1, '}')),
+    compound_statement: $ => choice(
+      seq(
+        '{',
+        optional($._terminated_statement),
+        token(prec(-1, '}')),
+      ),
+      seq(
+        '((',
+        repeat(
+          seq(
+            $._arithmetic_expression,
+            ',',
+          ),
+        ),
+        $._arithmetic_expression,
+        '))'),
     ),
 
     subshell: $ => seq(
@@ -435,7 +447,6 @@ module.exports = grammar({
           ),
           ']]',
         ),
-        seq('((', optional($._expression), '))'),
       ),
     ),
 
@@ -508,7 +519,7 @@ module.exports = grammar({
     subscript: $ => seq(
       field('name', $.variable_name),
       '[',
-      field('index', choice($._literal, $.binary_expression, $.unary_expression, $.parenthesized_expression)),
+      field('index', choice($._literal, $.binary_expression, $.unary_expression, $.compound_statement, $.subshell)),
       optional($._concat),
       ']',
       optional($._concat),
@@ -701,7 +712,7 @@ module.exports = grammar({
     ),
 
     arithmetic_expansion: $ => choice(
-      seq(choice('$((', '(('), commaSep1($._arithmetic_expression), '))'),
+      seq('$((', commaSep1($._arithmetic_expression), '))'),
       seq('$[', $._arithmetic_expression, ']'),
     ),
 
@@ -731,6 +742,7 @@ module.exports = grammar({
       $._simple_variable_name,
       $.variable_name,
       $.string,
+      $.raw_string,
     )),
 
     _arithmetic_binary_expression: $ => {
@@ -1108,7 +1120,7 @@ module.exports = grammar({
       $.variable_name,
     ),
 
-    _special_variable_name: $ => alias(choice('*', '@', '?', '!', '#', '-', '$', '0', '_'), $.special_variable_name),
+    _special_variable_name: $ => alias(choice('*', '@', '?', '!', '#', '-', '$', '_'), $.special_variable_name),
 
     word: _ => token(seq(
       choice(

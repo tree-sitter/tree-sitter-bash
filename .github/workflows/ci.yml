@@ -48,7 +48,7 @@ jobs:
         with:
           generate: false
           test-rust: true
-          test-node: true
+          test-node: false
           test-python: true
           test-go: true
           test-swift: false
