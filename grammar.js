@@ -394,12 +394,10 @@ module.exports = grammar({
       ),
       seq(
         '((',
-        optional(
-          repeat(
-            seq(
-              $._arithmetic_expression,
-              ',',
-            ),
+        repeat(
+          seq(
+            $._arithmetic_expression,
+            ',',
           ),
         ),
         $._arithmetic_expression,
