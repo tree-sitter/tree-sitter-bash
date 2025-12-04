@@ -13,18 +13,17 @@
         "src/parser.c",
         "src/scanner.c",
       ],
-      "conditions": [
-        ["OS!='win'", {
-          "cflags_c": [
-            "-std=c11",
-          ],
-        }, { # OS == "win"
-          "cflags_c": [
+      "cflags_c": [
+        "-std=c11",
+      ],
+      "msvs_settings": {
+        "VCCLCompilerTool": {
+          "AdditionalOptions": [
             "/std:c11",
             "/utf-8",
           ],
-        }],
-      ],
+        },
+      },
     }
   ]
 }
