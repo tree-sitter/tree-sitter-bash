@@ -857,6 +857,10 @@
           {
             "type": "herestring_redirect",
             "named": true
+          },
+          {
+            "type": "incomplete_redirect",
+            "named": true
           }
         ]
       }
@@ -1390,6 +1394,10 @@
           {
             "type": "herestring_redirect",
             "named": true
+          },
+          {
+            "type": "incomplete_redirect",
+            "named": true
           }
         ]
       }
@@ -1474,6 +1482,10 @@
           },
           {
             "type": "herestring_redirect",
+            "named": true
+          },
+          {
+            "type": "incomplete_redirect",
             "named": true
           }
         ]
@@ -1586,6 +1598,22 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "incomplete_redirect",
+    "named": true,
+    "fields": {
+      "descriptor": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "file_descriptor",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1836,6 +1864,10 @@
           },
           {
             "type": "herestring_redirect",
+            "named": true
+          },
+          {
+            "type": "incomplete_redirect",
             "named": true
           }
         ]
