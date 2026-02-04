@@ -142,6 +142,7 @@ exec {VIRTWL[0]}<&- {VIRTWL[1]}>&-
 grep 2>/dev/null -q "^/usr/bin/scponly$" /etc/shells
 
 x <x a b c
+ls -a <path>
 
 ---
 
@@ -254,7 +255,15 @@ x <x a b c
       (word)
       (word)
       (word)
-      (word))))
+      (word)))
+  (redirected_statement
+    (command
+      (command_name
+        (word))
+      (word))
+    (file_redirect
+      (word))
+    (incomplete_redirect)))
 
 ===============================
 File redirects (noclobber override)

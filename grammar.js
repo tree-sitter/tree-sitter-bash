@@ -185,6 +185,7 @@ module.exports = grammar({
         field('redirect', choice(
           repeat1(choice(
             $.file_redirect,
+            $.incomplete_redirect,
             $.heredoc_redirect,
           )),
         )),
@@ -539,6 +540,12 @@ module.exports = grammar({
       ),
     )),
 
+    // error recovery redirect with missing destination
+    incomplete_redirect: $ => prec(-1, seq(
+      field('descriptor', optional($.file_descriptor)),
+      choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
+    )),
+
     heredoc_redirect: $ => seq(
       field('descriptor', optional($.file_descriptor)),
       choice('<<', '<<-'),
@@ -594,7 +601,7 @@ module.exports = grammar({
       $._literal,
     )),
 
-    _redirect: $ => choice($.file_redirect, $.herestring_redirect),
+    _redirect: $ => choice($.file_redirect, $.herestring_redirect, $.incomplete_redirect),
 
     // Expressions
 
