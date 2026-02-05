@@ -1350,6 +1350,36 @@ Test commands with regexes
       (regex))))
 
 ================================================================================
+Test commands with glob patterns containing quoted spaces
+================================================================================
+
+[[ "${tmp}" = *"A B"* ]]
+[[ "${tmp}" = *"-----BEGIN CERTIFICATE-----"* ]]
+[[ "${tmp}" = *'single quoted with space'* ]]
+
+---
+
+(program
+  (test_command
+    (binary_expression
+      (string
+        (expansion
+          (variable_name)))
+      (regex)))
+  (test_command
+    (binary_expression
+      (string
+        (expansion
+          (variable_name)))
+      (regex)))
+  (test_command
+    (binary_expression
+      (string
+        (expansion
+          (variable_name)))
+      (regex))))
+
+================================================================================
 Test command paren statefulness with a case glob
 ================================================================================
 
