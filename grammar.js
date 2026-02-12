@@ -3,6 +3,7 @@
  * @author Max Brunsfeld <maxbrunsfeld@gmail.com>
  * @author Amaan Qureshi <amaanq12@gmail.com>
  * @license MIT
+
  */
 
 /// <reference types="tree-sitter-cli/dsl" />
