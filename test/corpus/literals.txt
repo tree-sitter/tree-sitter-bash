@@ -1297,10 +1297,29 @@ Strings with ANSI-C quoting
 ================================================================================
 
 echo $'Here\'s Johnny!\r\n'
+WORDCHARS=$'/-–_:,.;<>~!@#$%^&*|+=[]{}()?\'"`\\'
+echo $'escaped backslash at end \\'
+echo $'tab\there'
+echo $'mixed \\escapes\' and \\\\more'
 
 --------------------------------------------------------------------------------
 
 (program
+  (command
+    (command_name
+      (word))
+    (ansi_c_string))
+  (variable_assignment
+    (variable_name)
+    (ansi_c_string))
+  (command
+    (command_name
+      (word))
+    (ansi_c_string))
+  (command
+    (command_name
+      (word))
+    (ansi_c_string))
   (command
     (command_name
       (word))
