@@ -5231,7 +5231,7 @@
     },
     "ansi_c_string": {
       "type": "PATTERN",
-      "value": "\\$'([^']|\\\\')*'"
+      "value": "\\$'([^'\\\\]|\\\\.)*'"
     },
     "number": {
       "type": "CHOICE",

@@ -855,7 +855,7 @@ module.exports = grammar({
 
     raw_string: _ => /'[^']*'/,
 
-    ansi_c_string: _ => /\$'([^']|\\')*'/,
+    ansi_c_string: _ => /\$'([^'\\]|\\.)*'/, // older one is /\$'([^']|\\')*'/
 
     number: $ => choice(
       /-?(0x)?[0-9]+(#[0-9A-Za-z@_]+)?/,
