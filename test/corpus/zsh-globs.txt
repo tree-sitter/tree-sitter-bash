@@ -1,5 +1,5 @@
 ================================================================================
-Glob qualifier in array assignment inside function
+Zsh compatibility; trailing paren glob suffixes parsed correctly
 ================================================================================
 
 env_loader_loop() {
