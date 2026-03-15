@@ -1,0 +1,53 @@
+================================================================================
+Glob qualifier in array assignment inside function
+================================================================================
+
+env_loader_loop() {
+    local -a files
+
+    files=("$SRC_CFG_DIR"/*.sh(N))
+
+    if ((${#files[@]} == 0)); then
+        msg --warn "no *.sh files found in '$SRC_CFG_DIR'"
+        return 0
+    fi
+}
+
+--------------------------------------------------------------------------------
+
+(program
+  (function_definition
+    (word)
+    (compound_statement
+      (declaration_command
+        (word)
+        (variable_name))
+      (variable_assignment
+        (variable_name)
+        (array
+          (concatenation
+            (string
+              (simple_expansion
+                (variable_name)))
+            (word))))
+      (if_statement
+        (compound_statement
+          (binary_expression
+            (expansion
+              (subscript
+                (variable_name)
+                (word)))
+            (number)))
+        (command
+          (command_name
+            (word))
+          (word)
+          (string
+            (string_content)
+            (simple_expansion
+              (variable_name))
+            (string_content)))
+        (command
+          (command_name
+            (word))
+          (number))))))

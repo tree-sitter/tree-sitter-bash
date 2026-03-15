@@ -696,6 +696,7 @@ module.exports = grammar({
     ),
 
     _primary_expression: $ => choice(
+      alias($._glob_word, $.word),
       $.word,
       alias($.test_operator, $.word),
       $.string,
@@ -1132,6 +1133,19 @@ module.exports = grammar({
         seq('\\', noneOf('\\s')),
         '\\ ',
       )),
+    )),
+
+    _glob_word: _ => token(seq(
+      choice(
+        noneOf('#', ...SPECIAL_CHARACTERS),
+        seq('\\', noneOf('\\s')),
+      ),
+      repeat(choice(
+        noneOf(...SPECIAL_CHARACTERS),
+        seq('\\', noneOf('\\s')),
+        '\\ ',
+      )),
+      repeat1(/\([^()\s]+\)/),
     )),
 
     _c_terminator: _ => choice(';', /\n/, '&'),

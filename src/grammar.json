@@ -3925,6 +3925,15 @@
       "type": "CHOICE",
       "members": [
         {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_glob_word"
+          },
+          "named": true,
+          "value": "word"
+        },
+        {
           "type": "SYMBOL",
           "name": "word"
         },
@@ -6917,6 +6926,72 @@
                   "value": "\\ "
                 }
               ]
+            }
+          }
+        ]
+      }
+    },
+    "_glob_word": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "PATTERN",
+                "value": "[^#'\"<>{}\\[\\]()`$|&;\\\\\\s]"
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "\\"
+                  },
+                  {
+                    "type": "PATTERN",
+                    "value": "[^\\s]"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "PATTERN",
+                  "value": "[^'\"<>{}\\[\\]()`$|&;\\\\\\s]"
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "\\"
+                    },
+                    {
+                      "type": "PATTERN",
+                      "value": "[^\\s]"
+                    }
+                  ]
+                },
+                {
+                  "type": "STRING",
+                  "value": "\\ "
+                }
+              ]
+            }
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "PATTERN",
+              "value": "\\([^()\\s]+\\)"
             }
           }
         ]
