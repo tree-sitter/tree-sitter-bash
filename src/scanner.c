@@ -386,7 +386,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                 return true;
             }
         }
-        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] && !valid_symbols[EXPANSION_WORD]) {
+        if (iswspace(lexer->lookahead) && valid_symbols[CLOSING_BRACE] && !valid_symbols[EXPANSION_WORD] &&
+            !valid_symbols[NEWLINE]) {
             lexer->result_symbol = CONCAT;
             return true;
         }

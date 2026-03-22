@@ -39,7 +39,7 @@ class BdistWheel(bdist_wheel):
     def get_tag(self):
         python, abi, platform = super().get_tag()
         if python.startswith("cp"):
-            python, abi = "cp310", "abi3"
+            python, abi = "cp310", "abi3t"
         return python, abi, platform
 
 
@@ -70,7 +70,7 @@ setup(
     ],
     cmdclass={
         "build": Build,
-        "bdist_wheel": BdistWheel,
+        #"bdist_wheel": BdistWheel,
         "egg_info": EggInfo,
     },
     zip_safe=False

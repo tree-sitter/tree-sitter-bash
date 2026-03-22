@@ -1911,6 +1911,18 @@
               ]
             },
             {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_statement_not_subshell"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
               "type": "TOKEN",
               "content": {
                 "type": "PREC",
@@ -2474,20 +2486,24 @@
       ]
     },
     "variable_assignments": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "variable_assignment"
-        },
-        {
-          "type": "REPEAT1",
-          "content": {
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
             "type": "SYMBOL",
             "name": "variable_assignment"
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "variable_assignment"
+            }
           }
-        }
-      ]
+        ]
+      }
     },
     "subscript": {
       "type": "SEQ",
