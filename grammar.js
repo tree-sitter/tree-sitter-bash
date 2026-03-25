@@ -183,10 +183,15 @@ module.exports = grammar({
       seq(
         field('body', $._statement),
         field('redirect', choice(
-          repeat1(choice(
+          $.file_redirect,
+          $.heredoc_redirect,
+        )),
+        repeat(choice(
+          field('redirect', choice(
             $.file_redirect,
             $.heredoc_redirect,
           )),
+          field('argument', $._literal),
         )),
       ),
       seq(
@@ -530,7 +535,7 @@ module.exports = grammar({
       choice(
         seq(
           choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-          field('destination', repeat1($._literal)),
+          field('destination', $._literal),
         ),
         seq(
           choice('<&-', '>&-'), // close file descriptor

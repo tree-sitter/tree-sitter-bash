@@ -1288,7 +1288,7 @@
         ]
       },
       "destination": {
-        "multiple": true,
+        "multiple": false,
         "required": false,
         "types": [
           {
@@ -1812,6 +1812,20 @@
     "type": "redirected_statement",
     "named": true,
     "fields": {
+      "argument": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_primary_expression",
+            "named": true
+          },
+          {
+            "type": "concatenation",
+            "named": true
+          }
+        ]
+      },
       "body": {
         "multiple": false,
         "required": false,

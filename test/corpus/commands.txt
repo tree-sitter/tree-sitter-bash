@@ -226,14 +226,14 @@ x <x a b c
         (number)
         (word)
         (word)))
-    (file_redirect
-      (concatenation
-        (word)
-        (word)
-        (word)
-        (number)
-        (word)
-        (word)))
+    (file_redirect)
+    (concatenation
+      (word)
+      (word)
+      (word)
+      (number)
+      (word)
+      (word))
     (file_redirect))
   (redirected_statement
     (command
@@ -241,20 +241,50 @@ x <x a b c
         (word)))
     (file_redirect
       (file_descriptor)
-      (word)
-      (word)
-      (string
-        (string_content))
-      (word)))
+      (word))
+    (word)
+    (string
+      (string_content))
+    (word))
   (redirected_statement
     (command
       (command_name
         (word)))
     (file_redirect
+      (word))
+    (word)
+    (word)
+    (word)))
+
+===============================
+Redirect in middle of command with -exec
+===============================
+
+find /path -name "*.sql" 2>/dev/null -exec grep -l "pattern" {} \;
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word))
       (word)
       (word)
+      (string
+        (string_content)))
+    (file_redirect
+      (file_descriptor)
+      (word))
+    (word)
+    (word)
+    (word)
+    (string
+      (string_content))
+    (concatenation
       (word)
-      (word))))
+      (word))
+    (word)))
 
 ===============================
 File redirects (noclobber override)
