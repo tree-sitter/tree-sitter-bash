@@ -991,3 +991,60 @@ bin/ls /usr/bin
     (command_name
       (word))
     (word)))
+===============================
+Standalone heredoc
+===============================
+
+<<EOF
+hello
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+===============================
+Standalone heredoc with output redirect
+===============================
+
+<< 'EOF' > scratch.ts
+hello
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (heredoc_redirect
+      (heredoc_start)
+      (file_redirect
+        (word))
+      (heredoc_body)
+      (heredoc_end))))
+
+===============================
+Multiple standalone redirects including heredoc
+===============================
+
+> out.txt <<EOF 2> err.txt
+hello
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (file_redirect
+      (word))
+    (heredoc_redirect
+      (heredoc_start)
+      (file_redirect
+        (file_descriptor)
+        (word))
+      (heredoc_body)
+      (heredoc_end))))

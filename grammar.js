@@ -193,7 +193,7 @@ module.exports = grammar({
         field('body', choice($.if_statement, $.while_statement)),
         $.herestring_redirect,
       ),
-      field('redirect', repeat1($._redirect)),
+      field('redirect', repeat1(choice($.file_redirect, $.heredoc_redirect, $.herestring_redirect))),
       $.herestring_redirect,
     ))),
 
