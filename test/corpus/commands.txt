@@ -176,15 +176,13 @@ x <x a b c
       (number)))
   (list
     (test_command
-      (redirected_statement
-        (negated_command
-          (command
-            (command_name
-              (word))
-            (word)
-            (word)))
-        (file_redirect
-          (word))))
+      (binary_expression
+        (unary_expression
+          (word))
+        (test_operator)
+        (word))
+      (file_redirect
+        (word)))
     (command
       (command_name
         (word))))
@@ -225,8 +223,8 @@ x <x a b c
         (word)
         (number)
         (word)
-        (word)))
-    (file_redirect
+        (word))
+      (file_redirect)
       (concatenation
         (word)
         (word)
@@ -235,25 +233,355 @@ x <x a b c
         (word)
         (word)))
     (file_redirect))
+  (command
+    (command_name
+      (word))
+    (file_redirect
+      (file_descriptor)
+      (word))
+    (word)
+    (string
+      (string_content))
+    (word))
+  (command
+    (command_name
+      (word))
+    (file_redirect
+      (word))
+    (word)
+    (word)
+    (word)))
+
+===============================
+Mid-command redirects
+===============================
+
+echo hello 2>/dev/null world
+cmd arg1 >file arg2 arg3
+echo a 2>&1 b 1>/dev/null c
+cmd arg >a >b arg2
+cmd arg >a >b >c arg2
+cmd 2>/dev/null >file more
+cmd arg 2> >(tee log) more
+cmd arg <<< "input" more
+cmd arg 2>/dev/null <<< "input" more
+cmd arg <input more
+cmd > >(echo ")") trailing
+cmd > >(echo ')') trailing
+cmd >&- more
+cmd arg &>log more
+cmd arg &>>log more
+
+---
+
+(program
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (file_descriptor)
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (word))
+    (word)
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (file_descriptor)
+      (number))
+    (word)
+    (file_redirect
+      (file_descriptor)
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (word))
+    (file_redirect
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (word))
+    (file_redirect
+      (word))
+    (file_redirect
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (file_redirect
+      (file_descriptor)
+      (word))
+    (file_redirect
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (file_descriptor)
+      (process_substitution
+        (command
+          (command_name
+            (word))
+          (word))))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (herestring_redirect
+      (string
+        (string_content)))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (file_descriptor)
+      (word))
+    (herestring_redirect
+      (string
+        (string_content)))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (file_redirect
+      (process_substitution
+        (command
+          (command_name
+            (word))
+          (string
+            (string_content)))))
+    (word))
+  (command
+    (command_name
+      (word))
+    (file_redirect
+      (process_substitution
+        (command
+          (command_name
+            (word))
+          (raw_string))))
+    (word))
+  (command
+    (command_name
+      (word))
+    (file_redirect)
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (word))
+    (word))
+  (command
+    (command_name
+      (word))
+    (word)
+    (file_redirect
+      (word))
+    (word)))
+
+===============================
+Redirects on test commands
+===============================
+
+[ -f file ] 2>/dev/null
+[[ -f file ]] 2>/dev/null
+[ -f file ] 2>/dev/null && echo yes
+
+---
+
+(program
   (redirected_statement
-    (command
-      (command_name
+    (test_command
+      (unary_expression
+        (test_operator)
         (word)))
     (file_redirect
       (file_descriptor)
+      (word)))
+  (redirected_statement
+    (test_command
+      (unary_expression
+        (test_operator)
+        (word)))
+    (file_redirect
+      (file_descriptor)
+      (word)))
+  (list
+    (redirected_statement
+      (test_command
+        (unary_expression
+          (test_operator)
+          (word)))
+      (file_redirect
+        (file_descriptor)
+        (word)))
+    (command
+      (command_name
+        (word))
+      (word))))
+
+===============================
+Redirects inside test brackets
+===============================
+
+[ -f file 2>/dev/null ]
+[ -f file &>/dev/null ]
+[ ! cmd 2>/dev/null ]
+[ -f file 2>&1 ]
+
+---
+
+(program
+  (test_command
+    (unary_expression
+      (test_operator)
+      (word))
+    (file_redirect
+      (file_descriptor)
+      (word)))
+  (test_command
+    (unary_expression
+      (test_operator)
+      (word))
+    (file_redirect
+      (word)))
+  (test_command
+    (unary_expression
+      (word))
+    (file_redirect
+      (file_descriptor)
+      (word)))
+  (test_command
+    (unary_expression
+      (test_operator)
+      (word))
+    (file_redirect
+      (file_descriptor)
+      (number))))
+
+===============================
+Mid-command and trailing redirects combined
+===============================
+
+cmd arg1 2>/dev/null arg2 >trailing
+cmd "quoted" >mid arg >/dev/null
+cmd 2>&1 >log arg1 arg2 >/dev/null 2>&1
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word))
       (word)
-      (word)
+      (file_redirect
+        (file_descriptor)
+        (word))
+      (word))
+    (file_redirect
+      (word)))
+  (redirected_statement
+    (command
+      (command_name
+        (word))
       (string
         (string_content))
+      (file_redirect
+        (word))
+      (word))
+    (file_redirect
+      (word)))
+  (redirected_statement
+    (command
+      (command_name
+        (word))
+      (file_redirect
+        (file_descriptor)
+        (number))
+      (file_redirect
+        (word))
+      (word)
+      (word))
+    (file_redirect
+      (word))
+    (file_redirect
+      (file_descriptor)
+      (number))))
+
+===============================
+Redirects in pipelines and builtins
+===============================
+
+cmd1 | cmd2 > file
+exec 2>/dev/null
+cmd1 2>/dev/null arg | cmd2 >out arg2
+
+---
+
+(program
+  (redirected_statement
+    (pipeline
+      (command
+        (command_name
+          (word)))
+      (command
+        (command_name
+          (word))))
+    (file_redirect
       (word)))
   (redirected_statement
     (command
       (command_name
         (word)))
     (file_redirect
-      (word)
-      (word)
-      (word)
+      (file_descriptor)
+      (word)))
+  (pipeline
+    (command
+      (command_name
+        (word))
+      (file_redirect
+        (file_descriptor)
+        (word))
+      (word))
+    (command
+      (command_name
+        (word))
+      (file_redirect
+        (word))
       (word))))
 
 ===============================

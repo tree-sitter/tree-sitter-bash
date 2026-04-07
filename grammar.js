@@ -42,6 +42,33 @@ const PREC = {
   POSTFIX: 18,
 };
 
+// Shared redirect operator + destination structure used by file_redirect
+// and the mid-command redirect variants.
+const redirect_body = ($) => choice(
+  seq(
+    choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
+    field('destination', repeat1($._literal)),
+  ),
+  seq(
+    choice('<&-', '>&-'),
+    optional(field('destination', $._literal)),
+  ),
+);
+
+// Mid-command variant for redirects after the command name.
+// Close-fds (>&-, <&-) need a dedicated external token (_close_fd_redirect)
+// because they have no destination word -- the scanner uses different
+// lookahead logic (has_content_after_close_fd) to decide mid-command vs
+// trailing, unlike normal redirects which scan past the destination word
+// (has_words_after_redirect_chain).
+const mid_command_redirect_body = ($) => choice(
+  seq(
+    choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
+    field('destination', repeat1($._literal)),
+  ),
+  $._close_fd_redirect,
+);
+
 module.exports = grammar({
   name: 'bash',
 
@@ -97,6 +124,14 @@ module.exports = grammar({
     /\n/,
     '(',
     'esac',
+    // Mid-command redirect detection: the scanner emits these tokens when
+    // a redirect appears between arguments (not trailing). _mid_command_redirect
+    // carries the fd digits; _mid_command_redirect_nofd is a zero-width marker
+    // for bare operators; _close_fd_redirect handles >&-/<&- which lack a
+    // destination word and need separate lookahead logic.
+    $._mid_command_redirect,
+    $._mid_command_redirect_nofd,
+    $._close_fd_redirect,
     $.__error_recovery,
   ],
 
@@ -436,9 +471,25 @@ module.exports = grammar({
       ),
     ),
 
+    // Bash allows redirects inside [ ] test commands, e.g. [ -f foo 2>/dev/null ].
+    // Mid-command redirect variants handle the scanner-assisted disambiguation.
     test_command: $ => seq(
       choice(
-        seq('[', optional(choice($._expression, $.redirected_statement)), ']'),
+        seq(
+          '[',
+          repeat(field('redirect', choice(
+            alias($._mid_command_file_redirect, $.file_redirect),
+            alias($._mid_command_plain_redirect, $.file_redirect),
+          ))),
+          optional(seq(
+            $._expression,
+            repeat(field('redirect', choice(
+              alias($._mid_command_file_redirect, $.file_redirect),
+              alias($._mid_command_plain_redirect, $.file_redirect),
+            ))),
+          )),
+          ']',
+        ),
         seq(
           '[[',
           choice(
@@ -490,6 +541,11 @@ module.exports = grammar({
             choice($._literal, $.regex),
           )),
           field('redirect', $.herestring_redirect),
+          // Mid-command redirect variants: only in the post-name repeat
+          // because pre-name redirects don't need scanner disambiguation
+          // (the parser hasn't committed to redirected_statement yet).
+          field('redirect', alias($._mid_command_file_redirect, $.file_redirect)),
+          field('redirect', alias($._mid_command_plain_redirect, $.file_redirect)),
         )),
         $.subshell,
       ),
@@ -527,16 +583,24 @@ module.exports = grammar({
 
     file_redirect: $ => prec.left(seq(
       field('descriptor', optional($.file_descriptor)),
-      choice(
-        seq(
-          choice('<', '>', '>>', '&>', '&>>', '<&', '>&', '>|'),
-          field('destination', repeat1($._literal)),
-        ),
-        seq(
-          choice('<&-', '>&-'), // close file descriptor
-          optional(field('destination', $._literal)),
-        ),
-      ),
+      redirect_body($),
+    )),
+
+    // Mid-command redirect with fd (e.g., 2>file in "cmd arg 2>file arg2").
+    // Uses _mid_command_redirect (scanner-emitted) instead of file_descriptor.
+    // Only matched inside command's repeat when the scanner detects more
+    // arguments follow after the redirect.
+    _mid_command_file_redirect: $ => prec.left(seq(
+      field('descriptor', alias($._mid_command_redirect, $.file_descriptor)),
+      mid_command_redirect_body($),
+    )),
+
+    // Mid-command redirect without fd (e.g., >file in "cmd arg >file arg2").
+    // Zero-width _mid_command_redirect_nofd marker forces the parser to
+    // stay in command's repeat.
+    _mid_command_plain_redirect: $ => prec.left(seq(
+      $._mid_command_redirect_nofd,
+      mid_command_redirect_body($),
     )),
 
     heredoc_redirect: $ => seq(

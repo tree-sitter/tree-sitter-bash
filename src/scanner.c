@@ -35,6 +35,17 @@ enum TokenType {
     NEWLINE,
     OPENING_PAREN,
     ESAC,
+    // Mid-command redirect architecture: three scanner entry points.
+    // MID_COMMAND_REDIRECT: emitted for fd-prefixed redirects (e.g. 2>file)
+    //   when more arguments follow -- carries the fd digits as token text.
+    // MID_COMMAND_REDIRECT_NOFD: zero-width marker for bare redirects
+    //   (e.g. >file) when more arguments follow -- triggers the grammar's
+    //   mid-command redirect rule without consuming input.
+    // CLOSE_FD_REDIRECT: consumes >&- or <&- operators, which have no
+    //   destination word and need separate lookahead (has_content_after_close_fd).
+    MID_COMMAND_REDIRECT,
+    MID_COMMAND_REDIRECT_NOFD,
+    CLOSE_FD_REDIRECT,
     ERROR_RECOVERY,
 };
 
@@ -67,6 +78,13 @@ typedef struct {
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
+
+static inline bool is_statement_terminator(TSLexer *lexer) {
+    return lexer->eof(lexer) || lexer->lookahead == '\n' ||
+           lexer->lookahead == '\0' || lexer->lookahead == ';' ||
+           lexer->lookahead == '|' || lexer->lookahead == ')' ||
+           lexer->lookahead == '}' || lexer->lookahead == '#';
+}
 
 static inline bool in_error_recovery(const bool *valid_symbols) { return valid_symbols[ERROR_RECOVERY]; }
 
@@ -346,6 +364,202 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
     }
 }
 
+
+// Check if non-terminator content follows a close-fd redirect (>&- or <&-).
+// Close-fds have no destination word, so we skip whitespace and check whether
+// the next token is a statement terminator (trailing) or content (mid-command).
+// Precondition: lexer is positioned after the '-' of the close-fd operator.
+// Returns true if more command content follows.
+static bool has_content_after_close_fd(TSLexer *lexer) {
+    for (;;) {
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t') advance(lexer);
+
+        // Statement terminators -- trailing.
+        if (is_statement_terminator(lexer)) {
+            return false;
+        }
+
+        // Another close-fd in the chain? Could be bare (>&-) or
+        // fd-prefixed (3>&-). Skip it and loop.
+        if (lexer->lookahead == '>' || lexer->lookahead == '<') {
+            advance(lexer);
+            if (lexer->lookahead == '&') {
+                advance(lexer);
+                if (lexer->lookahead == '-') {
+                    advance(lexer);
+                    continue;
+                }
+            }
+            return true; // not a close-fd, something else follows
+        }
+
+        // fd-prefixed close-fd: digits followed by >&- or <&-
+        if (iswdigit(lexer->lookahead)) {
+            advance(lexer);
+            while (iswdigit(lexer->lookahead)) advance(lexer);
+            if (lexer->lookahead == '>' || lexer->lookahead == '<') {
+                advance(lexer);
+                if (lexer->lookahead == '&') {
+                    advance(lexer);
+                    if (lexer->lookahead == '-') {
+                        advance(lexer);
+                        continue; // fd-prefixed close-fd, skip and loop
+                    }
+                }
+            }
+            return true; // not a close-fd chain, content follows
+        }
+
+        // Any other character means more content follows.
+        return true;
+    }
+}
+
+// Peek past a redirect's destination word, then loop through any chained
+// redirects. Returns true if a non-redirect argument eventually follows,
+// meaning this is a mid-command redirect, not a trailing one.
+// Precondition: lexer is positioned after the redirect operator.
+// Limitation: $(), ${}, $(()) and backtick expansions in destinations are
+// not fully parsed -- may over-report mid-command, which is a benign false
+// positive since the grammar handles actual parsing regardless.
+static bool has_words_after_redirect_chain(TSLexer *lexer) {
+    for (;;) {
+        // Skip whitespace between operator and destination
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t') advance(lexer);
+
+        // Destination might be a process substitution: >(cmd) or <(cmd)
+        if (lexer->lookahead == '>' || lexer->lookahead == '<') {
+            advance(lexer);
+            if (lexer->lookahead == '(') {
+                // Process substitution -- consume until matching ')',
+                // tracking quotes and escapes to avoid miscounting.
+                advance(lexer);
+                int depth = 1;
+                bool ps_sq = false, ps_dq = false;
+                while (!lexer->eof(lexer) && depth > 0) {
+                    if (ps_sq) {
+                        if (lexer->lookahead == '\'') ps_sq = false;
+                    } else if (ps_dq) {
+                        if (lexer->lookahead == '\\') { advance(lexer); if (lexer->eof(lexer)) break; }
+                        else if (lexer->lookahead == '"') ps_dq = false;
+                    } else {
+                        if (lexer->lookahead == '\'') ps_sq = true;
+                        else if (lexer->lookahead == '"') ps_dq = true;
+                        else if (lexer->lookahead == '\\') { advance(lexer); if (lexer->eof(lexer)) break; }
+                        else if (lexer->lookahead == '(') depth++;
+                        else if (lexer->lookahead == ')') { depth--; if (depth == 0) break; }
+                    }
+                    advance(lexer);
+                }
+                if (lexer->lookahead == ')') advance(lexer);
+                goto check_after_dest;
+            }
+            // Already consumed > or <. This is a chained redirect operator.
+            // Handle multi-char variants: <<, <<<, <<-, >>, >&, <&, >|
+            if (lexer->lookahead == '<') {
+                advance(lexer);
+                if (lexer->lookahead == '<') advance(lexer); // <<<
+                if (lexer->lookahead == '-') advance(lexer); // <<-
+                continue;
+            }
+            if (lexer->lookahead == '&') {
+                advance(lexer);
+                // >&- or <&- is a close-fd with no destination
+                if (lexer->lookahead == '-') { advance(lexer); goto check_after_dest; }
+            } else if (lexer->lookahead == '>' || lexer->lookahead == '|') {
+                advance(lexer);
+            }
+            continue;
+        }
+
+        // Consume one destination word (handling quotes and escapes)
+        bool in_sq = false, in_dq = false, got_dest = false;
+        while (!lexer->eof(lexer)) {
+            if (in_sq) {
+                if (lexer->lookahead == '\'') in_sq = false;
+                advance(lexer); got_dest = true; continue;
+            }
+            if (in_dq) {
+                if (lexer->lookahead == '\\') { advance(lexer); if (!lexer->eof(lexer)) advance(lexer); got_dest = true; continue; }
+                if (lexer->lookahead == '"') in_dq = false;
+                advance(lexer); got_dest = true; continue;
+            }
+            if (lexer->lookahead == '\'') { in_sq = true; advance(lexer); got_dest = true; continue; }
+            if (lexer->lookahead == '"')  { in_dq = true; advance(lexer); got_dest = true; continue; }
+            if (lexer->lookahead == '\\') { advance(lexer); if (!lexer->eof(lexer)) advance(lexer); got_dest = true; continue; }
+            if (iswspace(lexer->lookahead) || lexer->lookahead == ';' ||
+                lexer->lookahead == '|' || lexer->lookahead == '&' ||
+                lexer->lookahead == ')' || lexer->lookahead == '(' ||
+                lexer->lookahead == '>' || lexer->lookahead == '<' ||
+                lexer->lookahead == '}' ||
+                lexer->lookahead == '\0' || lexer->lookahead == '#') break;
+            advance(lexer); got_dest = true;
+        }
+
+        if (!got_dest) return false;
+
+check_after_dest:
+        // Skip whitespace after destination
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t') advance(lexer);
+
+        // Statement terminators -- this is a trailing redirect.
+        if (is_statement_terminator(lexer)) {
+            return false;
+        }
+
+        // Another redirect follows? Skip its operator and loop.
+        if (lexer->lookahead == '>' || lexer->lookahead == '<') {
+            advance(lexer);
+            if (lexer->lookahead == '<') {
+                advance(lexer);
+                if (lexer->lookahead == '<') advance(lexer); // <<<
+            }
+            if (lexer->lookahead == '&') {
+                advance(lexer);
+                // >&- or <&- is a close-fd with no destination
+                if (lexer->lookahead == '-') { advance(lexer); goto check_after_dest; }
+            } else if (lexer->lookahead == '>' || lexer->lookahead == '|') {
+                advance(lexer);
+            }
+            continue;
+        }
+
+        // fd-redirect: digit(s) followed by > or <
+        if (iswdigit(lexer->lookahead)) {
+            advance(lexer);
+            while (iswdigit(lexer->lookahead)) advance(lexer);
+            if (lexer->lookahead == '>' || lexer->lookahead == '<') {
+                advance(lexer);
+                if (lexer->lookahead == '&') {
+                    advance(lexer);
+                    if (lexer->lookahead == '-') { advance(lexer); goto check_after_dest; }
+                } else if (lexer->lookahead == '>' || lexer->lookahead == '|') {
+                    advance(lexer);
+                }
+                if (lexer->lookahead == '-') advance(lexer);
+                continue;
+            }
+            return true;  // digit was part of an argument, not a redirect
+        }
+
+        // &> or &>> redirect
+        if (lexer->lookahead == '&') {
+            advance(lexer);
+            if (lexer->lookahead == '>') {
+                advance(lexer);
+                if (lexer->lookahead == '>') advance(lexer);  // &>>
+                if (lexer->lookahead == '-') advance(lexer);
+                continue;
+            }
+            // Bare & is a statement terminator (background operator)
+            return false;
+        }
+
+        // It's a regular word -- mid-command redirect confirmed
+        return true;
+    }
+}
+
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) || lexer->lookahead == '>' ||
@@ -587,6 +801,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         }
 
         if (valid_symbols[HEREDOC_ARROW] && lexer->lookahead == '<') {
+            lexer->mark_end(lexer); // pin before '<' for potential zero-width token
             advance(lexer);
             if (lexer->lookahead == '<') {
                 advance(lexer);
@@ -596,14 +811,59 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                     heredoc.allows_indent = true;
                     array_push(&scanner->heredocs, heredoc);
                     lexer->result_symbol = HEREDOC_ARROW_DASH;
+                    lexer->mark_end(lexer);
                 } else if (lexer->lookahead == '<' || lexer->lookahead == '=') {
                     return false;
                 } else {
                     Heredoc heredoc = heredoc_new();
                     array_push(&scanner->heredocs, heredoc);
                     lexer->result_symbol = HEREDOC_ARROW;
+                    lexer->mark_end(lexer);
                 }
                 return true;
+            }
+            // Not a heredoc -- plain < redirect. Already consumed '<'.
+            // Check for close-fd (<&-) and mid-command context.
+            if (lexer->lookahead == '&' &&
+                (valid_symbols[CLOSE_FD_REDIRECT] || valid_symbols[MID_COMMAND_REDIRECT_NOFD]) &&
+                !in_error_recovery(valid_symbols)) {
+                advance(lexer); // consume &
+                if (lexer->lookahead == '-') {
+                    // <&- pattern detected. Peek past to check for words.
+                    advance(lexer); // consume -
+                    if (valid_symbols[CLOSE_FD_REDIRECT]) {
+                        // Grammar expects the close-fd token.
+                        lexer->mark_end(lexer);
+                        lexer->result_symbol = CLOSE_FD_REDIRECT;
+                        return true;
+                    }
+                    bool has_more = has_content_after_close_fd(lexer);
+                    if (has_more && valid_symbols[MID_COMMAND_REDIRECT_NOFD]) {
+                        // Mid-command close-fd. Emit zero-width marker.
+                        // mark_end is already pinned before '<'.
+                        lexer->result_symbol = MID_COMMAND_REDIRECT_NOFD;
+                        return true;
+                    }
+                    // Trailing close-fd: return false for grammar literals.
+                    return false;
+                }
+                // <& but not <&- -- regular redirect
+                if (valid_symbols[MID_COMMAND_REDIRECT_NOFD]) {
+                    if (lexer->lookahead == '-') advance(lexer);
+                    if (has_words_after_redirect_chain(lexer)) {
+                        lexer->result_symbol = MID_COMMAND_REDIRECT_NOFD;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            if (valid_symbols[MID_COMMAND_REDIRECT_NOFD] && !in_error_recovery(valid_symbols)) {
+                // Non-close-fd < redirect
+                if (lexer->lookahead == '-') advance(lexer);
+                if (has_words_after_redirect_chain(lexer)) {
+                    lexer->result_symbol = MID_COMMAND_REDIRECT_NOFD;
+                    return true;
+                }
             }
             return false;
         }
@@ -624,6 +884,12 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             if (valid_symbols[EXTGLOB_PATTERN]) {
                 goto extglob_pattern;
             }
+            if ((valid_symbols[MID_COMMAND_REDIRECT] || valid_symbols[MID_COMMAND_REDIRECT_NOFD] ||
+                 valid_symbols[CLOSE_FD_REDIRECT]) &&
+                (lexer->lookahead == '>' || lexer->lookahead == '<' || lexer->lookahead == '&')) {
+                lexer->mark_end(lexer); // pin before redirect operator
+                goto mid_command_redirect_check;
+            }
             return false;
         }
 
@@ -638,9 +904,48 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             }
         }
 
-        if (is_number && valid_symbols[FILE_DESCRIPTOR] && (lexer->lookahead == '>' || lexer->lookahead == '<')) {
-            lexer->result_symbol = FILE_DESCRIPTOR;
-            return true;
+        if (is_number && (valid_symbols[FILE_DESCRIPTOR] || valid_symbols[MID_COMMAND_REDIRECT]) &&
+            (lexer->lookahead == '>' || lexer->lookahead == '<')) {
+            // Mark end here so the token covers just the fd digits,
+            // regardless of how far we advance for lookahead below.
+            lexer->mark_end(lexer);
+
+            if (valid_symbols[MID_COMMAND_REDIRECT] && !in_error_recovery(valid_symbols)) {
+                // Peek ahead past the redirect operator and destination chain
+                // to determine if more arguments follow (mid-command redirect).
+                advance(lexer); // consume > or <
+                // Detect close-fd: >&- or <&-
+                if (lexer->lookahead == '&') {
+                    advance(lexer);
+                    if (lexer->lookahead == '-') {
+                        // Close-fd detected. Peek past to check for words.
+                        advance(lexer); // consume -
+                        if (has_content_after_close_fd(lexer)) {
+                            lexer->result_symbol = MID_COMMAND_REDIRECT;
+                            return true;
+                        }
+                        // Trailing close-fd: fall through to FILE_DESCRIPTOR
+                        // so grammar string literals handle the operator.
+                    }
+                } else if (lexer->lookahead == '>' || lexer->lookahead == '|') {
+                    advance(lexer);
+                }
+                if (lexer->lookahead == '-') {
+                    advance(lexer);
+                }
+                if (has_words_after_redirect_chain(lexer)) {
+                    lexer->result_symbol = MID_COMMAND_REDIRECT;
+                    return true;
+                }
+            }
+
+            // Trailing redirect or MID_COMMAND_REDIRECT not valid --
+            // emit normal FILE_DESCRIPTOR.
+            if (valid_symbols[FILE_DESCRIPTOR]) {
+                lexer->result_symbol = FILE_DESCRIPTOR;
+                return true;
+            }
+            return false;
         }
 
         if (valid_symbols[VARIABLE_NAME]) {
@@ -683,7 +988,7 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return true;
     }
 
-regex:
+regex: // jumped to from test_operator when regex/extglob takes priority
     if ((valid_symbols[REGEX] || valid_symbols[REGEX_NO_SLASH] || valid_symbols[REGEX_NO_SPACE]) &&
         !in_error_recovery(valid_symbols)) {
         if (valid_symbols[REGEX] || valid_symbols[REGEX_NO_SPACE]) {
@@ -856,7 +1161,7 @@ regex:
         }
     }
 
-extglob_pattern:
+extglob_pattern: // jumped to from test_operator or variable_name fallthrough
     if (valid_symbols[EXTGLOB_PATTERN] && !in_error_recovery(valid_symbols)) {
         // first skip ws, then check for ? * + @ !
         while (iswspace(lexer->lookahead)) {
@@ -1068,7 +1373,7 @@ extglob_pattern:
         return false;
     }
 
-expansion_word:
+expansion_word: // jumped to from variable_name when inside ${...}
     if (valid_symbols[EXPANSION_WORD]) {
         bool advanced_once = false;
         bool advance_once_space = false;
@@ -1142,7 +1447,7 @@ expansion_word:
         }
     }
 
-brace_start:
+brace_start: // jumped to from variable_name when '{' starts a brace expression
     if (valid_symbols[BRACE_START] && !in_error_recovery(valid_symbols)) {
         while (iswspace(lexer->lookahead)) {
             skip(lexer);
@@ -1179,6 +1484,104 @@ brace_start:
 
         lexer->result_symbol = BRACE_START;
         return true;
+    }
+
+    // Non-fd mid-command redirect and close-fd redirect detection.
+    // Placed after all other checks so it doesn't interfere with
+    // higher-priority token types.
+mid_command_redirect_check:
+    // Pin the token end here so the marker is zero-width for
+    // MID_COMMAND_REDIRECT_NOFD regardless of how far we advance.
+    lexer->mark_end(lexer);
+    if ((valid_symbols[MID_COMMAND_REDIRECT] || valid_symbols[MID_COMMAND_REDIRECT_NOFD] ||
+         valid_symbols[CLOSE_FD_REDIRECT]) &&
+        !in_error_recovery(valid_symbols)) {
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t') {
+            advance(lexer);
+        }
+
+        // Detect close-fd redirects: >&- or <&-
+        // Must check before general redirect handling since > and < overlap.
+        // Close-fds have no destination, so the general redirect handler
+        // would misinterpret the next word as a destination. We detect
+        // the pattern here and check for trailing words ourselves.
+        if ((lexer->lookahead == '>' || lexer->lookahead == '<') &&
+            (valid_symbols[CLOSE_FD_REDIRECT] || valid_symbols[MID_COMMAND_REDIRECT_NOFD])) {
+            int32_t op = lexer->lookahead;
+            advance(lexer);
+            if (lexer->lookahead == '&') {
+                advance(lexer);
+                if (lexer->lookahead == '-') {
+                    // Confirmed close-fd pattern: >&- or <&-
+                    // Peek past the close-fd to see if words follow.
+                    advance(lexer); // consume -
+                    if (valid_symbols[CLOSE_FD_REDIRECT]) {
+                        // Grammar expects the close-fd token (e.g. after
+                        // a zero-width mid-command marker). Consume it.
+                        lexer->mark_end(lexer);
+                        lexer->result_symbol = CLOSE_FD_REDIRECT;
+                        return true;
+                    }
+                    bool has_more = has_content_after_close_fd(lexer);
+                    if (has_more && valid_symbols[MID_COMMAND_REDIRECT_NOFD]) {
+                        // Mid-command close-fd. Emit zero-width marker;
+                        // mark_end is already pinned at the start. The
+                        // grammar will expect _close_fd_redirect next.
+                        lexer->result_symbol = MID_COMMAND_REDIRECT_NOFD;
+                        return true;
+                    }
+                    // Trailing close-fd without CLOSE_FD_REDIRECT valid:
+                    // return false so grammar string literals handle it.
+                    return false;
+                }
+            }
+            // Not a close-fd. If mid-command redirect detection is active,
+            // continue with general redirect handling. We already consumed
+            // the > or < operator.
+            if (valid_symbols[MID_COMMAND_REDIRECT] || valid_symbols[MID_COMMAND_REDIRECT_NOFD]) {
+                // Handle multi-char operators: >> >& <& >|
+                // We consumed > or <. Check second char.
+                if (op == '>' && (lexer->lookahead == '>' || lexer->lookahead == '|')) {
+                    advance(lexer);
+                } else if (lexer->lookahead == '&') {
+                    advance(lexer);
+                }
+                if (lexer->lookahead == '-') advance(lexer);
+                if (has_words_after_redirect_chain(lexer)) {
+                    lexer->result_symbol = MID_COMMAND_REDIRECT_NOFD;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // General redirect operator start: > < &> &>>
+        if (valid_symbols[MID_COMMAND_REDIRECT] || valid_symbols[MID_COMMAND_REDIRECT_NOFD]) {
+            bool is_redirect = false;
+            if (lexer->lookahead == '>' || lexer->lookahead == '<') {
+                is_redirect = true;
+                advance(lexer);
+                if (lexer->lookahead == '>' || lexer->lookahead == '&' ||
+                    lexer->lookahead == '|') {
+                    advance(lexer);
+                }
+            } else if (lexer->lookahead == '&') {
+                advance(lexer);
+                if (lexer->lookahead == '>') {
+                    is_redirect = true;
+                    advance(lexer);
+                    if (lexer->lookahead == '>') advance(lexer);
+                }
+            }
+
+            if (is_redirect) {
+                if (lexer->lookahead == '-') advance(lexer);
+                if (has_words_after_redirect_chain(lexer)) {
+                    lexer->result_symbol = MID_COMMAND_REDIRECT_NOFD;
+                    return true;
+                }
+            }
+        }
     }
 
     return false;

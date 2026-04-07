@@ -2098,17 +2098,24 @@
   {
     "type": "test_command",
     "named": true,
-    "fields": {},
+    "fields": {
+      "redirect": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "file_redirect",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": false,
       "required": false,
       "types": [
         {
           "type": "_expression",
-          "named": true
-        },
-        {
-          "type": "redirected_statement",
           "named": true
         }
       ]
