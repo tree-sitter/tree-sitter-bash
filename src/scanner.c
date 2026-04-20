@@ -1184,7 +1184,7 @@ brace_start:
     return false;
 }
 
-void *tree_sitter_bash_external_scanner_create() {
+void *tree_sitter_bash_external_scanner_create(void) {
     Scanner *scanner = calloc(1, sizeof(Scanner));
     array_init(&scanner->heredocs);
     return scanner;
