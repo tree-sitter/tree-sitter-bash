@@ -1,11 +1,10 @@
 """Bash grammar for tree-sitter"""
 
-from importlib.resources import files as _files
-
 from ._binding import language
 
 
 def _get_query(name, file):
+    from importlib.resources import files as _files
     query = _files(f"{__package__}.queries") / file
     globals()[name] = query.read_text()
     return globals()[name]
