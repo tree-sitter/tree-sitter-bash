@@ -2,6 +2,7 @@
   "name": "tree-sitter-bash",
   "version": "0.25.1",
   "description": "Bash grammar for tree-sitter",
+  "type": "module",
   "repository": "https://github.com/tree-sitter/tree-sitter-bash",
   "license": "MIT",
   "author": {
