@@ -42,7 +42,7 @@ const PREC = {
   POSTFIX: 18,
 };
 
-module.exports = grammar({
+export default grammar({
   name: 'bash',
 
   conflicts: $ => [
