@@ -814,6 +814,12 @@ CMakeLists.txt | \
 *) rm -r ${lang} || die ;;
 esac
 
+case "$1" in
+  -first) echo 1;;
+  -second) echo 2;;
+  third) echo 3;;
+esac
+
 --------------------------------------------------------------------------------
 
 (program
@@ -931,7 +937,29 @@ esac
             (variable_name)))
         (command
           (command_name
-            (word)))))))
+            (word))))))
+  (case_statement
+    (string
+      (simple_expansion
+        (variable_name)))
+    (case_item
+      (word)
+      (command
+        (command_name
+          (word))
+        (number)))
+    (case_item
+      (word)
+      (command
+        (command_name
+          (word))
+        (number)))
+    (case_item
+      (word)
+      (command
+        (command_name
+          (word))
+        (number)))))
 
 ================================================================================
 Test commands
@@ -1409,7 +1437,7 @@ esac
     (simple_expansion
       (variable_name))
     (case_item
-      (extglob_pattern)
+      (word)
       (variable_assignment
         (variable_name)
         (simple_expansion

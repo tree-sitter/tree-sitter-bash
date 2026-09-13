@@ -904,7 +904,8 @@ extglob_pattern:
                             }
                         }
                     }
-                } else {
+                } else if (lexer->lookahead != '-') {
+                    // leave a leading - for the -\w check below
                     advance(lexer);
                 }
             }
