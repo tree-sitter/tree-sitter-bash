@@ -2,7 +2,6 @@
 #include "tree_sitter/parser.h"
 
 #include <assert.h>
-#include <ctype.h>
 #include <string.h>
 #include <wctype.h>
 
@@ -1155,7 +1154,7 @@ brace_start:
         advance(lexer);
         lexer->mark_end(lexer);
 
-        while (isdigit(lexer->lookahead)) {
+        while (iswdigit(lexer->lookahead)) {
             advance(lexer);
         }
 
@@ -1169,7 +1168,7 @@ brace_start:
         }
         advance(lexer);
 
-        while (isdigit(lexer->lookahead)) {
+        while (iswdigit(lexer->lookahead)) {
             advance(lexer);
         }
 
