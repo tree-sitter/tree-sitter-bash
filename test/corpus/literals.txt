@@ -1691,6 +1691,8 @@ echo }{0..2}
 echo {0..n} # not a brace expression
 echo {0..n..2} # not a brace expression
 echo {0..2}{1..2}
+echo {𱡠
+echo {1𱡠..2}
 
 ---
 
@@ -1747,4 +1749,17 @@ echo {0..2}{1..2}
         (number))
       (brace_expression
         (number)
-        (number)))))
+        (number))))
+  (command
+    (command_name
+      (word))
+    (concatenation
+      (word)
+      (word)))
+  (command
+    (command_name
+      (word))
+    (concatenation
+      (word)
+      (word)
+      (word))))
