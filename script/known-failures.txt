@@ -59,7 +59,6 @@ examples/gentoo/sys-fs/bcachefs-tools/bcachefs-tools-1.25.3.ebuild
 examples/gentoo/sys-fs/bcachefs-tools/bcachefs-tools-1.31.5.ebuild
 examples/gentoo/www-client/firefox-bin/files/firefox-bin-r1.sh
 examples/gentoo/www-client/firefox/files/firefox-r1.sh
-examples/wild-corpus/cloud/chef-bcpc/legacy_scripts/make_databag.sh
 examples/wild-corpus/cloud/docker/hack/make.sh
 examples/wild-corpus/cloud/kubernetes/build/common.sh
 examples/wild-corpus/cloud/kubernetes/cluster/gce/config-default.sh
