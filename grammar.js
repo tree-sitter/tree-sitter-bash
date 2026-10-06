@@ -547,7 +547,10 @@ module.exports = grammar({
         alias($._heredoc_pipeline, $.pipeline),
         seq(
           field('redirect', repeat1($._redirect)),
-          optional($._heredoc_expression),
+          optional(choice(
+            alias($._heredoc_pipeline, $.pipeline),
+            $._heredoc_expression,
+          )),
         ),
         $._heredoc_expression,
         $._heredoc_command,

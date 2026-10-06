@@ -2749,8 +2749,22 @@
                       "type": "CHOICE",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "_heredoc_expression"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "ALIAS",
+                              "content": {
+                                "type": "SYMBOL",
+                                "name": "_heredoc_pipeline"
+                              },
+                              "named": true,
+                              "value": "pipeline"
+                            },
+                            {
+                              "type": "SYMBOL",
+                              "name": "_heredoc_expression"
+                            }
+                          ]
                         },
                         {
                           "type": "BLANK"
