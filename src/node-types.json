@@ -1451,7 +1451,7 @@
         ]
       },
       "operator": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
@@ -1487,7 +1487,7 @@
         ]
       },
       "right": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {

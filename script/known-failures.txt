@@ -139,7 +139,6 @@ examples/wild-corpus/git/git-merge-resolve.sh
 examples/wild-corpus/git/git-rebase--interactive.sh
 examples/wild-corpus/git/git-submodule.sh
 examples/wild-corpus/git/t/lib-pack.sh
-examples/wild-corpus/git/t/t9500-gitweb-standalone-no-errors.sh
 examples/wild-corpus/gnu/binutils-2.26/ld/emulparams/elf64bmip.sh
 examples/wild-corpus/gnu/binutils-2.26/ld/genscripts.sh
 examples/wild-corpus/gnu/coreutils-8.22/gnulib-tests/init.sh

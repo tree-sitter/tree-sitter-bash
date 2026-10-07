@@ -2723,13 +2723,30 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_heredoc_pipeline"
-                  },
-                  "named": true,
-                  "value": "pipeline"
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_heredoc_pipeline"
+                      },
+                      "named": true,
+                      "value": "pipeline"
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_heredoc_statements"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "type": "SEQ",
@@ -2872,6 +2889,18 @@
             "type": "SYMBOL",
             "name": "_statement"
           }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_heredoc_statements"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -2910,12 +2939,29 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "FIELD",
-              "name": "right",
-              "content": {
-                "type": "SYMBOL",
-                "name": "_statement"
-              }
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "FIELD",
+                  "name": "right",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_statement"
+                  }
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "_heredoc_statements"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "type": "BLANK"

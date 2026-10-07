@@ -779,6 +779,71 @@ EOF
       (heredoc_body)
       (heredoc_end))))
 
+================================================================================
+Heredocs followed by multiple statements
+================================================================================
+
+cat <<EOF | grep x; echo y
+body
+EOF
+
+cat <<EOF && a; b
+body
+EOF
+
+cat <<EOF; a; b
+body
+EOF
+
+--------------------------------------------------------------------------------
+
+(program
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      (pipeline
+        (command
+          name: (command_name
+            (word))
+          argument: (word)))
+      right: (command
+        name: (command_name
+          (word))
+        argument: (word))
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      right: (command
+        name: (command_name
+          (word)))
+      right: (command
+        name: (command_name
+          (word)))
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      right: (command
+        name: (command_name
+          (word)))
+      right: (command
+        name: (command_name
+          (word)))
+      (heredoc_body)
+      (heredoc_end))))
+
 ==========================================
 Heredoc delimiters followed by metacharacters
 ==========================================
