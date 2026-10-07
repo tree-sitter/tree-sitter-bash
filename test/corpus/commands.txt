@@ -710,6 +710,211 @@ _EOF_
       (heredoc_end))))
 
 ==========================================
+Heredocs followed by statement terminators
+==========================================
+
+cat <<EOF; echo next
+one
+EOF
+
+cat <<EOF &
+two
+EOF
+
+cat <<EOF > out & wait
+three
+EOF
+
+cat <<EOF -; echo done
+four
+EOF
+
+---
+
+(program
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      right: (command
+        name: (command_name
+          (word))
+        argument: (word))
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      redirect: (file_redirect
+        destination: (word))
+      right: (command
+        name: (command_name
+          (word)))
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      argument: (word)
+      right: (command
+        name: (command_name
+          (word))
+        argument: (word))
+      (heredoc_body)
+      (heredoc_end))))
+
+==========================================
+Heredoc delimiters followed by metacharacters
+==========================================
+
+cat <<EOF|grep x
+one
+EOF
+
+cat <<'EOF'>out
+two
+EOF
+
+cat <<EOF;
+three
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (pipeline
+        (command
+          (command_name
+            (word))
+          (word)))
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (file_redirect
+        (word))
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+==========================================
+Heredoc delimiters with quoting or line continuations
+==========================================
+
+cat <<EO'F;X'
+$one
+EOF;X
+
+cat <<'A'"B"C
+$two
+ABC
+
+cat <<E\;F
+$three
+E;F
+
+cat <<'E;F'
+$five
+E;F
+
+cat <<"A|B"
+$six
+A|B
+
+cat <<EO\
+F
+$four
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (simple_expansion
+          (variable_name))
+        (heredoc_content))
+      (heredoc_end))))
+
+==========================================
 Heredocs with a $ that is not an expansion
 ==========================================
 

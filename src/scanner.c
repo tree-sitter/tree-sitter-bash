@@ -161,22 +161,64 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
  * POSIX-mandated substitution, and assumes the default value for
  * IFS.
  */
-static bool advance_word(TSLexer *lexer, String *unquoted_word) {
+static inline bool is_metacharacter(int32_t c) {
+    return c == '|' || c == '&' || c == ';' || c == '(' || c == ')' || c == '<' || c == '>';
+}
+
+static inline bool is_double_quote_escapable(int32_t c) {
+    return c == '$' || c == '`' || c == '"' || c == '\\';
+}
+
+/**
+ * Scans a heredoc delimiter word, performing quote removal into
+ * `unquoted_word`. Quotes may start and end anywhere in the word (`E'OF'`,
+ * `'A'"B"C`), and a metacharacter only ends the word outside quotes.
+ * `quoted` is set when any part of the word is quoted or escaped.
+ */
+static bool advance_word(TSLexer *lexer, String *unquoted_word, bool *quoted) {
     bool empty = true;
-
     int32_t quote = 0;
-    if (lexer->lookahead == '\'' || lexer->lookahead == '"') {
-        quote = lexer->lookahead;
-        advance(lexer);
-    }
 
-    while (lexer->lookahead &&
-           !(quote ? lexer->lookahead == quote || lexer->lookahead == '\r' || lexer->lookahead == '\n'
-                   : iswspace(lexer->lookahead))) {
-        if (lexer->lookahead == '\\') {
-            advance(lexer);
-            if (!lexer->lookahead) {
-                return false;
+    while (lexer->lookahead) {
+        int32_t c = lexer->lookahead;
+        if (quote) {
+            if (c == quote) {
+                quote = 0;
+                advance(lexer);
+                continue;
+            }
+            if (c == '\r' || c == '\n') {
+                break;
+            }
+            if (quote == '"' && c == '\\') {
+                advance(lexer);
+                if (!lexer->lookahead) {
+                    return false;
+                }
+                if (!is_double_quote_escapable(lexer->lookahead)) {
+                    array_push(unquoted_word, '\\');
+                }
+            }
+        } else {
+            if (iswspace(c) || is_metacharacter(c)) {
+                break;
+            }
+            if (c == '\'' || c == '"') {
+                quote = c;
+                *quoted = true;
+                advance(lexer);
+                continue;
+            }
+            if (c == '\\') {
+                advance(lexer);
+                if (!lexer->lookahead) {
+                    return false;
+                }
+                if (lexer->lookahead == '\n') {
+                    advance(lexer);
+                    continue;
+                }
+                *quoted = true;
             }
         }
         empty = false;
@@ -184,10 +226,6 @@ static bool advance_word(TSLexer *lexer, String *unquoted_word) {
         advance(lexer);
     }
     array_push(unquoted_word, '\0');
-
-    if (quote && lexer->lookahead == quote) {
-        advance(lexer);
-    }
 
     return !empty;
 }
@@ -213,9 +251,9 @@ static bool scan_heredoc_start(Heredoc *heredoc, TSLexer *lexer) {
     }
 
     lexer->result_symbol = HEREDOC_START;
-    heredoc->is_raw = lexer->lookahead == '\'' || lexer->lookahead == '"' || lexer->lookahead == '\\';
+    heredoc->is_raw = false;
 
-    bool found_delimiter = advance_word(lexer, &heredoc->delimiter);
+    bool found_delimiter = advance_word(lexer, &heredoc->delimiter, &heredoc->is_raw);
     if (!found_delimiter) {
         reset_string(&heredoc->delimiter);
         return false;

@@ -547,10 +547,11 @@ module.exports = grammar({
         alias($._heredoc_pipeline, $.pipeline),
         seq(
           field('redirect', repeat1($._redirect)),
-          optional($._heredoc_expression),
+          optional(choice($._heredoc_expression, $._heredoc_statements)),
         ),
         $._heredoc_expression,
-        $._heredoc_command,
+        seq($._heredoc_command, optional($._heredoc_statements)),
+        $._heredoc_statements,
       )),
       /\n/,
       choice($._heredoc_body, $._simple_heredoc_body),
@@ -567,6 +568,11 @@ module.exports = grammar({
     ),
 
     _heredoc_command: $ => repeat1(field('argument', $._literal)),
+
+    _heredoc_statements: $ => seq(
+      field('operator', choice(';', '&')),
+      optional(field('right', $._statement)),
+    ),
 
     _heredoc_body: $ => seq(
       $.heredoc_body,

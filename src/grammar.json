@@ -2749,8 +2749,17 @@
                       "type": "CHOICE",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "_heredoc_expression"
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_heredoc_expression"
+                            },
+                            {
+                              "type": "SYMBOL",
+                              "name": "_heredoc_statements"
+                            }
+                          ]
                         },
                         {
                           "type": "BLANK"
@@ -2764,8 +2773,29 @@
                   "name": "_heredoc_expression"
                 },
                 {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "_heredoc_command"
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "_heredoc_statements"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "type": "SYMBOL",
-                  "name": "_heredoc_command"
+                  "name": "_heredoc_statements"
                 }
               ]
             },
@@ -2855,6 +2885,44 @@
           "name": "_literal"
         }
       }
+    },
+    "_heredoc_statements": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "operator",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ";"
+              },
+              {
+                "type": "STRING",
+                "value": "&"
+              }
+            ]
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "right",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_statement"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
     },
     "_heredoc_body": {
       "type": "SEQ",
