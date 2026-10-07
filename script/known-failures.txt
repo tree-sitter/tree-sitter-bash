@@ -110,7 +110,6 @@ examples/wild-corpus/freebsd-11.1/tools/tools/mctest/mctest_run.sh
 examples/wild-corpus/freebsd-11.1/tools/tools/nanobsd/fill_pkg.sh
 examples/wild-corpus/freebsd-11.1/tools/tools/shlib-compat/test/regress.sh
 examples/wild-corpus/freebsd-11.1/tools/tools/sysbuild/sysbuild.sh
-examples/wild-corpus/freebsd-11.1/tools/tools/sysdoc/sysdoc.sh
 examples/wild-corpus/freebsd-11.1/usr.bin/apply/tests/regress.sh
 examples/wild-corpus/freebsd-11.1/usr.bin/calendar/tests/regress.sh
 examples/wild-corpus/freebsd-11.1/usr.bin/comm/tests/regress.sh
@@ -159,7 +158,6 @@ examples/wild-corpus/hg-other/pygments-main/tests/examplefiles/example.sh
 examples/wild-corpus/hg-other/pygments-main/tests/examplefiles/ltmain.sh
 examples/wild-corpus/illumos-gate/usr/src/cmd/acct/prctmp.sh
 examples/wild-corpus/illumos-gate/usr/src/cmd/acct/prtacct.sh
-examples/wild-corpus/illumos-gate/usr/src/cmd/allocate/disk_clean.sh
 examples/wild-corpus/illumos-gate/usr/src/cmd/ast/msgcc/msgcc.sh
 examples/wild-corpus/illumos-gate/usr/src/cmd/avs/dscfg/dscfgadm.sh
 examples/wild-corpus/illumos-gate/usr/src/cmd/diff3/diff3.sh
@@ -360,4 +358,3 @@ examples/wild-corpus/shell/mksh/Build.sh
 examples/wild-corpus/shell/mksh/test.sh
 examples/wild-corpus/shell/modernish/install.sh
 examples/wild-corpus/shell/mwc-sh/shql.sh
-examples/wild-corpus/shell/posixcube/test.sh
