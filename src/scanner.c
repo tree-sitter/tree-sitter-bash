@@ -1069,7 +1069,7 @@ extglob_pattern:
     }
 
 expansion_word:
-    if (valid_symbols[EXPANSION_WORD]) {
+    if (valid_symbols[EXPANSION_WORD] && !in_error_recovery(valid_symbols)) {
         bool advanced_once = false;
         bool advance_once_space = false;
         for (;;) {
