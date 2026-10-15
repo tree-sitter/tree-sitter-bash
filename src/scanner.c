@@ -277,7 +277,13 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
                     lexer->result_symbol = middle_type;
                     heredoc->started = true;
                     advance(lexer);
-                    if (iswalpha(lexer->lookahead) || lexer->lookahead == '{' || lexer->lookahead == '(') {
+                    if (iswalnum(lexer->lookahead) ||
+                        lexer->lookahead == '{' || lexer->lookahead == '(' ||
+                        lexer->lookahead == '$' ||
+                        lexer->lookahead == '*' || lexer->lookahead == '@' ||
+                        lexer->lookahead == '?' || lexer->lookahead == '!' ||
+                        lexer->lookahead == '#' || lexer->lookahead == '-' ||
+                        lexer->lookahead == '_') {
                         return true;
                     }
                     break;

@@ -361,6 +361,41 @@ exit
     (command_name
       (word))))
 
+==================================
+Heredocs with positional parameters
+==================================
+
+cat <<EOF
+pos: $1
+all: $@
+count: $#
+star: $*
+EOF
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (simple_expansion
+          (variable_name))
+        (heredoc_content)
+        (simple_expansion
+          (special_variable_name))
+        (heredoc_content)
+        (simple_expansion
+          (special_variable_name))
+        (heredoc_content)
+        (simple_expansion
+          (special_variable_name))
+        (heredoc_content))
+      (heredoc_end))))
+
 =================================
 Heredocs with file redirects
 =================================
