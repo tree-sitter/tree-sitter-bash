@@ -238,9 +238,15 @@ static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer) {
         }
     }
     array_push(&heredoc->current_leading_word, '\0');
-    return heredoc->delimiter.size == 0
-               ? false
-               : strcmp(heredoc->current_leading_word.contents, heredoc->delimiter.contents) == 0;
+    if (heredoc->delimiter.size == 0 ||
+        strcmp(heredoc->current_leading_word.contents, heredoc->delimiter.contents) != 0) {
+        return false;
+    }
+    // The delimiter must be the whole line: a body line that merely starts with
+    // the delimiter text (`Err(x)` under `<<'E'`, `EOF2` under `<<EOF`) is content.
+    // A `)` may follow: that closes the `$(...)` the heredoc is nested in.
+    return lexer->lookahead == '\n' || lexer->lookahead == '\r' || lexer->lookahead == '\0' ||
+           lexer->lookahead == ')';
 }
 
 static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenType middle_type,

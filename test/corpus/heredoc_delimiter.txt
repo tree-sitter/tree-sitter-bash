@@ -1,0 +1,121 @@
+==========================================
+Heredoc: body line that starts with a one-letter delimiter
+==========================================
+
+cat <<'E'
+Err(x)
+E
+ls
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (command
+    (command_name
+      (word))))
+
+==========================================
+Heredoc: indented body line that starts with the delimiter
+==========================================
+
+cat <<'E'
+    Err(StoreError::NotFound)
+E
+ls
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (command
+    (command_name
+      (word))))
+
+==========================================
+Heredoc: body line that extends the delimiter
+==========================================
+
+cat <<'EOF'
+EOF2
+EOF
+ls
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (command
+    (command_name
+      (word))))
+
+==========================================
+Heredoc: delimiter followed by a command substitution close
+==========================================
+
+echo $(cat <<EOF
+foo
+EOF
+)
+
+---
+
+(program
+  (command
+    (command_name
+      (word))
+    (command_substitution
+      (redirected_statement
+        (command
+          (command_name
+            (word)))
+        (heredoc_redirect
+          (heredoc_start)
+          (heredoc_body)
+          (heredoc_end))))))
+
+==========================================
+Heredoc: delimiter alone on its line still ends the body
+==========================================
+
+cat <<E
+text
+E
+echo after
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (command
+    (command_name
+      (word))
+    (word)))
