@@ -240,7 +240,8 @@ static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer) {
     array_push(&heredoc->current_leading_word, '\0');
     return heredoc->delimiter.size == 0
                ? false
-               : strcmp(heredoc->current_leading_word.contents, heredoc->delimiter.contents) == 0;
+               : (lexer->lookahead == '\n' || lexer->eof(lexer)) &&
+                     strcmp(heredoc->current_leading_word.contents, heredoc->delimiter.contents) == 0;
 }
 
 static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenType middle_type,
@@ -336,6 +337,11 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
                         if (scan_heredoc_end_identifier(heredoc, lexer)) {
                             return true;
                         }
+                    }
+                    // Redispatch a lookahead after the consumed prefix, including expansions.
+                    if (heredoc->current_leading_word.size > 1) {
+                        did_advance = true;
+                        break;
                     }
                 }
                 did_advance = true;

@@ -741,7 +741,8 @@ $(cat <<INNERMOST
 Innermost Heredoc Content
 INNERMOST
 )
-INNER)
+INNER
+)
 Outer Heredoc End
 OUTER
 
