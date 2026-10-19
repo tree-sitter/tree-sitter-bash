@@ -44,6 +44,7 @@ typedef struct {
     bool is_raw;
     bool started;
     bool allows_indent;
+    bool end_pending;
     String delimiter;
     String current_leading_word;
 } Heredoc;
@@ -53,6 +54,7 @@ typedef struct {
         .is_raw = false,                                                                                               \
         .started = false,                                                                                              \
         .allows_indent = false,                                                                                        \
+        .end_pending = false,                                                                                          \
         .delimiter = array_new(),                                                                                      \
         .current_leading_word = array_new(),                                                                           \
     };
@@ -81,6 +83,7 @@ static inline void reset_heredoc(Heredoc *heredoc) {
     heredoc->is_raw = false;
     heredoc->started = false;
     heredoc->allows_indent = false;
+    heredoc->end_pending = false;
     reset_string(&heredoc->delimiter);
 }
 
@@ -100,13 +103,14 @@ static unsigned serialize(Scanner *scanner, char *buffer) {
 
     for (uint32_t i = 0; i < scanner->heredocs.size; i++) {
         Heredoc *heredoc = array_get(&scanner->heredocs, i);
-        if (size + 3 + sizeof(uint32_t) + heredoc->delimiter.size >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
+        if (size + 4 + sizeof(uint32_t) + heredoc->delimiter.size >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
             return 0;
         }
 
         buffer[size++] = (char)heredoc->is_raw;
         buffer[size++] = (char)heredoc->started;
         buffer[size++] = (char)heredoc->allows_indent;
+        buffer[size++] = (char)heredoc->end_pending;
 
         memcpy(&buffer[size], &heredoc->delimiter.size, sizeof(uint32_t));
         size += sizeof(uint32_t);
@@ -140,6 +144,7 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
             heredoc->is_raw = buffer[size++];
             heredoc->started = buffer[size++];
             heredoc->allows_indent = buffer[size++];
+            heredoc->end_pending = buffer[size++];
 
             memcpy(&heredoc->delimiter.size, &buffer[size], sizeof(uint32_t));
             size += sizeof(uint32_t);
@@ -161,12 +166,14 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
  * POSIX-mandated substitution, and assumes the default value for
  * IFS.
  */
-static bool advance_word(TSLexer *lexer, String *unquoted_word) {
+static bool advance_word(TSLexer *lexer, String *unquoted_word, bool *is_quoted) {
     bool empty = true;
+    *is_quoted = false;
 
     int32_t quote = 0;
     if (lexer->lookahead == '\'' || lexer->lookahead == '"') {
         quote = lexer->lookahead;
+        *is_quoted = true;
         advance(lexer);
     }
 
@@ -174,6 +181,7 @@ static bool advance_word(TSLexer *lexer, String *unquoted_word) {
            !(quote ? lexer->lookahead == quote || lexer->lookahead == '\r' || lexer->lookahead == '\n'
                    : iswspace(lexer->lookahead))) {
         if (lexer->lookahead == '\\') {
+            *is_quoted = true;
             advance(lexer);
             if (!lexer->lookahead) {
                 return false;
@@ -213,9 +221,7 @@ static bool scan_heredoc_start(Heredoc *heredoc, TSLexer *lexer) {
     }
 
     lexer->result_symbol = HEREDOC_START;
-    heredoc->is_raw = lexer->lookahead == '\'' || lexer->lookahead == '"' || lexer->lookahead == '\\';
-
-    bool found_delimiter = advance_word(lexer, &heredoc->delimiter);
+    bool found_delimiter = advance_word(lexer, &heredoc->delimiter, &heredoc->is_raw);
     if (!found_delimiter) {
         reset_string(&heredoc->delimiter);
         return false;
@@ -223,17 +229,38 @@ static bool scan_heredoc_start(Heredoc *heredoc, TSLexer *lexer) {
     return found_delimiter;
 }
 
-static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer) {
+static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer, bool *consumed) {
     reset_string(&heredoc->current_leading_word);
-    // Scan the first 'n' characters on this line, to see if they match the
-    // heredoc delimiter
-    int32_t size = 0;
+    // Unquoted heredocs compare logical lines, with backslash-newline removed.
+    uint32_t size = 0;
     if (heredoc->delimiter.size > 0) {
-        while (lexer->lookahead != '\0' && lexer->lookahead != '\n' &&
-               (int32_t)*array_get(&heredoc->delimiter, size) == lexer->lookahead &&
-               heredoc->current_leading_word.size < heredoc->delimiter.size) {
+        for (;;) {
+            if (!heredoc->is_raw && lexer->lookahead == '\\') {
+                advance(lexer);
+                if (consumed) {
+                    *consumed = true;
+                }
+                if (lexer->lookahead == '\n') {
+                    advance(lexer);
+                    continue;
+                }
+                // A non-newline escape is body text; do not redispatch an escaped '$'.
+                array_push(&heredoc->current_leading_word, '\\');
+                if (!lexer->eof(lexer)) {
+                    advance(lexer);
+                }
+                break;
+            }
+            if (lexer->lookahead == '\0' || lexer->lookahead == '\n' ||
+                size + 1 >= heredoc->delimiter.size ||
+                (int32_t)*array_get(&heredoc->delimiter, size) != lexer->lookahead) {
+                break;
+            }
             array_push(&heredoc->current_leading_word, lexer->lookahead);
             advance(lexer);
+            if (consumed) {
+                *consumed = true;
+            }
             size++;
         }
     }
@@ -247,6 +274,8 @@ static bool scan_heredoc_end_identifier(Heredoc *heredoc, TSLexer *lexer) {
 static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenType middle_type,
                                  enum TokenType end_type) {
     bool did_advance = false;
+    // A continued physical line at column zero may already have logical content.
+    bool line_has_content = lexer->get_column(lexer) != 0;
     Heredoc *heredoc = array_back(&scanner->heredocs);
 
     for (;;) {
@@ -263,11 +292,19 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
             case '\\': {
                 did_advance = true;
                 advance(lexer);
-                advance(lexer);
+                if (heredoc->is_raw) {
+                    line_has_content = true;
+                } else {
+                    if (lexer->lookahead != '\n') {
+                        line_has_content = true;
+                    }
+                    advance(lexer);
+                }
                 break;
             }
 
             case '$': {
+                line_has_content = true;
                 if (heredoc->is_raw) {
                     did_advance = true;
                     advance(lexer);
@@ -292,6 +329,7 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
             }
 
             case '\n': {
+                line_has_content = false;
                 if (!did_advance) {
                     skip(lexer);
                 } else {
@@ -305,17 +343,19 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
                 }
                 lexer->result_symbol = heredoc->started ? middle_type : end_type;
                 lexer->mark_end(lexer);
-                if (scan_heredoc_end_identifier(heredoc, lexer)) {
+                if (scan_heredoc_end_identifier(heredoc, lexer, NULL)) {
+                    heredoc->end_pending = true;
                     if (lexer->result_symbol == HEREDOC_END) {
                         array_pop(&scanner->heredocs);
                     }
                     return true;
                 }
+                line_has_content = heredoc->current_leading_word.size > 1;
                 break;
             }
 
             default: {
-                if (lexer->get_column(lexer) == 0) {
+                if (!line_has_content && lexer->get_column(lexer) == 0) {
                     // an alternative is to check the starting column of the
                     // heredoc body and track that statefully
                     while (iswspace(lexer->lookahead)) {
@@ -325,26 +365,31 @@ static bool scan_heredoc_content(Scanner *scanner, TSLexer *lexer, enum TokenTyp
                             skip(lexer);
                         }
                     }
+                    bool consumed = false;
                     if (end_type != SIMPLE_HEREDOC_BODY) {
                         lexer->result_symbol = middle_type;
-                        if (scan_heredoc_end_identifier(heredoc, lexer)) {
+                        if (scan_heredoc_end_identifier(heredoc, lexer, &consumed)) {
+                            heredoc->end_pending = true;
                             return true;
                         }
                     }
                     if (end_type == SIMPLE_HEREDOC_BODY) {
                         lexer->result_symbol = end_type;
                         lexer->mark_end(lexer);
-                        if (scan_heredoc_end_identifier(heredoc, lexer)) {
+                        if (scan_heredoc_end_identifier(heredoc, lexer, &consumed)) {
+                            heredoc->end_pending = true;
                             return true;
                         }
                     }
                     // Redispatch a lookahead after the consumed prefix, including expansions.
-                    if (heredoc->current_leading_word.size > 1) {
+                    if (consumed) {
                         did_advance = true;
+                        line_has_content = heredoc->current_leading_word.size > 1;
                         break;
                     }
                 }
                 did_advance = true;
+                line_has_content = true;
                 advance(lexer);
                 break;
             }
@@ -448,7 +493,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
 
     if (valid_symbols[HEREDOC_END] && scanner->heredocs.size > 0) {
         Heredoc *heredoc = array_back(&scanner->heredocs);
-        if (scan_heredoc_end_identifier(heredoc, lexer)) {
+        // A body token must first establish the logical delimiter boundary.
+        if (heredoc->end_pending && scan_heredoc_end_identifier(heredoc, lexer, NULL)) {
             array_delete(&heredoc->current_leading_word);
             array_delete(&heredoc->delimiter);
             array_pop(&scanner->heredocs);
