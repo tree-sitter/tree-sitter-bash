@@ -1,0 +1,497 @@
+===============================
+Heredoc delimiter prefixes are body content
+===============================
+
+cat <<'JS'
+JSON
+JS trailing
+'a'
+}
+XJSON
+J
+JS
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+===============================
+Heredoc delimiter prefixes preserve substitutions
+===============================
+
+cat <<JS
+JS$(printf FULL)
+J$(printf PARTIAL)
+JS
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution
+          (command
+            (command_name
+              (word))
+            (word)))
+        (heredoc_content)
+        (command_substitution
+          (command
+            (command_name
+              (word))
+            (word)))
+        (heredoc_content))
+      (heredoc_end))))
+
+===============================
+Heredoc delimiter prefixes after escaped newlines
+===============================
+
+cat <<JS
+body
+\
+JS$(printf FULL)
+\
+J$(printf PARTIAL)
+JS
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution
+          (command
+            (command_name
+              (word))
+            (word)))
+        (heredoc_content)
+        (command_substitution
+          (command
+            (command_name
+              (word))
+            (word)))
+        (heredoc_content))
+      (heredoc_end))))
+
+===============================
+Quoted heredoc prefixes stay literal before following commands
+===============================
+
+cat <<'JS'
+JS$(printf LITERAL)
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end)))
+  (command
+    (command_name
+      (word))
+    (word)))
+
+===============================
+Tab-stripped heredoc delimiter prefixes
+===============================
+
+cat <<-'JS'
+	JSON
+	'a'
+	}
+	JS
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+===============================
+Logical heredoc delimiter ending after a continuation
+===============================
+
+cat <<JS
+body
+JS\
+
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc delimiter ending after repeated continuations
+===============================
+
+cat <<JS
+body
+JS\
+\
+
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc delimiter ending at continued EOF
+===============================
+
+cat <<JS
+body
+JS\
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
+
+===============================
+Logical heredoc delimiter ending at repeatedly continued EOF
+===============================
+
+cat <<JS
+body
+JS\
+\
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end))))
+
+===============================
+Logical heredoc prefix followed by continued text
+===============================
+
+cat <<JS
+body
+JS\
+NOT_END
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc prefix followed by another physical delimiter
+===============================
+
+cat <<JS
+body
+JS\
+JS
+STILL_BODY
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc prefix preserves a continued substitution
+===============================
+
+cat <<JS
+body
+JS\
+$(printf SUB)
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution (command (command_name (word)) (word)))
+        (heredoc_content))
+      (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc prefix does not expand an escaped dollar
+===============================
+
+cat <<JS
+body
+JS\$(printf LITERAL)
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc comparison preserves quoted continuations
+===============================
+
+cat <<'JS'
+body
+JS\
+
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc delimiter split by a continuation
+===============================
+
+cat <<JS
+body
+J\
+S
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc prefix followed by a non-newline escape
+===============================
+
+cat <<JS
+body
+JS\q
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc resumption after a substitution and continuation
+===============================
+
+cat <<JS
+body
+$(printf X)\
+JS
+STILL_BODY
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution (command (command_name (word)) (word)))
+        (heredoc_content))
+      (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc resumption after a substitution and split prefix
+===============================
+
+cat <<JS
+body
+$(printf X)J\
+S
+STILL_BODY
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution (command (command_name (word)) (word)))
+        (heredoc_content))
+      (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc delimiter with an interior quoted backslash
+===============================
+
+cat <<J\\S
+body
+J\S
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc delimiter with an interior escape preserves continuations
+===============================
+
+cat <<J\S
+body
+JS\
+
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc quoted substitution text before a physical delimiter
+===============================
+
+cat <<J\S
+body
+$(printf X)\
+JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect (heredoc_start) (heredoc_body) (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc tab-stripped resumption after a substitution
+===============================
+
+cat <<-JS
+	body
+	$(printf X)\
+JS
+	STILL_BODY
+	JS
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution (command (command_name (word)) (word)))
+        (heredoc_content))
+      (heredoc_end)))
+  (command (command_name (word)) (word)))
+
+===============================
+Logical heredoc tab-stripped continued terminator after a substitution
+===============================
+
+cat <<-JS
+	body
+	$(printf X)
+	JS\
+
+printf AFTER
+
+---
+
+(program
+  (redirected_statement
+    (command (command_name (word)))
+    (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body
+        (command_substitution (command (command_name (word)) (word)))
+        (heredoc_content))
+      (heredoc_end)))
+  (command (command_name (word)) (word)))
