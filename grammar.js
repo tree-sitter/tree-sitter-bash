@@ -57,6 +57,8 @@ module.exports = grammar({
   inline: $ => [
     $._statement,
     $._terminator,
+    $._for_linebreak,
+    $._for_separator,
     $._literal,
     $._terminated_statement,
     $._primary_expression,
@@ -201,10 +203,13 @@ module.exports = grammar({
       choice('for', 'select'),
       field('variable', $._simple_variable_name),
       optional(seq(
-        'in',
-        field('value', repeat1($._literal)),
+        optional(seq(
+          optional($._for_linebreak),
+          'in',
+          field('value', repeat($._literal)),
+        )),
+        $._for_separator,
       )),
-      $._terminator,
       field('body', $.do_group),
     ),
 
@@ -1136,6 +1141,8 @@ module.exports = grammar({
 
     _c_terminator: _ => choice(';', /\n/, '&'),
     _terminator: _ => choice(';', ';;', /\n/, '&'),
+    _for_linebreak: _ => /\n/,
+    _for_separator: _ => choice(';', /\n/),
   },
 });
 

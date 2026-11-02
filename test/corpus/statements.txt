@@ -246,6 +246,143 @@ done
         argument: (word)))))
 
 ================================================================================
+For statements with optional separators
+================================================================================
+
+for arg do
+  echo "$arg"
+done
+
+for arg in; do
+  echo "$arg"
+done
+
+for arg in
+do
+  echo "$arg"
+done
+
+for arg
+in a b; do
+  echo "$arg"
+done
+
+for arg
+
+in a b
+do
+  echo "$arg"
+done
+
+for arg
+# comment
+in a b
+do
+  echo "$arg"
+done
+
+--------------------------------------------------------------------------------
+
+(program
+  (for_statement
+    variable: (variable_name)
+    body: (do_group
+      (command
+        name: (command_name
+          (word))
+        argument: (string
+          (simple_expansion
+            (variable_name))))))
+  (for_statement
+    variable: (variable_name)
+    body: (do_group
+      (command
+        name: (command_name
+          (word))
+        argument: (string
+          (simple_expansion
+            (variable_name))))))
+  (for_statement
+    variable: (variable_name)
+    body: (do_group
+      (command
+        name: (command_name
+          (word))
+        argument: (string
+          (simple_expansion
+            (variable_name))))))
+  (for_statement
+    variable: (variable_name)
+    value: (word)
+    value: (word)
+    body: (do_group
+      (command
+        name: (command_name
+          (word))
+        argument: (string
+          (simple_expansion
+            (variable_name))))))
+  (for_statement
+    variable: (variable_name)
+    value: (word)
+    value: (word)
+    body: (do_group
+      (command
+        name: (command_name
+          (word))
+        argument: (string
+          (simple_expansion
+            (variable_name))))))
+  (for_statement
+    variable: (variable_name)
+    (comment)
+    value: (word)
+    value: (word)
+    body: (do_group
+      (command
+        name: (command_name
+          (word))
+        argument: (string
+          (simple_expansion
+            (variable_name)))))))
+
+================================================================================
+For statements with ;; before do
+:error
+================================================================================
+
+for x ;; do echo "$x"; done
+
+--------------------------------------------------------------------------------
+
+================================================================================
+For statements with & before do
+:error
+================================================================================
+
+for x & do echo "$x"; done
+
+--------------------------------------------------------------------------------
+
+================================================================================
+For statements with a word list and ;; before do
+:error
+================================================================================
+
+for x in a ;; do echo "$x"; done
+
+--------------------------------------------------------------------------------
+
+================================================================================
+For statements with a word list and & before do
+:error
+================================================================================
+
+for x in a & do echo "$x"; done
+
+--------------------------------------------------------------------------------
+
+================================================================================
 Select statements
 ================================================================================
 
@@ -290,6 +427,38 @@ done
       (variable_assignment
         (variable_name)
         (raw_string)))))
+
+================================================================================
+Select statements with optional separators
+================================================================================
+
+select choice do
+  echo $choice
+done
+
+select choice in; do
+  echo $choice
+done
+
+--------------------------------------------------------------------------------
+
+(program
+  (for_statement
+    (variable_name)
+    (do_group
+      (command
+        (command_name
+          (word))
+        (simple_expansion
+          (variable_name)))))
+  (for_statement
+    (variable_name)
+    (do_group
+      (command
+        (command_name
+          (word))
+        (simple_expansion
+          (variable_name))))))
 
 ================================================================================
 C-style for statements

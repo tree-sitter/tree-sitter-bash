@@ -359,5 +359,4 @@ examples/wild-corpus/shell/bashdb/test/unit/test-file.sh
 examples/wild-corpus/shell/mksh/Build.sh
 examples/wild-corpus/shell/mksh/test.sh
 examples/wild-corpus/shell/modernish/install.sh
-examples/wild-corpus/shell/mwc-sh/shql.sh
 examples/wild-corpus/shell/posixcube/test.sh
