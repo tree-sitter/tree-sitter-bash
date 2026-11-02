@@ -282,6 +282,62 @@ cat a b >| /dev/null
       (word))))
 
 ===============================
+File redirects (read-write)
+===============================
+
+exec 3<>/dev/tcp/localhost/80
+exec 3<>"/dev/tcp/$host/$port"
+cat <>file
+while read -r line; do echo "$line"; done 3<>file
+
+---
+
+(program
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (file_redirect
+      (file_descriptor)
+      (word)))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (file_redirect
+      (file_descriptor)
+      (string
+        (string_content)
+        (simple_expansion
+          (variable_name))
+        (string_content)
+        (simple_expansion
+          (variable_name)))))
+  (redirected_statement
+    (command
+      (command_name
+        (word)))
+    (file_redirect
+      (word)))
+  (redirected_statement
+    (while_statement
+      (command
+        (command_name
+          (word))
+        (word)
+        (word))
+      (do_group
+        (command
+          (command_name
+            (word))
+          (string
+            (simple_expansion
+              (variable_name))))))
+    (file_redirect
+      (file_descriptor)
+      (word))))
+
+===============================
 Heredoc redirects
 ===============================
 
