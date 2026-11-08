@@ -685,6 +685,70 @@ ${comp[@]:start:end*2-start}
           (variable_name))))))
 
 ================================================================================
+Variable Expansions: Substring with a variable offset
+================================================================================
+
+${s:$i}
+
+${s:$i:1}
+
+"${s:$i:$n}"
+
+${a[@]:$i:2}
+
+${@:$i}
+
+${s:$i-1}
+
+--------------------------------------------------------------------------------
+
+(program
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (simple_expansion
+          (variable_name)))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (simple_expansion
+          (variable_name))
+        (number))))
+  (command
+    (command_name
+      (string
+        (expansion
+          (variable_name)
+          (simple_expansion
+            (variable_name))
+          (simple_expansion
+            (variable_name))))))
+  (command
+    (command_name
+      (expansion
+        (subscript
+          (variable_name)
+          (word))
+        (simple_expansion
+          (variable_name))
+        (number))))
+  (command
+    (command_name
+      (expansion
+        (special_variable_name)
+        (simple_expansion
+          (variable_name)))))
+  (command
+    (command_name
+      (expansion
+        (variable_name)
+        (simple_expansion
+          (variable_name))
+        (number)))))
+
+================================================================================
 Variable Expansions with operators
 ================================================================================
 

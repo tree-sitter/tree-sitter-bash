@@ -997,6 +997,7 @@ module.exports = grammar({
 
     _expansion_max_length: $ => seq(
       field('operator', ':'),
+      optional($.simple_expansion),
       optional(choice(
         $._simple_variable_name,
         $.number,
