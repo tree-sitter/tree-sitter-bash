@@ -2,7 +2,6 @@ examples/bash-it/completion/available/bundler.completion.bash
 examples/bash-it/completion/available/sqlmap.completion.bash
 examples/bash-it/plugins/available/colors.plugin.bash
 examples/bash-it/plugins/available/history-eternal.plugin.bash
-examples/bash-it/themes/hawaii50/hawaii50.theme.bash
 examples/bash/examples/functions/notify.bash
 examples/bash/examples/shellmath/shellmath.sh
 examples/bash/tests/arith-for.tests
@@ -269,7 +268,6 @@ examples/wild-corpus/linux-4.8.7/scripts/decode_stacktrace.sh
 examples/wild-corpus/linux-4.8.7/scripts/tags.sh
 examples/wild-corpus/linux-4.8.7/tools/perf/perf-completion.sh
 examples/wild-corpus/linux-4.8.7/tools/perf/perf-with-kcore.sh
-examples/wild-corpus/linux-4.8.7/tools/vm/slabinfo-gnuplot.sh
 examples/wild-corpus/minix/commands/scripts/DESCRIBE.sh
 examples/wild-corpus/minix/commands/scripts/mkdist.sh
 examples/wild-corpus/minix/lib/generate.sh
