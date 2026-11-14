@@ -350,7 +350,8 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[CONCAT] && !in_error_recovery(valid_symbols)) {
         if (!(lexer->lookahead == 0 || iswspace(lexer->lookahead) || lexer->lookahead == '>' ||
               lexer->lookahead == '<' || lexer->lookahead == ')' || lexer->lookahead == '(' ||
-              lexer->lookahead == ';' || lexer->lookahead == '&' || lexer->lookahead == '|' ||
+              (lexer->lookahead == ';' && !valid_symbols[CLOSING_BRACE]) || lexer->lookahead == '&' ||
+              lexer->lookahead == '|' ||
               (lexer->lookahead == '}' && valid_symbols[CLOSING_BRACE]) ||
               (lexer->lookahead == ']' && valid_symbols[CLOSING_BRACKET]))) {
             lexer->result_symbol = CONCAT;
@@ -636,6 +637,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             } else {
                 break;
             }
+        }
+
+        // `;` is a literal character inside `${...}`, e.g. `${v//a/b;c}`
+        if (valid_symbols[EXPANSION_WORD] && lexer->lookahead == ';') {
+            goto expansion_word;
         }
 
         if (is_number && valid_symbols[FILE_DESCRIPTOR] && (lexer->lookahead == '>' || lexer->lookahead == '<')) {
