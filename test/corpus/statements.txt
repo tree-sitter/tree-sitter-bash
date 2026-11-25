@@ -38,6 +38,119 @@ cat baz | head -n 1
       argument: (number))))
 
 ================================================================================
+Pipelines followed by a redirected command on the next line
+================================================================================
+
+a | b | c
+d x 2>/dev/null
+a | b
+d x 2>/dev/null
+a | b | c
+d x
+
+--------------------------------------------------------------------------------
+
+(program
+  (pipeline
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word))))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word))
+      argument: (word))
+    redirect: (file_redirect
+      descriptor: (file_descriptor)
+      destination: (word)))
+  (pipeline
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word))))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word))
+      argument: (word))
+    redirect: (file_redirect
+      descriptor: (file_descriptor)
+      destination: (word)))
+  (pipeline
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word))))
+  (command
+    name: (command_name
+      (word))
+    argument: (word)))
+
+================================================================================
+Pipelines followed by a list or a heredoc on the next line
+================================================================================
+
+a | b | c
+d x && e
+a | b | c
+d <<'EOF'
+x
+EOF
+
+--------------------------------------------------------------------------------
+
+(program
+  (pipeline
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word))))
+  (list
+    (command
+      name: (command_name
+        (word))
+      argument: (word))
+    (command
+      name: (command_name
+        (word))))
+  (pipeline
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word)))
+    (command
+      name: (command_name
+        (word))))
+  (redirected_statement
+    body: (command
+      name: (command_name
+        (word)))
+    redirect: (heredoc_redirect
+      (heredoc_start)
+      (heredoc_body)
+      (heredoc_end))))
+
+================================================================================
 Lists
 ================================================================================
 
